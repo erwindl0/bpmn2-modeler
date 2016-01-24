@@ -10,10 +10,8 @@
  *******************************************************************************/
 package org.eclipse.bpmn2.modeler.ui.editor;
 
-import org.eclipse.bpmn2.modeler.ui.editor.DesignEditor;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.graphiti.ui.editor.DiagramEditor;
-import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 
 public class SourceViewer extends StructuredTextEditor {

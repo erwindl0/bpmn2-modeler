@@ -16,8 +16,6 @@ package org.eclipse.bpmn2.modeler.core.runtime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.bpmn2.Definitions;
-import org.eclipse.bpmn2.DocumentRoot;
 import org.eclipse.bpmn2.modeler.core.utils.NamespaceUtil;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.emf.ecore.resource.Resource;

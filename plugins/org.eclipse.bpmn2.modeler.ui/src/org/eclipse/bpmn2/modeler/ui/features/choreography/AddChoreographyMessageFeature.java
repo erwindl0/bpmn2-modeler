@@ -150,7 +150,7 @@ public class AddChoreographyMessageFeature extends AbstractCustomFeature {
 		Definitions definitions = ModelUtil.getDefinitions(choreographyTask);
 		ModelHandler mh = ModelHandler.getInstance(choreographyTask);
 
-		Message message = Bpmn2ModelerFactory.create(participant.eResource(), Message.class);
+		Message message = Bpmn2ModelerFactory.createObject(participant.eResource(), Message.class);
 		String oldName = message.getName();
 		message.setName(Messages.AddChoreographyMessageFeature_New);
 		message.setId(null);

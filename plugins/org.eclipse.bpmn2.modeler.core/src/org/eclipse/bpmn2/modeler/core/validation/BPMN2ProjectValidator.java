@@ -30,7 +30,6 @@ import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -57,7 +56,6 @@ import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.wst.validation.AbstractValidator;
@@ -70,9 +68,6 @@ import org.eclipse.wst.validation.ValidatorMessage;
 
 public class BPMN2ProjectValidator extends AbstractValidator {
 
-	private IFile modelFile;
-	private TargetRuntime targetRuntime;
-
     @Override
     public synchronized ValidationResult validate(ValidationEvent event, ValidationState state, IProgressMonitor monitor) {
     	IResource file = event.getResource();
@@ -83,30 +78,31 @@ public class BPMN2ProjectValidator extends AbstractValidator {
         }
 
         ValidationResult result = null;
-    	modelFile = (IFile) file;
+    	IFile modelFile = (IFile) file;
     	try {
 			modelFile.deleteMarkers(null, true, IProject.DEPTH_INFINITE);
 
+			TargetRuntime runtime = TargetRuntime.getRuntime(new FileEditorInput(modelFile));
 	    	Bpmn2ModelerResourceSetImpl rs = new Bpmn2ModelerResourceSetImpl();
-			getTargetRuntime().registerExtensionResourceFactory(rs);
+	    	runtime.registerExtensionResourceFactory(rs);
 			URI modelUri = URI.createPlatformResourceURI(modelFile.getFullPath().toString(), true);
 			rs.setURIConverter(new ProxyURIConverterImplExtension(modelUri));
 	    	Map<Object,Object> options = new HashMap<Object,Object>();
 	    	options.put(Bpmn2ModelerResourceSetImpl.OPTION_PROGRESS_MONITOR, monitor);
 	    	rs.setLoadOptions(options);
-	
+
 			Resource resource = rs.createResource(modelUri, Bpmn2ModelerResourceImpl.BPMN2_CONTENT_TYPE_ID);
-			TargetRuntimeAdapter.adapt(resource, targetRuntime);
+			TargetRuntimeAdapter.adapt(resource, runtime);
 
             resource.load(null);
 	        result = new ValidationResult();
 	        if (resource.getContents().isEmpty()) {
 	            ValidatorMessage message = ValidatorMessage.create(Messages.BPMN2ProjectValidator_Invalid_File, modelFile);
-	            message.setType(getTargetRuntime().getProblemMarkerId());
+	            message.setType(runtime.getProblemMarkerId());
 	            result.add(message);
 	        } else {
 	            IBatchValidator validator = ModelValidationService.getInstance().newValidator(EvaluationMode.BATCH);
-	            processStatus(validator.validate(resource.getContents(), monitor), modelFile, result);
+	            processStatus(validator.validate(resource.getContents(), monitor), modelFile, result, runtime);
 	        }
 		} catch (CoreException e1) {
 			e1.printStackTrace();
@@ -255,17 +251,17 @@ public class BPMN2ProjectValidator extends AbstractValidator {
     	return needValidation;
     }
     
-    public void processStatus(IStatus status, IResource resource, ValidationResult result) {
+    public void processStatus(IStatus status, IResource resource, ValidationResult result, TargetRuntime runtime) {
         if (status.isMultiStatus()) {
             for (IStatus child : status.getChildren()) {
-                processStatus(child, resource, result);
+                processStatus(child, resource, result, runtime);
             }
         } else if (!status.isOK()) {
-            result.add(createValidationMessage(status, resource));
+            result.add(createValidationMessage(status, resource, runtime));
         }
     }
 
-    public ValidatorMessage createValidationMessage(IStatus status, IResource resource) {
+    public ValidatorMessage createValidationMessage(IStatus status, IResource resource, TargetRuntime runtime) {
         ValidatorMessage message = ValidatorMessage.create(status.getMessage(), resource);
         switch (status.getSeverity()) {
         case IStatus.INFO:
@@ -304,7 +300,7 @@ public class BPMN2ProjectValidator extends AbstractValidator {
             }
         }
 
-        message.setType(getTargetRuntime().getProblemMarkerId());
+        message.setType(runtime.getProblemMarkerId());
 
         return message;
     }
@@ -318,13 +314,4 @@ public class BPMN2ProjectValidator extends AbstractValidator {
             Activator.getDefault().getLog().log(e.getStatus());
         }
     }
-	
-    protected TargetRuntime getTargetRuntime() {
-		Assert.isTrue(modelFile!=null);
-		if (targetRuntime==null) {
-			IEditorInput input = new FileEditorInput(modelFile);
-			targetRuntime = TargetRuntime.getRuntime(input);
-		}
-		return targetRuntime;
-	}
 }

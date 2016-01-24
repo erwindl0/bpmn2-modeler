@@ -81,7 +81,7 @@ public abstract class AddDataFeature<T extends ItemAwareElement> extends Abstrac
 			if (feature!=null && businessObject.eGet(feature)!=null)
 				value = ((Boolean)businessObject.eGet(feature)).toString();
 
-		peService.setPropertyValue(containerShape, GraphitiConstants.COLLECTION_PROPERTY, value);
+		FeatureSupport.setPropertyValue(containerShape, GraphitiConstants.COLLECTION_PROPERTY, value);
 
 		boolean isImport = context.getProperty(GraphitiConstants.IMPORT_PROPERTY) != null;
 		createDIShape(containerShape, businessObject, !isImport);
@@ -102,7 +102,7 @@ public abstract class AddDataFeature<T extends ItemAwareElement> extends Abstrac
 		line.setForeground(manageColor(StyleUtil.CLASS_FOREGROUND));
 		line.setLineWidth(1);
 		line.setLineVisible(false);
-		peService.setPropertyValue(collectionShape, GraphitiConstants.HIDEABLE_PROPERTY, Boolean.toString(true));
+		FeatureSupport.setPropertyValue(collectionShape, GraphitiConstants.HIDEABLE_PROPERTY, Boolean.toString(true));
 		return collectionShape;
 	}
 

@@ -12,7 +12,7 @@ package org.eclipse.bpmn2.modeler.core.features;
 
 import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.modeler.core.runtime.CustomTaskImageProvider.IconSize;
-import org.eclipse.bpmn2.modeler.core.features.Messages;
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
@@ -35,7 +35,6 @@ import org.eclipse.graphiti.features.context.impl.AddContext;
 import org.eclipse.graphiti.features.custom.ICustomFeature;
 import org.eclipse.graphiti.mm.pictograms.Connection;
 import org.eclipse.graphiti.mm.pictograms.PictogramElement;
-import org.eclipse.graphiti.services.Graphiti;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -204,7 +203,7 @@ public class CustomConnectionFeatureContainer extends CustomElementFeatureContai
 
 			// create the PE and copy our ID into its properties.
 			PictogramElement pe = getFeatureProvider().addIfPossible(addContext);
-			Graphiti.getPeService().setPropertyValue(pe, GraphitiConstants.CUSTOM_ELEMENT_ID, id);
+			FeatureSupport.setPropertyValue(pe, GraphitiConstants.CUSTOM_ELEMENT_ID, id);
 
 			return pe;
 		}
@@ -248,7 +247,6 @@ public class CustomConnectionFeatureContainer extends CustomElementFeatureContai
 		@Override
 		public BaseElement createBusinessObject(ICreateConnectionContext context) {
 			BaseElement businessObject = createFeatureDelegate.createBusinessObject(context);
-			customTaskDescriptor.populateObject(businessObject, true);
 			return businessObject;
 		}
 
@@ -375,7 +373,7 @@ public class CustomConnectionFeatureContainer extends CustomElementFeatureContai
 			PictogramElement pe = addFeatureDelegate.add(context);
 			// make sure everyone knows that this PE is a custom task
 			if (pe != null)
-				peService.setPropertyValue(pe, GraphitiConstants.CUSTOM_ELEMENT_ID, getId());
+				FeatureSupport.setPropertyValue(pe, GraphitiConstants.CUSTOM_ELEMENT_ID, getId());
 
 			return pe;
 		}

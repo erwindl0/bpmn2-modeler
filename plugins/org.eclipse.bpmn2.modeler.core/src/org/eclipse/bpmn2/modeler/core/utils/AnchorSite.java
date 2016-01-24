@@ -50,11 +50,11 @@ public enum AnchorSite {
 	}
 	
 	public static AnchorSite getSite(FixPointAnchor anchor) {
-		return getSite(Graphiti.getPeService().getPropertyValue(anchor, GraphitiConstants.ANCHOR_LOCATION));
+		return getSite(FeatureSupport.getPropertyValue(anchor, GraphitiConstants.ANCHOR_LOCATION));
 	}
 	
 	public static void setSite(FixPointAnchor anchor, AnchorSite site) {
-		Graphiti.getPeService().setPropertyValue(anchor, GraphitiConstants.ANCHOR_LOCATION, site.getKey());
+		FeatureSupport.setPropertyValue(anchor, GraphitiConstants.ANCHOR_LOCATION, site.getKey());
 	}
 	
 	/**

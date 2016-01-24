@@ -25,6 +25,7 @@ public class Messages extends NLS {
 	public static String ModelHandler_Collaboration;
 	public static String ModelHandler_Collaboration_Diagram;
 	public static String ModelHandler_Default;
+	public static String ModelHandler_Default_Pool;
 	public static String ModelHandler_Initiating_Participant;
 	public static String ModelHandler_Initiating_Pool;
 	public static String ModelHandler_Initiating_Process;

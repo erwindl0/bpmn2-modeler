@@ -13,6 +13,7 @@
 
 package org.eclipse.bpmn2.modeler.core.merrimac.dialogs;
 
+import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesAdapter;
 import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesProvider;
 import org.eclipse.bpmn2.modeler.core.adapters.InsertionAdapter;
 import org.eclipse.bpmn2.modeler.core.model.Bpmn2ModelerFactory;
@@ -20,6 +21,7 @@ import org.eclipse.bpmn2.modeler.core.utils.ModelUtil;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.transaction.RecordingCommand;
 import org.eclipse.graphiti.ui.editor.DiagramEditor;
@@ -82,15 +84,17 @@ public class FeatureEditingDialog extends ObjectEditingDialog {
 	protected EObject createNewObject(final EObject object, final EStructuralFeature feature, final EClass eclass) {
 		final EObject[] result = new EObject[1];
 		if (domain!=null) {
+			final Resource resource = ExtendedPropertiesAdapter.getResource(domain.getResourceSet());
 			domain.getCommandStack().execute(new RecordingCommand(domain) {
 				@Override
 				protected void doExecute() {
-					result[0] = Bpmn2ModelerFactory.createFeature(object, feature, eclass);
+					result[0] = Bpmn2ModelerFactory.createFeature(resource, object, feature, eclass);
 				}
 			});
 		}
 		else {
-			result[0] = Bpmn2ModelerFactory.createFeature(object, feature, eclass);
+			final Resource resource = ExtendedPropertiesAdapter.getResource(object);
+			result[0] = Bpmn2ModelerFactory.createFeature(resource, object, feature, eclass);
 		}
 		return result[0];
 	}

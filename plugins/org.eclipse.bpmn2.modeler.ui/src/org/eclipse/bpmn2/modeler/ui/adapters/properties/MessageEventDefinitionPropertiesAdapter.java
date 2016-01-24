@@ -34,6 +34,8 @@ public class MessageEventDefinitionPropertiesAdapter extends EventDefinitionProp
     	EStructuralFeature ref = Bpmn2Package.eINSTANCE.getMessageEventDefinition_OperationRef();
     	setProperty(ref, UI_CAN_CREATE_NEW, Boolean.FALSE);
     	setProperty(ref, UI_CAN_EDIT, Boolean.FALSE);
+    	setProperty(ref, UI_IS_MULTI_CHOICE, Boolean.TRUE);
+    	
     	setFeatureDescriptor(ref, new OperationRefFeatureDescriptor<MessageEventDefinition>(this,object,ref));
     	
     	ref = Bpmn2Package.eINSTANCE.getMessageEventDefinition_MessageRef();

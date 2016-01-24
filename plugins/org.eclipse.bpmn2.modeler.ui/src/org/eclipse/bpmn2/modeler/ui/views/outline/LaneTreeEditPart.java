@@ -17,7 +17,6 @@ import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.FlowNode;
 import org.eclipse.bpmn2.Lane;
 import org.eclipse.bpmn2.SequenceFlow;
-import org.eclipse.emf.ecore.EObject;
 
 public class LaneTreeEditPart extends AbstractGraphicsTreeEditPart {
 

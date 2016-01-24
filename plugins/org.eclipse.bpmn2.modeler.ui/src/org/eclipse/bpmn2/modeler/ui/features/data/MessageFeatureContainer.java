@@ -29,12 +29,11 @@ import org.eclipse.bpmn2.modeler.core.features.data.AbstractCreateRootElementFea
 import org.eclipse.bpmn2.modeler.core.features.label.AddShapeLabelFeature;
 import org.eclipse.bpmn2.modeler.core.features.label.UpdateLabelFeature;
 import org.eclipse.bpmn2.modeler.core.model.Bpmn2ModelerFactory;
-import org.eclipse.bpmn2.modeler.core.utils.AnchorUtil;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
 import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
+import org.eclipse.bpmn2.modeler.core.utils.ModelUtil;
 import org.eclipse.bpmn2.modeler.core.utils.ShapeDecoratorUtil;
 import org.eclipse.bpmn2.modeler.core.utils.ShapeDecoratorUtil.Envelope;
-import org.eclipse.bpmn2.modeler.core.utils.ModelUtil;
 import org.eclipse.bpmn2.modeler.core.utils.StyleUtil;
 import org.eclipse.bpmn2.modeler.ui.ImageProvider;
 import org.eclipse.bpmn2.modeler.ui.features.flow.MessageFlowFeatureContainer;
@@ -66,8 +65,6 @@ import org.eclipse.graphiti.mm.pictograms.ContainerShape;
 import org.eclipse.graphiti.mm.pictograms.PictogramElement;
 import org.eclipse.graphiti.mm.pictograms.Shape;
 import org.eclipse.graphiti.services.Graphiti;
-import org.eclipse.graphiti.services.IGaService;
-import org.eclipse.graphiti.services.IPeService;
 import org.eclipse.graphiti.ui.internal.util.ui.PopupMenu;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -306,7 +303,7 @@ public class MessageFeatureContainer extends BaseElementFeatureContainer {
 			EObject targetBusinessObject = (EObject)getBusinessObjectForPictogramElement(context.getTargetContainer());
 			Definitions definitions = ModelUtil.getDefinitions(targetBusinessObject);
 			
-			Message message = Bpmn2ModelerFactory.create(targetBusinessObject.eResource(), Message.class);
+			Message message = Bpmn2ModelerFactory.createObject(targetBusinessObject.eResource(), Message.class);
 			String oldName = message.getName();
 			message.setName(Messages.MessageFeatureContainer_New);
 			message.setId(null);

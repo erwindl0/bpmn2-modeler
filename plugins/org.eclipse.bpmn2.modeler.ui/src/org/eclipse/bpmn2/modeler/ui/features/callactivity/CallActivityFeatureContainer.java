@@ -32,13 +32,13 @@ import org.eclipse.bpmn2.modeler.core.features.MultiUpdateFeature;
 import org.eclipse.bpmn2.modeler.core.features.activity.AbstractCreateExpandableFlowNodeFeature;
 import org.eclipse.bpmn2.modeler.core.features.activity.task.DirectEditTaskFeature;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
-import org.eclipse.bpmn2.modeler.core.utils.ShapeDecoratorUtil;
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.bpmn2.modeler.core.utils.ModelUtil;
+import org.eclipse.bpmn2.modeler.core.utils.ShapeDecoratorUtil;
 import org.eclipse.bpmn2.modeler.ui.ImageProvider;
 import org.eclipse.bpmn2.modeler.ui.features.activity.AbstractActivityFeatureContainer;
 import org.eclipse.bpmn2.modeler.ui.features.activity.DeleteActivityFeature;
 import org.eclipse.bpmn2.modeler.ui.features.activity.subprocess.LayoutExpandableActivityFeature;
-import org.eclipse.bpmn2.modeler.ui.features.activity.subprocess.Messages;
 import org.eclipse.bpmn2.modeler.ui.features.callactivity.AbstractCallGlobalTaskFeatureContainer.AddCallGlobalTaskFeature;
 import org.eclipse.bpmn2.modeler.ui.features.choreography.ShowDiagramPageFeature;
 import org.eclipse.emf.common.util.TreeIterator;
@@ -205,7 +205,7 @@ public class CallActivityFeatureContainer extends AbstractActivityFeatureContain
 
 			IPeService peService = Graphiti.getPeService();
 			PictogramElement element = context.getPictogramElement();
-			String property = peService.getPropertyValue(element, CALL_ACTIVITY_REF_PROPERTY);
+			String property = FeatureSupport.getPropertyValue(element, CALL_ACTIVITY_REF_PROPERTY);
 			if (property == null) {
 				return Reason.createFalseReason();
 			}
@@ -241,7 +241,7 @@ public class CallActivityFeatureContainer extends AbstractActivityFeatureContain
 				if (imageId != null) {
 				if (globalTaskShape == null) {
 					globalTaskShape = peService.createShape(container, false);
-					peService.setPropertyValue(globalTaskShape, GLOBAL_TASK_SHAPE_PROPERTY, Boolean.toString(true));
+					FeatureSupport.setPropertyValue(globalTaskShape, GLOBAL_TASK_SHAPE_PROPERTY, Boolean.toString(true));
 				}
 					Image image = gaService.createImage(globalTaskShape, imageId);
 					gaService.setLocationAndSize(image, MARKER_OFFSET + 2, MARKER_OFFSET + 2, 16, 16);
@@ -258,7 +258,7 @@ public class CallActivityFeatureContainer extends AbstractActivityFeatureContain
 				ShapeDecoratorUtil.showActivityMarker(container, GraphitiConstants.ACTIVITY_MARKER_EXPAND);
 			}
 
-			peService.setPropertyValue(container, CALL_ACTIVITY_REF_PROPERTY,
+			FeatureSupport.setPropertyValue(container, CALL_ACTIVITY_REF_PROPERTY,
 					getCallableElementStringValue(callActivity.getCalledElementRef()));
 			return true;
 		}

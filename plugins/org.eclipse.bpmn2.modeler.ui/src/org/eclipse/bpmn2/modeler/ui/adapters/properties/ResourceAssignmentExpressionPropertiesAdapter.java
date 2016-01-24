@@ -56,7 +56,7 @@ public class ResourceAssignmentExpressionPropertiesAdapter extends ExtendedPrope
 				protected void internalSet(ResourceAssignmentExpression rae, EStructuralFeature feature, Object value, int index) {
 					if (!(rae.getExpression() instanceof FormalExpression)) {
 						if (value instanceof String) {
-							final FormalExpression e = Bpmn2ModelerFactory.create(rae.eResource(), FormalExpression.class);
+							final FormalExpression e = Bpmn2ModelerFactory.createObject(rae.eResource(), FormalExpression.class);
 							e.setBody((String) value);
 							rae.eSet(feature, e);
 						}

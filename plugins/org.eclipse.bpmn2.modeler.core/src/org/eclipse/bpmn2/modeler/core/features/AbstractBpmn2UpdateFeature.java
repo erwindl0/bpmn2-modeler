@@ -75,6 +75,8 @@ public abstract class AbstractBpmn2UpdateFeature extends AbstractUpdateFeature {
 		if (DIImport.isImporting(context)) {
 			return Reason.createTrueReason("Initial update"); //$NON-NLS-1$
 		}
+		if (context.getProperty(GraphitiConstants.FORCE_UPDATE_ALL) != null)
+			return Reason.createTrueReason("Forced update"); //$NON-NLS-1$
 		return Reason.createFalseReason();
 	}
 }

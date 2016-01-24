@@ -14,7 +14,7 @@ package org.eclipse.bpmn2.modeler.ui.features.callactivity;
 
 import org.eclipse.bpmn2.CallActivity;
 import org.eclipse.bpmn2.GlobalTask;
-import org.eclipse.bpmn2.modeler.core.utils.ShapeDecoratorUtil;
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.bpmn2.modeler.ui.features.activity.subprocess.AddExpandableActivityFeature;
 import org.eclipse.graphiti.features.IAddFeature;
 import org.eclipse.graphiti.features.ICreateFeature;
@@ -22,7 +22,6 @@ import org.eclipse.graphiti.features.IFeatureProvider;
 import org.eclipse.graphiti.features.context.IAddContext;
 import org.eclipse.graphiti.mm.algorithms.RoundedRectangle;
 import org.eclipse.graphiti.mm.pictograms.ContainerShape;
-import org.eclipse.graphiti.services.Graphiti;
 
 
 public abstract class AbstractCallGlobalTaskFeatureContainer<T extends GlobalTask> extends CallActivityFeatureContainer {
@@ -46,7 +45,7 @@ public abstract class AbstractCallGlobalTaskFeatureContainer<T extends GlobalTas
 		@Override
 		protected void decorateShape(IAddContext context, ContainerShape containerShape, CallActivity businessObject) {
 			super.decorateShape(context, containerShape, businessObject);
-			Graphiti.getPeService().setPropertyValue(containerShape, CALL_ACTIVITY_REF_PROPERTY,
+			FeatureSupport.setPropertyValue(containerShape, CALL_ACTIVITY_REF_PROPERTY,
 					getCallableElementStringValue(businessObject.getCalledElementRef()));
 			RoundedRectangle rect = (RoundedRectangle)getGraphicsAlgorithm(containerShape);
 			rect.setLineWidth(4);

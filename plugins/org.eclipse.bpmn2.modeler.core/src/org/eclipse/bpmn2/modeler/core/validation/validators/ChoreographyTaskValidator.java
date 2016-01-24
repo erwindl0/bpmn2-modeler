@@ -16,7 +16,6 @@ package org.eclipse.bpmn2.modeler.core.validation.validators;
 import org.eclipse.bpmn2.ChoreographyTask;
 import org.eclipse.bpmn2.InteractionNode;
 import org.eclipse.bpmn2.MessageFlow;
-import org.eclipse.bpmn2.modeler.core.validation.Messages;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.validation.IValidationContext;

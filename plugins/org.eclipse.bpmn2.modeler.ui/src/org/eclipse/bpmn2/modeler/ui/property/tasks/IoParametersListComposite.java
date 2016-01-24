@@ -102,11 +102,11 @@ public class IoParametersListComposite extends DefaultListComposite {
 		
 		// make sure the getIoSpec() has both a default InputSet and OutputSet
 		if (getIoSpec().getInputSets().size()==0) {
-			InputSet is = Bpmn2ModelerFactory.create(getIoSpec().eResource(), InputSet.class);
+			InputSet is = Bpmn2ModelerFactory.createObject(getIoSpec().eResource(), InputSet.class);
 			getIoSpec().getInputSets().add(is);
 		}
 		if (getIoSpec().getOutputSets().size()==0) {
-			OutputSet os = Bpmn2ModelerFactory.create(getIoSpec().eResource(), OutputSet.class);
+			OutputSet os = Bpmn2ModelerFactory.createObject(getIoSpec().eResource(), OutputSet.class);
 			getIoSpec().getOutputSets().add(os);
 		}
 		

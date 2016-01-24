@@ -15,6 +15,7 @@ package org.eclipse.bpmn2.modeler.ui.features.choreography;
 import java.util.Collection;
 
 import org.eclipse.bpmn2.modeler.core.features.GraphitiConstants;
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.graphiti.mm.algorithms.GraphicsAlgorithm;
 import org.eclipse.graphiti.mm.pictograms.ContainerShape;
 import org.eclipse.graphiti.mm.pictograms.PictogramElement;
@@ -25,7 +26,7 @@ public class ChoreographySelectionBehavior {
 
 	public static boolean canApplyTo(PictogramElement pe) {
 		if (pe instanceof ContainerShape) {
-			String property = Graphiti.getPeService().getPropertyValue(pe, GraphitiConstants.MESSAGE_LINK);
+			String property = FeatureSupport.getPropertyValue(pe, GraphitiConstants.MESSAGE_LINK);
 			return Boolean.parseBoolean(property);
 		}
 		return false;

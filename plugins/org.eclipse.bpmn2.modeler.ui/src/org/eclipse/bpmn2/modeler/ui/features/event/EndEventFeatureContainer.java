@@ -21,6 +21,7 @@ import org.eclipse.bpmn2.modeler.core.features.MultiUpdateFeature;
 import org.eclipse.bpmn2.modeler.core.features.event.AbstractCreateEventFeature;
 import org.eclipse.bpmn2.modeler.core.features.event.AbstractUpdateEventFeature;
 import org.eclipse.bpmn2.modeler.core.features.event.AddEventFeature;
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.bpmn2.modeler.ui.ImageProvider;
 import org.eclipse.bpmn2.modeler.ui.features.AbstractAppendNodeFeature;
 import org.eclipse.emf.ecore.EClass;
@@ -71,7 +72,7 @@ public class EndEventFeatureContainer extends AbstractEventFeatureContainer {
 			Ellipse e = (Ellipse)getGraphicsAlgorithm(containerShape);
 			e.setLineWidth(3);
 			IPeService peService = Graphiti.getPeService();
-			peService.setPropertyValue(containerShape,
+			FeatureSupport.setPropertyValue(containerShape,
 					UpdateEndEventFeature.END_EVENT_MARKER,
 					AbstractUpdateEventFeature.getEventDefinitionsValue((EndEvent)businessObject));
 		}

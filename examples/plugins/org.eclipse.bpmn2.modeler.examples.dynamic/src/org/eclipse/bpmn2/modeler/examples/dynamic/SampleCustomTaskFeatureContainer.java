@@ -25,6 +25,7 @@ import org.eclipse.bpmn2.modeler.core.model.ModelDecorator;
 import org.eclipse.bpmn2.modeler.core.preferences.ShapeStyle;
 import org.eclipse.bpmn2.modeler.core.preferences.ShapeStyle.LabelPosition;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.bpmn2.modeler.core.utils.StyleUtil;
 import org.eclipse.bpmn2.modeler.examples.dynamic.SampleImageProvider.IconSize;
 import org.eclipse.bpmn2.modeler.ui.features.artifact.CreateTextAnnotationFeature;
@@ -191,7 +192,7 @@ public class SampleCustomTaskFeatureContainer extends CustomShapeFeatureContaine
 							return reason;
 						
 						PictogramElement pe = context.getPictogramElement();
-						String propertyValue = Graphiti.getPeService().getPropertyValue(pe, "evaluate.property");
+						String propertyValue = FeatureSupport.getPropertyValue(pe, "evaluate.property");
 						if (propertyValue==null || propertyValue.isEmpty())
 							propertyValue = "false";
 						
@@ -268,7 +269,7 @@ public class SampleCustomTaskFeatureContainer extends CustomShapeFeatureContaine
 						ss.setDefaultColors(IColorConstant.LIGHT_GRAY);
 					}
 					StyleUtil.applyStyle(shape.getGraphicsAlgorithm(), ta, ss);
-					Graphiti.getPeService().setPropertyValue(containerShape, "evaluate.property", propertyValue);
+					FeatureSupport.setPropertyValue(containerShape, "evaluate.property", propertyValue);
 				}
 			}
 		};

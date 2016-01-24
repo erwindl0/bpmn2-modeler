@@ -23,7 +23,6 @@ import org.eclipse.bpmn2.modeler.core.features.GraphitiConstants;
 import org.eclipse.graphiti.mm.pictograms.Anchor;
 import org.eclipse.graphiti.mm.pictograms.AnchorContainer;
 import org.eclipse.graphiti.mm.pictograms.ConnectionDecorator;
-import org.eclipse.graphiti.services.Graphiti;
 
 public enum AnchorType {
 	ACTIVITY("activity"), POOL("pool"), GATEWAY("gateway"), MESSAGELINK("messagelink"), CONNECTION("connection"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
@@ -52,7 +51,7 @@ public enum AnchorType {
 			return CONNECTION;
 		
 		BaseElement be = BusinessObjectUtil.getFirstBaseElement(ac);
-		String property = Graphiti.getPeService().getPropertyValue(ac, GraphitiConstants.MESSAGE_LINK);
+		String property = FeatureSupport.getPropertyValue(ac, GraphitiConstants.MESSAGE_LINK);
 		if (Boolean.parseBoolean(property)) {
 			return MESSAGELINK;
 		}
@@ -75,10 +74,10 @@ public enum AnchorType {
 	}
 	
 	public static AnchorType getType(Anchor anchor) {
-		return getType(Graphiti.getPeService().getPropertyValue(anchor, GraphitiConstants.ANCHOR_TYPE));
+		return getType(FeatureSupport.getPropertyValue(anchor, GraphitiConstants.ANCHOR_TYPE));
 	}
 	
 	public static void setType(Anchor anchor, AnchorType at) {
-		Graphiti.getPeService().setPropertyValue(anchor, GraphitiConstants.ANCHOR_TYPE, at.getKey());
+		FeatureSupport.setPropertyValue(anchor, GraphitiConstants.ANCHOR_TYPE, at.getKey());
 	}
 }

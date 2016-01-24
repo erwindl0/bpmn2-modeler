@@ -30,6 +30,7 @@ import org.eclipse.bpmn2.modeler.core.features.flow.AbstractCreateFlowFeature;
 import org.eclipse.bpmn2.modeler.core.features.flow.AbstractReconnectFlowFeature;
 import org.eclipse.bpmn2.modeler.core.utils.AnchorUtil;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.bpmn2.modeler.core.utils.StyleUtil;
 import org.eclipse.bpmn2.modeler.ui.ImageProvider;
 import org.eclipse.emf.ecore.EClass;
@@ -108,7 +109,7 @@ public class AssociationFeatureContainer extends BaseElementConnectionFeatureCon
 		String newDirection = businessObject.getAssociationDirection().toString();
 		if (newDirection==null || newDirection.isEmpty())
 			newDirection = AssociationDirection.NONE.toString();
-		String oldDirection = peService.getPropertyValue(connection, ASSOCIATION_DIRECTION);
+		String oldDirection = FeatureSupport.getPropertyValue(connection, ASSOCIATION_DIRECTION);
 		if (oldDirection==null || oldDirection.isEmpty())
 			oldDirection = AssociationDirection.NONE.toString();
 
@@ -116,7 +117,7 @@ public class AssociationFeatureContainer extends BaseElementConnectionFeatureCon
 			ConnectionDecorator sourceDecorator = null;
 			ConnectionDecorator targetDecorator = null;
 			for (ConnectionDecorator d : connection.getConnectionDecorators()) {
-				String s = peService.getPropertyValue(d, ARROWHEAD_DECORATOR);
+				String s = FeatureSupport.getPropertyValue(d, ARROWHEAD_DECORATOR);
 				if (s!=null) {
 					if (s.equals("source")) //$NON-NLS-1$
 						sourceDecorator = d;
@@ -141,7 +142,7 @@ public class AssociationFeatureContainer extends BaseElementConnectionFeatureCon
 					sourceDecorator = peService.createConnectionDecorator(connection, false, 0.0, true);
 					Polyline arrowhead = gaService.createPolyline(sourceDecorator, new int[] { -l, w, 0, 0, -l, -w });
 					StyleUtil.applyStyle(arrowhead, businessObject);
-					peService.setPropertyValue(sourceDecorator, ARROWHEAD_DECORATOR, "source"); //$NON-NLS-1$
+					FeatureSupport.setPropertyValue(sourceDecorator, ARROWHEAD_DECORATOR, "source"); //$NON-NLS-1$
 				}
 			}
 			else {
@@ -153,7 +154,7 @@ public class AssociationFeatureContainer extends BaseElementConnectionFeatureCon
 					targetDecorator = peService.createConnectionDecorator(connection, false, 1.0, true);
 					Polyline arrowhead = gaService.createPolyline(targetDecorator, new int[] { -l, w, 0, 0, -l, -w });
 					StyleUtil.applyStyle(arrowhead, businessObject);
-					peService.setPropertyValue(targetDecorator, ARROWHEAD_DECORATOR, "target"); //$NON-NLS-1$
+					FeatureSupport.setPropertyValue(targetDecorator, ARROWHEAD_DECORATOR, "target"); //$NON-NLS-1$
 				}
 			}
 			else {
@@ -162,7 +163,7 @@ public class AssociationFeatureContainer extends BaseElementConnectionFeatureCon
 			}
 		
 			// update the property value in the Connection PictogramElement
-			peService.setPropertyValue(connection, ASSOCIATION_DIRECTION, newDirection);
+			FeatureSupport.setPropertyValue(connection, ASSOCIATION_DIRECTION, newDirection);
 		}
 
 	}
@@ -389,7 +390,7 @@ public class AssociationFeatureContainer extends BaseElementConnectionFeatureCon
 				String newDirection = businessObject.getAssociationDirection().toString();
 				if (newDirection==null || newDirection.isEmpty())
 					newDirection = AssociationDirection.NONE.toString();
-				String oldDirection = Graphiti.getPeService().getPropertyValue(connection, ASSOCIATION_DIRECTION);
+				String oldDirection = FeatureSupport.getPropertyValue(connection, ASSOCIATION_DIRECTION);
 				if (oldDirection==null || oldDirection.isEmpty())
 					oldDirection = AssociationDirection.NONE.toString();
 	

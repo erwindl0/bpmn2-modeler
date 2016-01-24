@@ -71,7 +71,7 @@ public class StyleUtil {
 		return s;
 	}
 
-	private static Style findStyle(StyleContainer container, String id) {
+	public static Style findStyle(StyleContainer container, String id) {
 		if (container.getStyles() != null) {
 			for (Style s : container.getStyles()) {
 				if (s.getId().equals(id)) {
@@ -91,7 +91,7 @@ public class StyleUtil {
 	}
 	
 	public static void setFillStyle(GraphicsAlgorithm ga, FillStyle fillStyle) {
-		peService.setPropertyValue(ga, FILL_STYLE, fillStyle.toString());
+		FeatureSupport.setPropertyValue(ga, FILL_STYLE, fillStyle.toString());
 	}
 	
 	public static GraphicsAlgorithm getShapeStyleContainer(PictogramElement pe) {
@@ -100,7 +100,7 @@ public class StyleUtil {
 			EObject o = childIter.next();
 			if (o instanceof GraphicsAlgorithm) {
 				GraphicsAlgorithm ga = (GraphicsAlgorithm)o;
-				if (peService.getPropertyValue(ga, Bpmn2Preferences.PREF_SHAPE_STYLE)!=null) {
+				if (FeatureSupport.getPropertyValue(ga, Bpmn2Preferences.PREF_SHAPE_STYLE)!=null) {
 					return ga;
 				}
 			}
@@ -124,7 +124,7 @@ public class StyleUtil {
 			IColorConstant foreground = ga instanceof AbstractText ? ss.getLabelForeground() : ss.getShapeForeground();
 			IColorConstant background = ss.getShapeBackground();
 
-			peService.setPropertyValue(ga, Bpmn2Preferences.PREF_SHAPE_STYLE, Boolean.TRUE.toString());
+			FeatureSupport.setPropertyValue(ga, Bpmn2Preferences.PREF_SHAPE_STYLE, Boolean.TRUE.toString());
 			if (BusinessObjectUtil.isConnection(be.eClass().getInstanceClass())) {
 				ga.setForeground(gaService.manageColor(diagram, foreground));
 				if (ga instanceof AbstractText) {
@@ -177,7 +177,7 @@ public class StyleUtil {
 					ga.setForeground(gaService.manageColor(diagram, foreground));
 				}
 				
-				String fillStyle = peService.getPropertyValue(ga, FILL_STYLE);
+				String fillStyle = FeatureSupport.getPropertyValue(ga, FILL_STYLE);
 				if (fillStyle==null || fillStyle.equals(FillStyle.FILL_STYLE_DEFAULT.name())) {
 					// fill with gradient
 					ga.setFilled(true);

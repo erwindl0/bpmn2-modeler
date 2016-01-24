@@ -13,7 +13,6 @@
 package org.eclipse.bpmn2.modeler.ui.features.callactivity;
 
 import org.eclipse.bpmn2.Bpmn2Package;
-import org.eclipse.bpmn2.GlobalManualTask;
 import org.eclipse.bpmn2.GlobalUserTask;
 import org.eclipse.bpmn2.modeler.ui.ImageProvider;
 import org.eclipse.emf.ecore.EClass;

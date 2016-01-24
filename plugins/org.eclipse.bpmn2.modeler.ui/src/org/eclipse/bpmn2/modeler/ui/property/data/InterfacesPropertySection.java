@@ -158,7 +158,7 @@ public class InterfacesPropertySection extends DefaultPropertySection {
 
 		@Override
 		protected EObject addListItem(EObject object, EStructuralFeature feature) {
-			Interface iface = Bpmn2ModelerFactory.create(object.eResource(), Interface.class);
+			Interface iface = Bpmn2ModelerFactory.createObject(object.eResource(), Interface.class);
 			
 			EList<EObject> list = getItemList();
 			list.add(iface);

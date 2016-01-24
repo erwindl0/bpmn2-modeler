@@ -675,7 +675,7 @@ public class Bpmn2ToolBehaviorProvider extends DefaultToolBehaviorProvider imple
 		for (ICustomFeature cf : fp.getCustomFeatures(cc)) {
 			if (cf.isAvailable(cc) && cf.canExecute(cc)) {
 				ContextButtonEntry button = new ContextButtonEntry(cf, cc);
-				button.setText(cf.getName()); //$NON-NLS-1$
+				button.setText(cf.getName());
 				button.setIconId(cf.getImageId());
 				button.setDescription(cf.getDescription());
 				
@@ -700,7 +700,7 @@ public class Bpmn2ToolBehaviorProvider extends DefaultToolBehaviorProvider imple
 
 		// 3.b. create context button and add "Create Connections" feature
 		ContextButtonEntry button = new ContextButtonEntry(null, context);
-		button.setText("Create Connection"); //$NON-NLS-1$
+		button.setText(Messages.Bpmn2ToolBehaviorProvider_Create_Connection);
 		String description = null;
 		ArrayList<String> names = new ArrayList<String>();
 		button.setIconId(ImageProvider.IMG_16_SEQUENCE_FLOW);
@@ -785,7 +785,7 @@ public class Bpmn2ToolBehaviorProvider extends DefaultToolBehaviorProvider imple
 		}
 		// temp debugging stuff to dump connection routing info
 		for (PictogramElement pe : context.getPictogramElements()) {
-			String id = Graphiti.getPeService().getPropertyValue(pe, "ROUTING_NET_CONNECTION"); //$NON-NLS-1$
+			String id = FeatureSupport.getPropertyValue(pe, "ROUTING_NET_CONNECTION"); //$NON-NLS-1$
 			if (pe instanceof FreeFormConnection) {
 				System.out.println("id="+id); //$NON-NLS-1$
 				FreeFormConnection c = (FreeFormConnection)pe;

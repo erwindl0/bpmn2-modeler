@@ -73,7 +73,7 @@ public class ResourceRoleDetailComposite extends DefaultDetailComposite {
 					new ResourceAssignmentExpressionDetailComposite(this, SWT.NONE);
 			EObject value = (EObject)object.eGet(reference);
 			if (value==null) {
-				value = modelHandler.create((EClass)reference.getEType());
+				value = modelHandler.createObject((EClass)reference.getEType());
 				InsertionAdapter.add(object, reference, value);
 			}
 			composite.setBusinessObject(value);

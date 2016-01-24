@@ -14,7 +14,7 @@ import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.modeler.core.model.ModelDecorator;
 import org.eclipse.bpmn2.modeler.core.runtime.CustomTaskImageProvider;
 import org.eclipse.bpmn2.modeler.core.runtime.CustomTaskImageProvider.IconSize;
-import org.eclipse.bpmn2.modeler.core.features.Messages;
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.graphiti.IExecutionInfo;
@@ -181,7 +181,7 @@ public class CustomShapeFeatureContainer extends CustomElementFeatureContainer i
 			
 			// create the PE and copy our ID into its properties.
 			PictogramElement pe = getFeatureProvider().addIfPossible(addContext);
-			Graphiti.getPeService().setPropertyValue(pe,GraphitiConstants.CUSTOM_ELEMENT_ID,id);
+			FeatureSupport.setPropertyValue(pe,GraphitiConstants.CUSTOM_ELEMENT_ID,id);
 			
 			return pe;
 		}
@@ -202,7 +202,6 @@ public class CustomShapeFeatureContainer extends CustomElementFeatureContainer i
 		@Override
 		public BaseElement createBusinessObject(ICreateContext context) {
 			BaseElement businessObject = createFeatureDelegate.createBusinessObject(context);
-			customTaskDescriptor.populateObject(businessObject, true);
 			return businessObject;
 		}
 
@@ -291,7 +290,7 @@ public class CustomShapeFeatureContainer extends CustomElementFeatureContainer i
 			PictogramElement pe = addFeatureDelegate.add(context);
 			// make sure everyone knows that this PE is a custom task
 			if (pe!=null)
-				peService.setPropertyValue(pe,GraphitiConstants.CUSTOM_ELEMENT_ID,getId());
+				FeatureSupport.setPropertyValue(pe,GraphitiConstants.CUSTOM_ELEMENT_ID,getId());
 			
 			// add an icon to the top-left corner if applicable, and if the implementing
 			// addFeatureDelegate hasn't already done so.

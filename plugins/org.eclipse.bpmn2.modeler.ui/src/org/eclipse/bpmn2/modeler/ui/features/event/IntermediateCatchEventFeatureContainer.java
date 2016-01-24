@@ -18,11 +18,10 @@ import org.eclipse.bpmn2.modeler.core.features.MultiUpdateFeature;
 import org.eclipse.bpmn2.modeler.core.features.event.AbstractCreateEventFeature;
 import org.eclipse.bpmn2.modeler.core.features.event.AbstractUpdateEventFeature;
 import org.eclipse.bpmn2.modeler.core.features.event.AddEventFeature;
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.bpmn2.modeler.core.utils.ShapeDecoratorUtil;
 import org.eclipse.bpmn2.modeler.core.utils.StyleUtil;
 import org.eclipse.bpmn2.modeler.ui.ImageProvider;
-import org.eclipse.bpmn2.modeler.ui.features.activity.AppendActivityFeature;
-import org.eclipse.bpmn2.modeler.ui.features.gateway.AppendGatewayFeature;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.graphiti.features.IAddFeature;
 import org.eclipse.graphiti.features.ICreateFeature;
@@ -83,7 +82,7 @@ public class IntermediateCatchEventFeatureContainer extends AbstractEventFeature
 			Ellipse circle = ShapeDecoratorUtil.createIntermediateEventCircle(e);
 			circle.setForeground(manageColor(StyleUtil.CLASS_FOREGROUND));
 			IPeService peService = Graphiti.getPeService();
-			peService.setPropertyValue(containerShape,
+			FeatureSupport.setPropertyValue(containerShape,
 					UpdateIntermediateCatchEventFeature.INTERMEDIATE_CATCH_EVENT_MARKER,
 					AbstractUpdateEventFeature.getEventDefinitionsValue((IntermediateCatchEvent)businessObject));
 		}

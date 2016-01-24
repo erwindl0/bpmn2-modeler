@@ -24,11 +24,12 @@ import org.eclipse.bpmn2.FlowElement;
 import org.eclipse.bpmn2.FlowNode;
 import org.eclipse.bpmn2.Lane;
 import org.eclipse.bpmn2.di.BPMNShape;
-import org.eclipse.bpmn2.modeler.core.di.DIUtils;
 import org.eclipse.bpmn2.modeler.core.features.CustomShapeFeatureContainer.CreateCustomShapeFeature;
 import org.eclipse.bpmn2.modeler.core.features.GraphitiConstants;
 import org.eclipse.bpmn2.modeler.core.features.IBpmn2CreateFeature;
+import org.eclipse.bpmn2.modeler.core.preferences.Bpmn2Preferences;
 import org.eclipse.bpmn2.modeler.core.preferences.ModelEnablements;
+import org.eclipse.bpmn2.modeler.core.preferences.ShapeStyle;
 import org.eclipse.bpmn2.modeler.core.utils.AnchorUtil;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
 import org.eclipse.bpmn2.modeler.core.utils.GraphicsUtil;
@@ -42,13 +43,17 @@ import org.eclipse.graphiti.datatypes.ILocation;
 import org.eclipse.graphiti.features.ICreateFeature;
 import org.eclipse.graphiti.features.IDeleteFeature;
 import org.eclipse.graphiti.features.IFeatureProvider;
+import org.eclipse.graphiti.features.ILayoutFeature;
 import org.eclipse.graphiti.features.IReconnectionFeature;
+import org.eclipse.graphiti.features.IResizeShapeFeature;
 import org.eclipse.graphiti.features.IUpdateFeature;
 import org.eclipse.graphiti.features.context.IContext;
 import org.eclipse.graphiti.features.context.ICustomContext;
 import org.eclipse.graphiti.features.context.impl.CreateContext;
 import org.eclipse.graphiti.features.context.impl.DeleteContext;
+import org.eclipse.graphiti.features.context.impl.LayoutContext;
 import org.eclipse.graphiti.features.context.impl.ReconnectionContext;
+import org.eclipse.graphiti.features.context.impl.ResizeShapeContext;
 import org.eclipse.graphiti.features.context.impl.UpdateContext;
 import org.eclipse.graphiti.features.custom.AbstractCustomFeature;
 import org.eclipse.graphiti.mm.pictograms.Anchor;
@@ -308,11 +313,24 @@ public abstract class AbstractMorphNodeFeature<T extends FlowNode> extends Abstr
 		createContext.setSize(w, h);
 		createContext.putProperty(GraphitiConstants.IMPORT_PROPERTY, Boolean.TRUE);
 		BPMNShape oldBpmnShape = BusinessObjectUtil.getFirstElementOfType(oldShape, BPMNShape.class);
-		createContext.putProperty(GraphitiConstants.COPIED_BPMN_SHAPE, oldBpmnShape);
+		createContext.putProperty(GraphitiConstants.COPIED_BPMN_DI_ELEMENT, oldBpmnShape);
 
 		Object[] created = createFeature.create(createContext);
 		FlowElement newObject = (FlowElement) created[0];
 		ContainerShape newShape = (ContainerShape) created[1];
+		Bpmn2Preferences preferences = Bpmn2Preferences.getInstance(oldShape);
+		ShapeStyle ss = preferences.getShapeStyle(newObject);
+		
+		// change width/height to default for this new shape type if needed
+		if (ss.getDefaultHeight()!=h || ss.getDefaultWidth()!=w) {
+			ResizeShapeContext resizeContext = new ResizeShapeContext(newShape);
+			resizeContext.setHeight(ss.getDefaultHeight());
+			resizeContext.setWidth(ss.getDefaultWidth());
+			resizeContext.setX(x - (ss.getDefaultWidth() - w)/2);
+			resizeContext.setY(y - (ss.getDefaultHeight() - h)/2);
+			IResizeShapeFeature resizeFeature = getFeatureProvider().getResizeShapeFeature(resizeContext);
+			resizeFeature.resizeShape(resizeContext);
+		}
 		
 		BaseElement oldObject = BusinessObjectUtil.getFirstElementOfType(oldShape, BaseElement.class);
 		if (oldObject instanceof Lane) {
@@ -349,6 +367,12 @@ public abstract class AbstractMorphNodeFeature<T extends FlowNode> extends Abstr
 		if (deleteFeature.canDelete(deleteContext))
 			deleteFeature.delete(deleteContext);
 		
+		// layout the new shape
+		LayoutContext layoutContext = new LayoutContext(newShape);
+		ILayoutFeature layoutFeature = getFeatureProvider().getLayoutFeature(layoutContext);
+		if (layoutFeature!=null && layoutFeature.canLayout(layoutContext))
+			layoutFeature.layout(layoutContext);
+
 		return newShape;
 	}
 

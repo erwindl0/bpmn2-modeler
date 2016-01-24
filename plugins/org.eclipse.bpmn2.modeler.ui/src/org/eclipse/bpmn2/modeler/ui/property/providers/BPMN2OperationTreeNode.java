@@ -13,9 +13,8 @@ package org.eclipse.bpmn2.modeler.ui.property.providers;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.bpmn2.Message;
-import org.eclipse.bpmn2.Operation;
 import org.eclipse.bpmn2.Error;
+import org.eclipse.bpmn2.Operation;
 import org.eclipse.bpmn2.modeler.ui.Activator;
 import org.eclipse.bpmn2.modeler.ui.IConstants;
 import org.eclipse.swt.graphics.Image;

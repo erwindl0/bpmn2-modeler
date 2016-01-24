@@ -67,7 +67,6 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.wst.wsdl.WSDLElement;
 
 public class ActivityDetailComposite extends DefaultDetailComposite {
 
@@ -178,8 +177,11 @@ public class ActivityDetailComposite extends DefaultDetailComposite {
 						domain.getCommandStack().execute(new RecordingCommand(domain) {
 							@Override
 							protected void doExecute() {
-								if (activity.getLoopCharacteristics() !=null)
-									activity.setLoopCharacteristics(null);
+								LoopCharacteristics lc = activity.getLoopCharacteristics();
+								if (lc !=null) {
+									getBusinessObjectDelegate().setValue(activity,
+											Bpmn2Package.eINSTANCE.getActivity_LoopCharacteristics(), null);
+								}
 								setBusinessObject(activity);
 							}
 						});
@@ -199,7 +201,8 @@ public class ActivityDetailComposite extends DefaultDetailComposite {
 							@Override
 							protected void doExecute() {
 								StandardLoopCharacteristics loopChar = createModelObject(StandardLoopCharacteristics.class);
-								activity.setLoopCharacteristics(loopChar);
+								getBusinessObjectDelegate().setValue(activity,
+										Bpmn2Package.eINSTANCE.getActivity_LoopCharacteristics(), loopChar);
 								setBusinessObject(activity);
 							}
 						});
@@ -219,7 +222,8 @@ public class ActivityDetailComposite extends DefaultDetailComposite {
 							@Override
 							protected void doExecute() {
 								MultiInstanceLoopCharacteristics loopChar = createModelObject(MultiInstanceLoopCharacteristics.class);
-								activity.setLoopCharacteristics(loopChar);
+								getBusinessObjectDelegate().setValue(activity,
+										Bpmn2Package.eINSTANCE.getActivity_LoopCharacteristics(), loopChar);
 								setBusinessObject(activity);
 							}
 						});
@@ -448,14 +452,15 @@ public class ActivityDetailComposite extends DefaultDetailComposite {
 		Resource resource = activity.eResource();
 		InputOutputSpecification ioSpec = activity.getIoSpecification();
 		if (ioSpec==null) {
-			ioSpec = Bpmn2ModelerFactory.create(resource, InputOutputSpecification.class);
+			ioSpec = Bpmn2ModelerFactory.createObject(resource, InputOutputSpecification.class);
 			ModelUtil.setID(ioSpec, resource);
 			if (operationChanged) {
 				activity.setIoSpecification(ioSpec);
 			}
 		}
+		
+		final InputSet inputSet = Bpmn2ModelerFactory.createObject(resource, InputSet.class);
 		if (ioSpec.getInputSets().size()==0) {
-			final InputSet inputSet = Bpmn2ModelerFactory.create(resource, InputSet.class);
 			ModelUtil.setID(inputSet);
 			if (operationChanged || ioSpec.eContainer()==null)
 			{
@@ -465,8 +470,9 @@ public class ActivityDetailComposite extends DefaultDetailComposite {
 				InsertionAdapter.add(ioSpec, Bpmn2Package.eINSTANCE.getInputOutputSpecification_InputSets(), inputSet);
 			}
 		}
+		
+		final OutputSet outputSet = Bpmn2ModelerFactory.createObject(resource, OutputSet.class);
 		if (ioSpec.getOutputSets().size()==0) {
-			final OutputSet outputSet = Bpmn2ModelerFactory.create(resource, OutputSet.class);
 			ModelUtil.setID(outputSet);
 			if (operationChanged || ioSpec.eContainer()==null)
 			{
@@ -509,7 +515,7 @@ public class ActivityDetailComposite extends DefaultDetailComposite {
 				input = ioSpec.getDataInputs().get(0);
 			}
 			else {
-				input = Bpmn2ModelerFactory.create(resource, DataInput.class);
+				input = Bpmn2ModelerFactory.createObject(resource, DataInput.class);
 				input.setName( DataInputPropertiesAdapter.generateName(ioSpec.getDataInputs()) );
 				newInput = true;
 			}
@@ -541,7 +547,7 @@ public class ActivityDetailComposite extends DefaultDetailComposite {
 				output = ioSpec.getDataOutputs().get(0);
 			}
 			else {
-				output = Bpmn2ModelerFactory.create(resource, DataOutput.class);
+				output = Bpmn2ModelerFactory.createObject(resource, DataOutput.class);
 				output.setName( DataOutputPropertiesAdapter.generateName(ioSpec.getDataOutputs()) );
 				newOutput = true;
 			}
@@ -570,7 +576,6 @@ public class ActivityDetailComposite extends DefaultDetailComposite {
 		if (ioSpec.getDataInputs().size()>0) {
 			input = ioSpec.getDataInputs().get(0);
 			// fix missing InputSet
-			final InputSet inputSet = ioSpec.getInputSets().get(0);
 			if (!inputSet.getDataInputRefs().contains(input)) {
 				final DataInput i = input;
 				TransactionalEditingDomain domain = getDiagramEditor().getEditingDomain();
@@ -585,7 +590,6 @@ public class ActivityDetailComposite extends DefaultDetailComposite {
 		if (ioSpec.getDataOutputs().size()>0) {
 			output = ioSpec.getDataOutputs().get(0);
 			// fix missing OutputSet
-			final OutputSet outputSet = ioSpec.getOutputSets().get(0);
 			if (!outputSet.getDataOutputRefs().contains(output)) {
 				final DataOutput o = output;
 				TransactionalEditingDomain domain = getDiagramEditor().getEditingDomain();

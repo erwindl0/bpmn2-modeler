@@ -15,6 +15,7 @@ package org.eclipse.bpmn2.modeler.ui.adapters.properties;
 
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.bpmn2.Bpmn2Package;
 import org.eclipse.bpmn2.Definitions;
@@ -24,7 +25,6 @@ import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesAdapter;
 import org.eclipse.bpmn2.modeler.core.adapters.FeatureDescriptor;
 import org.eclipse.bpmn2.modeler.core.adapters.InsertionAdapter;
 import org.eclipse.bpmn2.modeler.core.adapters.ObjectDescriptor;
-import org.eclipse.bpmn2.modeler.core.adapters.ObjectPropertyProvider;
 import org.eclipse.bpmn2.modeler.core.model.Bpmn2ModelerFactory;
 import org.eclipse.bpmn2.modeler.core.runtime.TargetRuntime;
 import org.eclipse.bpmn2.modeler.core.runtime.TypeLanguageDescriptor;
@@ -36,6 +36,8 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
+import org.eclipse.emf.transaction.impl.TransactionalEditingDomainImpl;
 import org.eclipse.wst.wsdl.Fault;
 import org.eclipse.wst.wsdl.Message;
 import org.eclipse.xsd.XSDElementDeclaration;
@@ -129,7 +131,7 @@ public class ItemDefinitionPropertiesAdapter extends ExtendedPropertiesAdapter<I
 			}
 			
 			@Override
-			public ItemDefinition createObject(Resource resource, EClass eclass) {
+			public ItemDefinition createObject(Resource resource, EClass eclass, Map<String, Object> args) {
 				ItemDefinition itemDefinition = ItemDefinitionPropertiesAdapter.createItemDefinition(resource);
 				return itemDefinition;
 			}
@@ -166,11 +168,14 @@ public class ItemDefinitionPropertiesAdapter extends ExtendedPropertiesAdapter<I
 	}
 
 	public static ItemDefinition createItemDefinition(Resource resource) {
-		ItemDefinition itemDefinition = Bpmn2ModelerFactory.eINSTANCE.createItemDefinition();
+		final ItemDefinition itemDefinition = Bpmn2ModelerFactory.eINSTANCE.createItemDefinition();
 		ModelUtil.setID(itemDefinition, resource);
-		Definitions defs = ModelUtil.getDefinitions(resource);
-		if (defs!=null) {
-			defs.getRootElements().add(itemDefinition);
+		if (resource!=null) {
+			final Definitions defs = ModelUtil.getDefinitions(resource);
+			TransactionalEditingDomainImpl domain = (TransactionalEditingDomainImpl) AdapterFactoryEditingDomain.getEditingDomainFor(defs);
+			if (domain!=null && domain.getActiveTransaction()!=null) {
+				defs.getRootElements().add(itemDefinition);
+			}
 		}
 
 		return itemDefinition;
@@ -187,7 +192,7 @@ public class ItemDefinitionPropertiesAdapter extends ExtendedPropertiesAdapter<I
 	}
 	
 	public static String getStructureName(ItemDefinition itemDefinition) {
-		Resource resource = ObjectPropertyProvider.getResource(itemDefinition);
+		Resource resource = ExtendedPropertiesAdapter.getResource(itemDefinition);
 		String name = ""; //$NON-NLS-1$
 		if (itemDefinition!=null) {
 			Object value = itemDefinition.getStructureRef();

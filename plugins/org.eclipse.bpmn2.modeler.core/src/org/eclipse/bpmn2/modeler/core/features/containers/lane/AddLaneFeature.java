@@ -93,7 +93,7 @@ public class AddLaneFeature extends AbstractBpmn2AddFeature<Lane> {
 		StyleUtil.applyStyle(rect, businessObject);
 		
 		boolean isImport = context.getProperty(GraphitiConstants.IMPORT_PROPERTY) != null;
-		boolean isCopy = context.getProperty(GraphitiConstants.COPIED_BPMN_SHAPE) != null;
+		boolean isCopy = context.getProperty(GraphitiConstants.COPIED_BPMN_DI_ELEMENT) != null;
 
 		int width = this.getWidth(context);
 		int height = this.getHeight(context);

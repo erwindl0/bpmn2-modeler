@@ -162,7 +162,7 @@ public class BusinessObjectUtil {
 		Iterator<PictogramElement> iterator = peService.getAllContainedPictogramElements(container).iterator();
 		while (iterator.hasNext()) {
 			PictogramElement pe = iterator.next();
-			String value = peService.getPropertyValue(pe, property);
+			String value = FeatureSupport.getPropertyValue(pe, property);
 			if (value != null && value.equals(expectedValue) && clazz.isInstance(pe)) {
 				return (T) pe;
 			}
@@ -171,7 +171,7 @@ public class BusinessObjectUtil {
 		// also search the linked objects
 		PictogramElement pe = getFirstElementOfType(container, PictogramElement.class);
 		if (pe!=null) {
-			String value = peService.getPropertyValue(pe, property);
+			String value = FeatureSupport.getPropertyValue(pe, property);
 			if (value != null && value.equals(expectedValue) && clazz.isInstance(pe)) {
 				return (T) pe;
 			}

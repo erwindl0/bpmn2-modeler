@@ -149,6 +149,33 @@ public class DIGenerator {
 		}
 		
 		removeDuplicates(missing.getChildren());
+		
+		// special hack for Default Pool in a Collaboration:
+		// the main canvas CAN act as the "default" pool,
+		// but there can be only one.
+		List<DiagramElementTreeNode> removed = new ArrayList<DiagramElementTreeNode>();
+		for (DiagramElementTreeNode node : missing) {
+			if (node.getBaseElement() instanceof Participant) {
+				Participant p = (Participant) node.getBaseElement();
+				int numberOfDefaultPools = 0;
+				if (p.eContainer() instanceof Collaboration) {
+					Collaboration c = (Collaboration) p.eContainer();
+					for (Participant p2 : c.getParticipants()) {
+						if (missing.contains(p2))
+							++numberOfDefaultPools;
+					}
+				}
+				if (numberOfDefaultPools<=1)
+					removed.add(node);
+			}
+		}
+		
+		for (DiagramElementTreeNode node : removed) {
+			missing.removeChild(node);
+			if (node.getParent().getChildren().isEmpty())
+				missing.removeChild(node.getParent());
+		}
+		
 		return missing;
 	}
 	

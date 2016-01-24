@@ -27,7 +27,7 @@ public abstract class AbstractCreateRootElementFeature<T extends RootElement> ex
 
 	@Override
     public boolean canCreate(ICreateContext context) {
-	    return true;
+	    return super.canCreate(context);
     }
 
 	@Override

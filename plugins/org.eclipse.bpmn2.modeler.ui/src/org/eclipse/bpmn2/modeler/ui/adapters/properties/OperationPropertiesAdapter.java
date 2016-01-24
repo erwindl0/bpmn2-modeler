@@ -14,6 +14,7 @@
 package org.eclipse.bpmn2.modeler.ui.adapters.properties;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.bpmn2.Bpmn2Package;
 import org.eclipse.bpmn2.Definitions;
@@ -64,8 +65,8 @@ public class OperationPropertiesAdapter extends ExtendedPropertiesAdapter<Operat
     	setObjectDescriptor( new ObjectDescriptor<Operation>(this,object) {
 
 			@Override
-			public Operation createObject(Resource resource, EClass eclass) {
-				Operation operation = super.createObject(resource, eclass);
+			public Operation createObject(Resource resource, EClass eclass, Map<String, Object> args) {
+				Operation operation = super.createObject(resource, eclass, args);
 				// find an Interface to which we can add this new Operation
 				// Ask user which Interface if there are more than one.
 				Definitions definitions = ModelUtil.getDefinitions(resource);
@@ -137,7 +138,7 @@ public class OperationPropertiesAdapter extends ExtendedPropertiesAdapter<Operat
 					intf = interfaces.get(0);
 				}
 				else if (definitions != null) {
-					intf = Bpmn2ModelerFactory.create(resource, Interface.class);
+					intf = Bpmn2ModelerFactory.createObject(resource, Interface.class);
 //					InsertionAdapter.add(definitions, Bpmn2Package.eINSTANCE.getDefinitions_RootElements(), intf);
 					definitions.getRootElements().add(intf);
 				}

@@ -23,6 +23,7 @@ import org.eclipse.bpmn2.modeler.core.runtime.TargetRuntime;
 import org.eclipse.bpmn2.modeler.core.runtime.ToolPaletteDescriptor;
 import org.eclipse.bpmn2.modeler.core.runtime.ToolPaletteDescriptor.ToolDescriptor;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.graphiti.IExecutionInfo;
 import org.eclipse.graphiti.features.ICreateConnectionFeature;
@@ -37,7 +38,6 @@ import org.eclipse.graphiti.mm.pictograms.Connection;
 import org.eclipse.graphiti.mm.pictograms.ContainerShape;
 import org.eclipse.graphiti.mm.pictograms.Diagram;
 import org.eclipse.graphiti.mm.pictograms.PictogramElement;
-import org.eclipse.graphiti.services.Graphiti;
 import org.eclipse.graphiti.ui.editor.DiagramEditor;
 
 /**
@@ -179,7 +179,7 @@ public class CompoundCreateFeature<CONTEXT extends IContext>
 						businessObjects.add(bo);
 						String id = fp.getProperty(ToolPaletteDescriptor.TOOLPART_ID);
 						if (id!=null) {
-							Graphiti.getPeService().setPropertyValue(pe, ToolPaletteDescriptor.TOOLPART_ID, id);
+							FeatureSupport.setPropertyValue(pe, ToolPaletteDescriptor.TOOLPART_ID, id);
 						}
 						continue;
 					}

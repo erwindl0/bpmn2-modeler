@@ -13,19 +13,12 @@
 package org.eclipse.bpmn2.modeler.ui.features.activity.subprocess;
 
 import org.eclipse.bpmn2.Activity;
-import org.eclipse.bpmn2.di.BPMNDiagram;
-import org.eclipse.bpmn2.di.BPMNShape;
-import org.eclipse.bpmn2.modeler.core.di.DIUtils;
 import org.eclipse.bpmn2.modeler.core.features.activity.LayoutActivityFeature;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
 import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.graphiti.features.IFeatureProvider;
-import org.eclipse.graphiti.features.IResizeShapeFeature;
 import org.eclipse.graphiti.features.context.ILayoutContext;
-import org.eclipse.graphiti.features.context.impl.ResizeShapeContext;
-import org.eclipse.graphiti.mm.algorithms.GraphicsAlgorithm;
 import org.eclipse.graphiti.mm.pictograms.ContainerShape;
-import org.eclipse.graphiti.mm.pictograms.PictogramElement;
 
 public class LayoutExpandableActivityFeature extends LayoutActivityFeature {
 
@@ -38,53 +31,8 @@ public class LayoutExpandableActivityFeature extends LayoutActivityFeature {
 		ContainerShape containerShape = (ContainerShape) context.getPictogramElement();
 		Activity activity = BusinessObjectUtil.getFirstElementOfType(containerShape, Activity.class);
 		try {
-			BPMNDiagram bpmnDiagram = DIUtils.findBPMNDiagram(containerShape);
-			BPMNShape shape = DIUtils.findBPMNShape(bpmnDiagram, activity);
-			
-			if (shape.isIsExpanded()) {
-				
-				// SubProcess is expanded
-				
-				boolean needResize = false;
-				GraphicsAlgorithm parentGa = containerShape.getGraphicsAlgorithm();
-				
-				for (PictogramElement pe : FeatureSupport.getContainerChildren(containerShape)) {
-					GraphicsAlgorithm ga = pe.getGraphicsAlgorithm();
-					if (ga!=null) {
-						if (ga.getX() < 0 || ga.getY() < 0) {
-							needResize = true;
-							break;
-						}
-						if (ga.getX() + ga.getWidth() > parentGa.getWidth()) {
-							needResize = true;
-							break;
-						}
-						if (ga.getY() + ga.getHeight() > parentGa.getHeight()) {
-							needResize = true;
-							break;
-						}
-					}
-				}
-
-				if (needResize) {
-					ResizeShapeContext resizeContext = new ResizeShapeContext(containerShape);
-					resizeContext.setX(parentGa.getX());
-					resizeContext.setY(parentGa.getY());
-					resizeContext.setWidth(parentGa.getWidth());
-					resizeContext.setHeight(parentGa.getHeight());
-					IResizeShapeFeature resizeFeature = getFeatureProvider().getResizeShapeFeature(resizeContext);
-					resizeFeature.resizeShape(resizeContext);
-				}
-				
-				FeatureSupport.setContainerChildrenVisible(getFeatureProvider(), containerShape, true);
-			}
-			else {
-				
-				// SubProcess is collapsed
-				
-				FeatureSupport.setContainerChildrenVisible(getFeatureProvider(), containerShape, false);
-			}
-			
+			boolean setChildrenVisible = FeatureSupport.isElementExpanded(activity);
+			FeatureSupport.setContainerChildrenVisible(getFeatureProvider(), containerShape, setChildrenVisible);
 		} catch (Exception e) {
 			// It's OK, I've played a programmer before...
 			// e.printStackTrace();

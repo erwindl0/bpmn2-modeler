@@ -184,7 +184,7 @@ public class DefaultConnectionRouter extends AbstractConnectionRouter {
 			return allShapes;
 		
 		allShapes = new ArrayList<ContainerShape>();
-		Diagram diagram = fp.getDiagramTypeProvider().getDiagram();
+		Diagram diagram = peService.getDiagramForPictogramElement(connection);
 		
 		// first find all ancestors of source and  target, and their siblings
 		List<ContainerShape> ancestors = new ArrayList<ContainerShape>();
@@ -365,7 +365,8 @@ public class DefaultConnectionRouter extends AbstractConnectionRouter {
 	protected List<Connection> findCrossings(Connection connection, Point start, Point end) {
 		// TODO: figure out why this isn't working!
 		List<Connection> crossings = new ArrayList<Connection>();
-		List<Connection> allConnections = fp.getDiagramTypeProvider().getDiagram().getConnections();
+		Diagram diagram = peService.getDiagramForPictogramElement(connection);
+		List<Connection> allConnections = diagram.getConnections();
 		List<FixPointAnchor> connectionAnchors = AnchorUtil.getAnchors(connection);
 		for (Connection c : allConnections) {
 			if (Graphiti.getPeService().getProperty(c, RoutingNet.CONNECTION)!=null) {
@@ -418,7 +419,7 @@ public class DefaultConnectionRouter extends AbstractConnectionRouter {
 			DeleteRoutingConnectionFeature deleteFeature = new DeleteRoutingConnectionFeature(fp);
 			deleteFeature.delete();
 
-			Diagram diagram = fp.getDiagramTypeProvider().getDiagram();
+			Diagram diagram = peService.getDiagramForPictogramElement(connection);
 			for (int i=0; i<allRoutes.size(); ++i) {
 				ConnectionRoute r = allRoutes.get(i);
 //				Anchor sa = AnchorUtil.createFixedAnchor(source, r.get(0));
@@ -478,7 +479,7 @@ public class DefaultConnectionRouter extends AbstractConnectionRouter {
 				connection.getBendpoints().add(route.get(i));
 			}
 
-			peService.setPropertyValue(connection, CONNECTION, "" + route.getId()); //$NON-NLS-1$
+			FeatureSupport.setPropertyValue(connection, CONNECTION, "" + route.getId()); //$NON-NLS-1$
 
 			Polyline connectionLine = Graphiti.getGaService().createPolyline(
 					connection);

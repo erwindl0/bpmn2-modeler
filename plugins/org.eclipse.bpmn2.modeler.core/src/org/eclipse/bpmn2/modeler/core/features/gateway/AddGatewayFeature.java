@@ -82,7 +82,7 @@ public abstract class AddGatewayFeature<T extends Gateway>
 			newBpmnShape.setIsMarkerVisible(false);
 		}
 		else {
-			BPMNShape oldBpmnShape = (BPMNShape)context.getProperty(GraphitiConstants.COPIED_BPMN_SHAPE);
+			BPMNShape oldBpmnShape = (BPMNShape)context.getProperty(GraphitiConstants.COPIED_BPMN_DI_ELEMENT);
 			if (oldBpmnShape!=null) {
 				newBpmnShape.setIsMarkerVisible( oldBpmnShape.isIsMarkerVisible() );
 			}

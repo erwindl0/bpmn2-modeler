@@ -33,7 +33,6 @@ import org.eclipse.emf.ecore.util.FeatureMap.Entry;
 import org.eclipse.graphiti.mm.algorithms.GraphicsAlgorithm;
 import org.eclipse.graphiti.mm.pictograms.PictogramElement;
 import org.eclipse.graphiti.mm.pictograms.Shape;
-import org.eclipse.graphiti.services.Graphiti;
 
 /**
  *
@@ -110,7 +109,7 @@ public class StyleChangeAdapter extends AdapterImpl implements IExtensionValueAd
 			Shape labelShape = FeatureSupport.getLabelShape(pictogramElement);
 			if (labelShape!=null) {
 				ga = labelShape.getGraphicsAlgorithm();
-				Graphiti.getPeService().setPropertyValue(labelShape, GraphitiConstants.LABEL_CHANGED, "true"); //$NON-NLS-1$
+				FeatureSupport.setPropertyValue(labelShape, GraphitiConstants.LABEL_CHANGED, "true"); //$NON-NLS-1$
 				StyleUtil.applyStyle(ga, businessObject, ss);
 			}
 		}

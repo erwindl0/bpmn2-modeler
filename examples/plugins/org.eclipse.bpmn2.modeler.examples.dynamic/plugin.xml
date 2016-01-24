@@ -41,7 +41,7 @@
 		</propertyTab>
 		
 		<propertyTab
-			id="org.eclipse.bpmn2.modeler.examples.dynamic.flow.tab"
+			id="org.eclipse.bpmn2.modeler.examples.dynamic.tab"
 			class="default"
 			features="priority"
 			type="org.eclipse.bpmn2.SequenceFlow"
@@ -85,7 +85,7 @@
 			name="Mitigation Flow"
 			category="Risk &amp; Mitigation"
 			icon="flow.png"
-			runtimeId="org.eclipse.bpmn2.modeler.examples.dynamic.flow"
+			runtimeId="org.eclipse.bpmn2.modeler.examples.dynamic"
 			type="SequenceFlow">
 			<property name="name" value="Mitigate" type="EString"/>
 			<property name="priority" value="1" type="EInt"/>

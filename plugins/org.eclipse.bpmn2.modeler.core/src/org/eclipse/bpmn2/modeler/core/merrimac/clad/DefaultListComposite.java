@@ -16,7 +16,6 @@ import java.util.List;
 import org.eclipse.bpmn2.Definitions;
 import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesProvider;
 import org.eclipse.bpmn2.modeler.core.merrimac.dialogs.ModelSubclassSelectionDialog;
-import org.eclipse.bpmn2.modeler.core.model.Bpmn2ModelerFactory;
 import org.eclipse.bpmn2.modeler.core.runtime.TargetRuntime;
 import org.eclipse.bpmn2.modeler.core.utils.ModelUtil;
 import org.eclipse.dd.di.DiagramElement;
@@ -81,7 +80,7 @@ public class DefaultListComposite extends AbstractListComposite {
 				if (listItemClass==null)
 					return null; // user cancelled
 			}
-			newItem = Bpmn2ModelerFactory.createFeature(object,feature,listItemClass);
+			newItem = getBusinessObjectDelegate().createFeature(object,feature,listItemClass);
 			if (newItem==null) {
 				MessageDialog.openError(getShell(), Messages.DefaultListComposite_Internal_Error_Title,
 					NLS.bind(Messages.DefaultListComposite_Internal_Error_Message_No_Factory,

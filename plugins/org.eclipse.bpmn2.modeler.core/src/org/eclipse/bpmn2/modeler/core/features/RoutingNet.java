@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Stack;
 
 import org.eclipse.bpmn2.modeler.core.features.RoutingLane.Adjacence;
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.bpmn2.modeler.core.utils.GraphicsUtil;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.emf.common.util.TreeIterator;
@@ -647,7 +648,7 @@ public class RoutingNet extends ArrayList<RoutingLane> {
 			roundedRect.setLineWidth(2);
 
 //			link(rectShape, context.getNewObject());
-			peService.setPropertyValue(containerShape, LANE, "true"); //$NON-NLS-1$
+			FeatureSupport.setPropertyValue(containerShape, LANE, "true"); //$NON-NLS-1$
 			
 			gaService.setLocationAndSize(roundedRect, 0, 0, width, height);
 			peService.sendToFront(containerShape);
@@ -689,7 +690,7 @@ public class RoutingNet extends ArrayList<RoutingLane> {
 			Connection connection = peService.createFreeFormConnection(diagram);
 			connection.setStart(sourceAnchor);
 			connection.setEnd(targetAnchor);
-			peService.setPropertyValue(connection, CONNECTION, "true"); //$NON-NLS-1$
+			FeatureSupport.setPropertyValue(connection, CONNECTION, "true"); //$NON-NLS-1$
 
 			Polyline connectionLine = Graphiti.getGaService().createPolyline(connection);
 
@@ -810,7 +811,7 @@ public class RoutingNet extends ArrayList<RoutingLane> {
 					Object o = iter.next();
 					if (o instanceof ContainerShape) {
 						ContainerShape s = (ContainerShape)o;
-						if (peService.getPropertyValue(s, LANE)!=null) {
+						if (FeatureSupport.getPropertyValue(s, LANE)!=null) {
 							deleted.add(s);
 						}
 					}

@@ -8,7 +8,7 @@
 
 	<groupId>org.eclipse.bpmn2.modeler</groupId>
 	<artifactId>org.eclipse.bpmn2.modeler.parent</artifactId>
-	<version>1.2.1-SNAPSHOT</version>
+	<version>1.3.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>BPMN2 Modeler Parent</name>
@@ -31,6 +31,7 @@
 	<properties>
 		<tycho-version>0.21.0</tycho-version>
 		<tycho-extras-version>${tycho-version}</tycho-extras-version>
+		<BUILD_ALIAS>Alpha1</BUILD_ALIAS>
 	</properties>
 
 	<profiles>
@@ -116,6 +117,20 @@
 				<eclipse-site>http://download.eclipse.org/releases/mars</eclipse-site>
 				<platform-version>[4.5,5.0)</platform-version>
 				<platform-version-name>mars</platform-version-name>
+			</properties>
+		</profile>
+		<profile>
+			<id>platform-neon</id>
+			<activation>
+				<property>
+					<name>platform-version-name</name>
+					<value>neon</value>
+				</property>
+			</activation>
+			<properties>
+				<eclipse-site>http://download.eclipse.org/releases/neon</eclipse-site>
+				<platform-version>[4.6,5.0)</platform-version>
+				<platform-version-name>neon</platform-version-name>
 			</properties>
 		</profile>
 		<profile>
@@ -268,6 +283,15 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-packaging-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<format>'${BUILD_ALIAS}-v'yyyyMMdd-HHmm</format>
+				</configuration>
+			</plugin>
+			
+			<plugin>
 				<groupId>org.eclipse.tycho.extras</groupId>
 				<artifactId>tycho-source-feature-plugin</artifactId>
 				<version>${tycho-extras-version}</version>
@@ -284,7 +308,7 @@
 					<excludes>
 						<plugin id="org.eclipse.bpmn2.modeler.core.source" />
 						<plugin id="org.eclipse.bpmn2.modeler.ui.source" />
-						<plugin id="org.eclipse.bpmn2.modeler.runtime.jboss.jbpm5.source" />
+						<plugin id="org.eclipse.bpmn2.modeler.runtime.jboss.jbpm.source" />
 					</excludes>
 				</configuration>
 			</plugin>
@@ -306,7 +330,7 @@
 					<excludes>
 						<plugin id="org.eclipse.bpmn2.modeler.core.source" />
 						<plugin id="org.eclipse.bpmn2.modeler.ui.source" />
-						<plugin id="org.eclipse.bpmn2.modeler.runtime.jboss.jbpm5.source" />
+						<plugin id="org.eclipse.bpmn2.modeler.runtime.jboss.jbpm.source" />
 					</excludes>
 				</configuration>
 			</plugin>

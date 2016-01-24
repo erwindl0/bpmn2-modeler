@@ -36,6 +36,7 @@ import org.eclipse.graphiti.features.custom.AbstractCustomFeature;
 import org.eclipse.graphiti.features.custom.ICustomFeature;
 import org.eclipse.graphiti.mm.pictograms.Connection;
 import org.eclipse.graphiti.mm.pictograms.Diagram;
+import org.eclipse.graphiti.mm.pictograms.FreeFormConnection;
 import org.eclipse.graphiti.mm.pictograms.PictogramElement;
 import org.eclipse.graphiti.services.Graphiti;
 
@@ -278,9 +279,15 @@ public class BPMNDiagramFeatureContainer extends BaseElementFeatureContainer {
 					BaseElement be = ((BPMNEdge)de).getBpmnElement();
 					for (PictogramElement pe : Graphiti.getLinkService().getPictogramElements(diagram, be)) {
 						if (pe instanceof Connection) {
+							Connection c = (Connection) pe;
+							if (c instanceof FreeFormConnection) {
+								// adjust connection bendpoints
+								FreeFormConnection ffc = (FreeFormConnection)c;
+								ffc.getBendpoints().clear();
+							}
+
 							// force the default routing to happen
-							if (FeatureSupport.updateConnection(getFeatureProvider(),
-									(Connection)pe, true))
+							if (FeatureSupport.updateConnection(getFeatureProvider(), c, true))
 								hasDoneChanges = true;
 						}
 					}

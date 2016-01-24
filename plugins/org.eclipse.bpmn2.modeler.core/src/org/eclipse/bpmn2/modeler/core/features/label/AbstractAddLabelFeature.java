@@ -60,7 +60,7 @@ abstract public class AbstractAddLabelFeature extends AbstractAddPictogramElemen
 		text.setX(-1);
 		text.setY(-1);
 		applyStyle(text, businessObject);
-		peService.setPropertyValue(labelShape, GraphitiConstants.LABEL_SHAPE, Boolean.toString(true));
+		FeatureSupport.setPropertyValue(labelShape, GraphitiConstants.LABEL_SHAPE, Boolean.toString(true));
 		
 		link(labelShape, new Object[] {businessObject, labelOwner});
 		link(labelOwner, new Object[] {labelShape});

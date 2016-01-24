@@ -12,10 +12,9 @@
  ******************************************************************************/
 package org.eclipse.bpmn2.modeler.core.features;
 
-import org.eclipse.bpmn2.modeler.core.utils.AnchorSite;
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.graphiti.features.IFeatureProvider;
-import org.eclipse.graphiti.mm.algorithms.styles.Point;
 import org.eclipse.graphiti.mm.pictograms.Connection;
 import org.eclipse.graphiti.services.Graphiti;
 import org.eclipse.graphiti.services.IGaService;
@@ -76,7 +75,7 @@ public abstract class AbstractConnectionRouter implements IConnectionRouter {
 			newInfo += ","; //$NON-NLS-1$
 		newInfo += info;
 		
-		peService.setPropertyValue(connection, ROUTING_INFO, newInfo);
+		FeatureSupport.setPropertyValue(connection, ROUTING_INFO, newInfo);
 		return newInfo;
 	}
 	
@@ -124,7 +123,7 @@ public abstract class AbstractConnectionRouter implements IConnectionRouter {
 		if (newInfo==null || newInfo.isEmpty())
 			peService.removeProperty(connection, ROUTING_INFO);
 		else
-			peService.setPropertyValue(connection, ROUTING_INFO, newInfo);
+			FeatureSupport.setPropertyValue(connection, ROUTING_INFO, newInfo);
 		return newInfo;
 	}
 	
@@ -135,7 +134,7 @@ public abstract class AbstractConnectionRouter implements IConnectionRouter {
 	 * @return the routing info
 	 */
 	public static String getRoutingInfo(Connection connection) {
-		String info = peService.getPropertyValue(connection, ROUTING_INFO);
+		String info = FeatureSupport.getPropertyValue(connection, ROUTING_INFO);
 		if (info==null || info.isEmpty())
 			return ""; //$NON-NLS-1$
 		return info;

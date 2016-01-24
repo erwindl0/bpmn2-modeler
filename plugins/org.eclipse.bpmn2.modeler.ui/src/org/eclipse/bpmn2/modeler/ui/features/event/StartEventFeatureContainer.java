@@ -19,6 +19,7 @@ import org.eclipse.bpmn2.modeler.core.features.MultiUpdateFeature;
 import org.eclipse.bpmn2.modeler.core.features.event.AbstractCreateEventFeature;
 import org.eclipse.bpmn2.modeler.core.features.event.AbstractUpdateEventFeature;
 import org.eclipse.bpmn2.modeler.core.features.event.AddEventFeature;
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.bpmn2.modeler.ui.ImageProvider;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.graphiti.features.IAddFeature;
@@ -74,9 +75,9 @@ public class StartEventFeatureContainer extends AbstractEventFeatureContainer {
 		protected void decorateShape(IAddContext context, ContainerShape containerShape, StartEvent businessObject) {
 			super.decorateShape(context, containerShape, businessObject);
 			Ellipse e = (Ellipse)getGraphicsAlgorithm(containerShape);
-			Graphiti.getPeService().setPropertyValue(containerShape, INTERRUPTING, Boolean.toString(true));
+			FeatureSupport.setPropertyValue(containerShape, INTERRUPTING, Boolean.toString(true));
 			IPeService peService = Graphiti.getPeService();
-			peService.setPropertyValue(containerShape,
+			FeatureSupport.setPropertyValue(containerShape,
 					UpdateStartEventFeature.START_EVENT_MARKER,
 					AbstractUpdateEventFeature.getEventDefinitionsValue((StartEvent)businessObject));
 		}
@@ -147,7 +148,7 @@ public class StartEventFeatureContainer extends AbstractEventFeatureContainer {
 			IPeService peService = Graphiti.getPeService();
 			PictogramElement element = context.getPictogramElement();
 
-			String prop = peService.getPropertyValue(element, INTERRUPTING);
+			String prop = FeatureSupport.getPropertyValue(element, INTERRUPTING);
 			if (prop == null) {
 				return Reason.createFalseReason();
 			}
@@ -172,7 +173,7 @@ public class StartEventFeatureContainer extends AbstractEventFeatureContainer {
 				ellipse.setLineStyle(style);
 			}
 			
-			peService.setPropertyValue(container, INTERRUPTING, Boolean.toString(event.isIsInterrupting()));
+			FeatureSupport.setPropertyValue(container, INTERRUPTING, Boolean.toString(event.isIsInterrupting()));
 			return true;
 		}
 	}

@@ -24,7 +24,7 @@ import org.eclipse.emf.ecore.resource.Resource;
  * 
  * @author Flavio Donzé
  */
-public class TargetRuntimeAdapter extends AdapterImpl {
+public class TargetRuntimeAdapter extends AdapterImpl implements ITargetRuntimeProvider {
 	/** current target runtime of the adapter */
 	private TargetRuntime targetRuntime = null;
 	
@@ -134,5 +134,10 @@ public class TargetRuntimeAdapter extends AdapterImpl {
 	 */
 	public TargetRuntime getTargetRuntime() {
 		return targetRuntime;
+	}
+
+	@Override
+	public void setTargetRuntime(TargetRuntime rt) {
+		this.targetRuntime = rt;
 	}
 }

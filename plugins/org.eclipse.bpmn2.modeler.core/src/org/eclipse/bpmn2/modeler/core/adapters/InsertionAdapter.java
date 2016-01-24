@@ -48,10 +48,6 @@ public class InsertionAdapter extends EContentAdapter implements IResourceProvid
 		this.feature = feature;
 		this.value = value;
 	}
-	
-	private InsertionAdapter(EObject object, String featureName, EObject value) {
-		this(object, object.eClass().getEStructuralFeature(featureName), value);
-	}
 
 	/**
 	 * Create an InsertionAdapter that will add the value into the given
@@ -69,6 +65,18 @@ public class InsertionAdapter extends EContentAdapter implements IResourceProvid
 	 */
 	public static EObject add(EObject object, EStructuralFeature feature, EObject value) {
 		if (object!=null) {
+			// don't add another one if the object already has one of these
+			for (Adapter a : value.eAdapters()) {
+				if (a instanceof InsertionAdapter) {
+					InsertionAdapter ia = (InsertionAdapter) a;
+					if (	ia.resource==object.eResource() &&
+							ia.object==object &&
+							ia.feature==feature &&
+							ia.value==value) {
+						return value;
+					}
+				}
+			}
 			value.eAdapters().add(
 					new InsertionAdapter(object, feature, value));
 		}
@@ -84,11 +92,8 @@ public class InsertionAdapter extends EContentAdapter implements IResourceProvid
 	 * @return the value to be inserted
 	 */
 	public static EObject add(EObject object, String featureName, EObject value) {
-		if (object!=null) {
-			value.eAdapters().add(
-					new InsertionAdapter(object, featureName, value));
-		}
-		return value;
+		EStructuralFeature feature = object.eClass().getEStructuralFeature(featureName);
+		return add(object,feature,value);
 	}
 
 	/* (non-Javadoc)

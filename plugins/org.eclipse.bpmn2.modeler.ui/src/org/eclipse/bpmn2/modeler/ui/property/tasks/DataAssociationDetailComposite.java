@@ -526,7 +526,7 @@ public class DataAssociationDetailComposite extends ItemAwareElementDetailCompos
 						// and add it to the Activity's DataInput/OutputAssociations list using
 						// an InsertionAdapter.
 						if (isInput) {
-							DataInputAssociation diAssociation = modelHandler.create(DataInputAssociation.class);
+							DataInputAssociation diAssociation = modelHandler.createObject(DataInputAssociation.class);
 							diAssociation.setTargetRef(parameter);
 							association = diAssociation;
 							InsertionAdapter.add(
@@ -535,7 +535,7 @@ public class DataAssociationDetailComposite extends ItemAwareElementDetailCompos
 									association);
 						}
 						else {
-							DataOutputAssociation doAssociation = modelHandler.create(DataOutputAssociation.class);
+							DataOutputAssociation doAssociation = modelHandler.createObject(DataOutputAssociation.class);
 							if (parameter==null)
 								doAssociation.getSourceRef().clear();
 							else

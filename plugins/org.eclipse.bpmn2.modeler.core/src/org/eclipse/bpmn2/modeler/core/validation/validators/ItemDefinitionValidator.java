@@ -14,8 +14,6 @@
 package org.eclipse.bpmn2.modeler.core.validation.validators;
 
 import org.eclipse.bpmn2.ItemDefinition;
-import org.eclipse.bpmn2.Process;
-import org.eclipse.bpmn2.modeler.core.utils.ModelUtil;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.validation.IValidationContext;

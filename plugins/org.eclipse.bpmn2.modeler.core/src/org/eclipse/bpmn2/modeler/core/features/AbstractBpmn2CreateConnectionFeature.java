@@ -23,11 +23,11 @@ import org.eclipse.bpmn2.Lane;
 import org.eclipse.bpmn2.SequenceFlow;
 import org.eclipse.bpmn2.modeler.core.LifecycleEvent;
 import org.eclipse.bpmn2.modeler.core.LifecycleEvent.EventType;
-import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesAdapter;
 import org.eclipse.bpmn2.modeler.core.merrimac.dialogs.ObjectEditingDialog;
+import org.eclipse.bpmn2.modeler.core.model.Bpmn2ModelerFactory;
+import org.eclipse.bpmn2.modeler.core.model.Bpmn2ModelerFactory.KeyValue;
 import org.eclipse.bpmn2.modeler.core.preferences.Bpmn2Preferences;
 import org.eclipse.bpmn2.modeler.core.preferences.ModelEnablements;
-import org.eclipse.bpmn2.modeler.core.runtime.CustomTaskDescriptor;
 import org.eclipse.bpmn2.modeler.core.runtime.TargetRuntime;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
 import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
@@ -90,9 +90,9 @@ public abstract class AbstractBpmn2CreateConnectionFeature<
 		super(fp, "", ""); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	@Override
 	public String getCreateName() {
-		// TODO: get name from Messages by generating a field name using the business object class
-		return ModelUtil.toCanonicalString(getFeatureClass().getName());
+		return ModelUtil.getTypeLabel(getFeatureClass());
 	}
 
 	/* (non-Javadoc)
@@ -101,8 +101,7 @@ public abstract class AbstractBpmn2CreateConnectionFeature<
 	 */
 	@Override
 	public String getCreateDescription() {
-		return NLS.bind(Messages.AbstractBpmn2CreateConnectionFeature_Create,
-				ModelUtil.toCanonicalString( getFeatureClass().getName()));
+		return NLS.bind(Messages.AbstractBpmn2CreateConnectionFeature_Create, getCreateName());
 	}
 
 	@Override
@@ -250,14 +249,14 @@ public abstract class AbstractBpmn2CreateConnectionFeature<
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public CONNECTION createBusinessObject(ICreateConnectionContext context) {
+		Object bo = context.getProperty(GraphitiConstants.BUSINESS_OBJECT);
+		if (bo!=null)
+			return (CONNECTION) bo;
 		Resource resource = getResource(context);
 		EClass eclass = getBusinessObjectClass();
-		ExtendedPropertiesAdapter adapter = ExtendedPropertiesAdapter.adapt(eclass);
 		String id = (String)context.getProperty(GraphitiConstants.CUSTOM_ELEMENT_ID);
-		if (id!=null) {
-			adapter.setProperty(GraphitiConstants.CUSTOM_ELEMENT_ID, id);
-		}
-		CONNECTION businessObject = (CONNECTION)adapter.getObjectDescriptor().createObject(resource,eclass);
+		CONNECTION businessObject = (CONNECTION)Bpmn2ModelerFactory.createObject(resource,eclass,
+				new KeyValue(GraphitiConstants.CUSTOM_ELEMENT_ID, id));
 		EStructuralFeature nameFeature = businessObject.eClass().getEStructuralFeature("name"); //$NON-NLS-1$
 		if (nameFeature!=null) {
 			businessObject.eUnset(nameFeature);

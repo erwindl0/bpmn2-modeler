@@ -10,11 +10,6 @@
  *******************************************************************************/
 package org.eclipse.bpmn2.modeler.ui;
 
-/**
- * @author Bob Brodt
- *
- */
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
 
 /**

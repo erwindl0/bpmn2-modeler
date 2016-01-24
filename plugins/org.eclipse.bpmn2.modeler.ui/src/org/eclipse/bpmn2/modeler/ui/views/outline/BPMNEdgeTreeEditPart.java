@@ -13,9 +13,10 @@ package org.eclipse.bpmn2.modeler.ui.views.outline;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.di.BPMNEdge;
 import org.eclipse.bpmn2.di.BPMNLabel;
-import org.eclipse.bpmn2.di.BPMNShape;
+import org.eclipse.bpmn2.modeler.core.utils.ModelUtil;
 
 public class BPMNEdgeTreeEditPart extends AbstractGraphicsTreeEditPart {
 
@@ -50,6 +51,14 @@ public class BPMNEdgeTreeEditPart extends AbstractGraphicsTreeEditPart {
 	@Override
 	protected String getText() {
 		BPMNEdge bpmnEdge = getBPMNEdge();
-		return super.getText(bpmnEdge.getBpmnElement());
+		BaseElement be = bpmnEdge.getBpmnElement();
+		if (be!=null) {
+			String label = ModelUtil.getTypeLabel(be.eClass());
+			String source = labelProvider.getText(bpmnEdge.getSourceElement());
+			String target = labelProvider.getText(bpmnEdge.getTargetElement());
+			String text = label + ": " + source + " -> " + target;
+			return text;
+		}
+		return super.getText();
 	}
 }

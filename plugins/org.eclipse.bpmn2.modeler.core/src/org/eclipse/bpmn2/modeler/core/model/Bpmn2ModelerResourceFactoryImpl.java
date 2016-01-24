@@ -12,18 +12,11 @@
  ******************************************************************************/
 package org.eclipse.bpmn2.modeler.core.model;
 
-import java.util.ArrayList;
-
 import org.eclipse.bpmn2.Definitions;
 import org.eclipse.bpmn2.DocumentRoot;
-import org.eclipse.bpmn2.util.OnlyContainmentTypeInfo;
-import org.eclipse.bpmn2.util.XmlExtendedMetadata;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceFactoryImpl;
-import org.eclipse.emf.ecore.util.ExtendedMetaData;
-import org.eclipse.emf.ecore.xmi.XMLResource;
-import org.eclipse.emf.ecore.xmi.impl.ElementHandlerImpl;
 
 /**
  * The <b>Resource Factory</b> for the BPMN2 Modeler. Constructs a specialized BPMN2 Resource
@@ -63,8 +56,8 @@ public class Bpmn2ModelerResourceFactoryImpl extends ResourceFactoryImpl {
 
     public Definitions createAndInitResource(URI uri) {
         Resource resource = createResource(uri);
-        Definitions definitions = Bpmn2ModelerFactory.create(resource, Definitions.class);
-        DocumentRoot docummentRoot = Bpmn2ModelerFactory.create(resource, DocumentRoot.class);
+        Definitions definitions = Bpmn2ModelerFactory.createObject(resource, Definitions.class);
+        DocumentRoot docummentRoot = Bpmn2ModelerFactory.createObject(resource, DocumentRoot.class);
         docummentRoot.setDefinitions(definitions);
         resource.getContents().add(docummentRoot);
 

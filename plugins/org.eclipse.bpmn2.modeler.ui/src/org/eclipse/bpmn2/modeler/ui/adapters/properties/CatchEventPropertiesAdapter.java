@@ -47,7 +47,7 @@ public class CatchEventPropertiesAdapter extends EventPropertiesAdapter<CatchEve
 			public EObject createFeature(Resource resource, EClass eclass) {
 				OutputSet outputSet = object.getOutputSet();
 				if (outputSet==null) {
-					outputSet = Bpmn2ModelerFactory.create(resource, OutputSet.class);
+					outputSet = Bpmn2ModelerFactory.createObject(resource, OutputSet.class);
 					object.setOutputSet(outputSet);
 				}
 				DataOutput dataOutput = DataOutputPropertiesAdapter.createDataOutput(resource, object.getDataOutputs());

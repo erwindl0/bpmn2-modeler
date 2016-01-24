@@ -35,6 +35,7 @@ public class BaseElementValidator extends AbstractBpmn2ElementValidator<BaseElem
 	protected static HashSet<EClass> idOptional = new HashSet<EClass>();
 	static {
 		idOptional.add(Bpmn2Package.eINSTANCE.getDefinitions());
+		idOptional.add(Bpmn2Package.eINSTANCE.getDocumentation());
 		// TODO: are there other BPMN2 object types whose IDs are optional?
 	}
 

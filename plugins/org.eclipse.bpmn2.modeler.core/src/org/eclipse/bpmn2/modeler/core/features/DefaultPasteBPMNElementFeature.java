@@ -288,7 +288,7 @@ public class DefaultPasteBPMNElementFeature extends AbstractPasteFeature {
 			protected EObject createCopy(EObject eObject) {
 				EClass eClass = getTarget(eObject.eClass());
 				if (eClass.getEPackage().getEFactoryInstance() == Bpmn2Factory.eINSTANCE) {
-					return Bpmn2ModelerFactory.create(resource, eClass);
+					return Bpmn2ModelerFactory.createObject(resource, eClass);
 				}
 				return super.createCopy(eObject); 
 			}
@@ -311,15 +311,22 @@ public class DefaultPasteBPMNElementFeature extends AbstractPasteFeature {
 	}
 
 	private BaseElement createNewObject(BaseElement oldObject, BaseElement targetContainerObject) {
-		Bpmn2ModelerFactory.setEnableModelExtensions(false);
-		BaseElement newObject = copyEObject(oldObject);
-		Bpmn2ModelerFactory.setEnableModelExtensions(true);
-
+		BaseElement newObject = null;
+		try {
+			Bpmn2ModelerFactory.lock();
+			Bpmn2ModelerFactory.setEnableModelExtensions(false);
+			newObject = copyEObject(oldObject);
+		}
+		finally {
+			Bpmn2ModelerFactory.setEnableModelExtensions(true);
+			Bpmn2ModelerFactory.unlock();
+		}
+		
 		if (targetContainerObject instanceof Participant) {
 			// need to create a Process for target container if it doesn't have one yet
 			Participant participant = (Participant) targetContainerObject;
 			if (participant.getProcessRef()==null) {
-				Process process = Bpmn2ModelerFactory.create(resource, Process.class);
+				Process process = Bpmn2ModelerFactory.createObject(resource, Process.class);
 				participant.setProcessRef(process);
 			}
 			targetContainerObject = participant.getProcessRef();
@@ -343,7 +350,7 @@ public class DefaultPasteBPMNElementFeature extends AbstractPasteFeature {
 					fc.getLaneSets().get(0).getLanes().add((Lane)newObject);
 				}
 				else {
-					LaneSet ls = Bpmn2ModelerFactory.create(resource, LaneSet.class);
+					LaneSet ls = Bpmn2ModelerFactory.createObject(resource, LaneSet.class);
 					fc.getLaneSets().add(ls);
 					ls.getLanes().add((Lane)newObject);
 				}
@@ -351,7 +358,7 @@ public class DefaultPasteBPMNElementFeature extends AbstractPasteFeature {
 			else if (targetContainerObject instanceof Lane) {
 				Lane ln = (Lane)targetContainerObject;
 				if (ln.getChildLaneSet()==null) {
-					LaneSet ls = Bpmn2ModelerFactory.create(resource, LaneSet.class);
+					LaneSet ls = Bpmn2ModelerFactory.createObject(resource, LaneSet.class);
 					ln.setChildLaneSet(ls);
 				}
 				ln.getChildLaneSet().getLanes().add((Lane)newObject);
@@ -374,7 +381,7 @@ public class DefaultPasteBPMNElementFeature extends AbstractPasteFeature {
 			Participant participant = (Participant)newObject;
 			if (((Participant) newObject).getProcessRef()!=null) {
 				// need to create a new Process for this thing
-				Process process = Bpmn2ModelerFactory.create(resource, Process.class);
+				Process process = Bpmn2ModelerFactory.createObject(resource, Process.class);
 				participant.setProcessRef(process);
 			}
 			if (targetContainerObject instanceof Collaboration) {
@@ -531,7 +538,7 @@ public class DefaultPasteBPMNElementFeature extends AbstractPasteFeature {
 		if (oldObject instanceof BaseElement) {
 			BPMNDiagram bpmnDiagram = DIUtils.findBPMNDiagram(oldShape);
 			oldBpmnShape = DIUtils.findBPMNShape(bpmnDiagram, (BaseElement)oldObject);
-			ac.putProperty(GraphitiConstants.COPIED_BPMN_SHAPE, oldBpmnShape);
+			ac.putProperty(GraphitiConstants.COPIED_BPMN_DI_ELEMENT, oldBpmnShape);
 		}
 		ac.putProperty(GraphitiConstants.COPIED_BPMN_OBJECT, oldObject);
 		

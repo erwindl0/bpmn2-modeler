@@ -21,7 +21,6 @@ import org.eclipse.bpmn2.CallChoreography;
 import org.eclipse.bpmn2.CallConversation;
 import org.eclipse.bpmn2.CatchEvent;
 import org.eclipse.bpmn2.CategoryValue;
-import org.eclipse.bpmn2.ChoreographyActivity;
 import org.eclipse.bpmn2.CompensateEventDefinition;
 import org.eclipse.bpmn2.CorrelationKey;
 import org.eclipse.bpmn2.CorrelationProperty;
@@ -37,13 +36,9 @@ import org.eclipse.bpmn2.Error;
 import org.eclipse.bpmn2.ErrorEventDefinition;
 import org.eclipse.bpmn2.Escalation;
 import org.eclipse.bpmn2.EscalationEventDefinition;
-import org.eclipse.bpmn2.Event;
 import org.eclipse.bpmn2.EventDefinition;
 import org.eclipse.bpmn2.FlowElement;
-import org.eclipse.bpmn2.FlowElementsContainer;
-import org.eclipse.bpmn2.FlowNode;
 import org.eclipse.bpmn2.FormalExpression;
-import org.eclipse.bpmn2.Gateway;
 import org.eclipse.bpmn2.GlobalScriptTask;
 import org.eclipse.bpmn2.Group;
 import org.eclipse.bpmn2.Import;
@@ -53,7 +48,6 @@ import org.eclipse.bpmn2.Interface;
 import org.eclipse.bpmn2.ItemAwareElement;
 import org.eclipse.bpmn2.ItemDefinition;
 import org.eclipse.bpmn2.LinkEventDefinition;
-import org.eclipse.bpmn2.LoopCharacteristics;
 import org.eclipse.bpmn2.Message;
 import org.eclipse.bpmn2.MessageEventDefinition;
 import org.eclipse.bpmn2.MessageFlow;
@@ -77,22 +71,11 @@ import org.eclipse.bpmn2.Signal;
 import org.eclipse.bpmn2.SignalEventDefinition;
 import org.eclipse.bpmn2.Task;
 import org.eclipse.bpmn2.ThrowEvent;
-import org.eclipse.bpmn2.impl.CatchEventImpl;
-import org.eclipse.bpmn2.impl.ChoreographyActivityImpl;
-import org.eclipse.bpmn2.impl.EventImpl;
-import org.eclipse.bpmn2.impl.FlowElementImpl;
-import org.eclipse.bpmn2.impl.FlowElementsContainerImpl;
-import org.eclipse.bpmn2.impl.FlowNodeImpl;
-import org.eclipse.bpmn2.impl.GatewayImpl;
-import org.eclipse.bpmn2.impl.LoopCharacteristicsImpl;
-import org.eclipse.bpmn2.impl.ThrowEventImpl;
 import org.eclipse.bpmn2.modeler.core.adapters.AdapterRegistry;
 import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesAdapter;
 import org.eclipse.bpmn2.modeler.core.adapters.ObjectDescriptor;
-import org.eclipse.bpmn2.modeler.core.adapters.ObjectPropertyProvider;
 import org.eclipse.bpmn2.modeler.core.runtime.PropertyExtensionDescriptor;
 import org.eclipse.bpmn2.modeler.core.runtime.TargetRuntime;
-import org.eclipse.bpmn2.modeler.core.runtime.TargetRuntimeAdapter;
 import org.eclipse.bpmn2.modeler.core.utils.ModelUtil;
 import org.eclipse.bpmn2.modeler.ui.Messages;
 import org.eclipse.bpmn2.modeler.ui.adapters.properties.ActivityPropertiesAdapter;
@@ -119,7 +102,6 @@ import org.eclipse.bpmn2.modeler.ui.adapters.properties.ErrorPropertiesAdapter;
 import org.eclipse.bpmn2.modeler.ui.adapters.properties.EscalationEventDefinitionPropertiesAdapter;
 import org.eclipse.bpmn2.modeler.ui.adapters.properties.EscalationPropertiesAdapter;
 import org.eclipse.bpmn2.modeler.ui.adapters.properties.EventDefinitionPropertiesAdapter;
-import org.eclipse.bpmn2.modeler.ui.adapters.properties.EventPropertiesAdapter;
 import org.eclipse.bpmn2.modeler.ui.adapters.properties.FlowElementPropertiesAdapter;
 import org.eclipse.bpmn2.modeler.ui.adapters.properties.FormalExpressionPropertiesAdapter;
 import org.eclipse.bpmn2.modeler.ui.adapters.properties.GlobalScriptTaskPropertiesAdapter;
@@ -231,108 +213,48 @@ public class Bpmn2EditorItemProviderAdapterFactory extends Bpmn2ItemProviderAdap
 		public ExtendedPropertiesAdapter defaultCase(EObject object) {
         	ExtendedPropertiesAdapter adapter = null;
         	try {
-	        	if (object instanceof EClass) {
-	        		EClass eclass = (EClass)object;
-	        		// this is an EClass: search the current target runtime for an adapter that
-	        		// can handle this thing.
-	        	    adapter = getTargetRuntimeAdapter(eclass);
-	        	    if (adapter==null) {
-	        	    	// If none is found, create a dummy EObject and cache it.
-	        	    	//
-	        	    	// These are abstract types that are supported by {@see Bpmn2ModelerFactory#create(EClass)}
-	        	    	// Additional abstract types can be added here:
-	        	    	if (eclass.getInstanceClass()==CatchEvent.class) {
-	        	    		object = new CatchEventImpl() {};
-	        	    		adapter = new CatchEventPropertiesAdapter(adapterFactory, (CatchEvent)object);
-	        	    	}
-	        	    	else if (eclass.getInstanceClass()==Event.class) {
-	        	    		object = new EventImpl() {};
-	        	    		adapter = new EventPropertiesAdapter(adapterFactory, (Event)object);
-	        	    	}
-	        	    	else if (eclass.getInstanceClass()==ThrowEvent.class) {
-	        	    		object = new ThrowEventImpl() {};
-	        	    		adapter = new ThrowEventPropertiesAdapter(adapterFactory, (ThrowEvent)object);
-	        	    	}
-	        	    	else if (eclass.getInstanceClass()==FlowElement.class) {
-	        	    		object = new FlowElementImpl() {};
-	        	    		adapter = new FlowElementPropertiesAdapter(adapterFactory, (FlowElement)object);
-	        	    	}
-	        	    	else if (eclass.getInstanceClass()==ChoreographyActivity.class) {
-	        	    		object = new ChoreographyActivityImpl() {};
-	        	    		adapter = new ExtendedPropertiesAdapter<ChoreographyActivity> (adapterFactory, (ChoreographyActivity)object);
-	        	    	}
-	        	    	else if (eclass.getInstanceClass()==FlowElementsContainer.class) {
-	        	    		object = new FlowElementsContainerImpl() {};
-	        	    		adapter = new ExtendedPropertiesAdapter<FlowElementsContainer> (adapterFactory, (FlowElementsContainer)null);
-	        	    	}
-	        	    	else if (eclass.getInstanceClass()==FlowNode.class) {
-	        	    		object = new FlowNodeImpl() {};
-	        	    		adapter = new ExtendedPropertiesAdapter<FlowNode> (adapterFactory, (FlowNode)object);
-	        	    	}
-	        	    	else if (eclass.getInstanceClass()==Gateway.class) {
-	        	    		object = new GatewayImpl() {};
-	        	    		adapter = new ExtendedPropertiesAdapter<Gateway> (adapterFactory, (Gateway)object);
-	        	    	}
-	        	    	else if (eclass.getInstanceClass()==LoopCharacteristics.class) {
-	        	    		object = new LoopCharacteristicsImpl() {};
-	        	    		adapter = new ExtendedPropertiesAdapter<LoopCharacteristics> (adapterFactory, (LoopCharacteristics)object);
-	        	    	}
-	        	    	else {
-	        	    		object = ExtendedPropertiesAdapter.getDummyObject(eclass);
-	        	    		
-	        	    		ObjectPropertyProvider factoryAdapter = ObjectPropertyProvider.getAdapter(eclass.getEPackage().getEFactoryInstance());
-	        	    		TargetRuntime rt = TargetRuntime.getRuntime(factoryAdapter.getResource());
-	        	    		TargetRuntimeAdapter.adapt(object, rt);
-
-		   		    		adapter = doSwitch(object);
-	        	    	}
-	        	    }
-	        	}
-	        	else
+	        	if (!(object instanceof EClass)) {
 	        		adapter = getTargetRuntimeAdapter(object);
-	        	
-	        	if (adapter==null) {
-		        	adapter = new ExtendedPropertiesAdapter(adapterFactory,object);
-		        	adapter.setObjectDescriptor(new ObjectDescriptor(adapter,object) {
-						@Override
-						public String getLabel() {
-							if (ModelUtil.isStringWrapper(object)) {
-								return Messages.CommonLabels_Data_Type;
+		        	if (adapter==null) {
+			        	adapter = new ExtendedPropertiesAdapter(adapterFactory,object);
+			        	adapter.setObjectDescriptor(new ObjectDescriptor(adapter,object) {
+							@Override
+							public String getLabel() {
+								if (ModelUtil.isStringWrapper(object)) {
+									return Messages.CommonLabels_Data_Type;
+								}
+								return super.getLabel();
 							}
-							return super.getLabel();
-						}
-		
-						@Override
-						public String getTextValue() {
-							if (ModelUtil.isStringWrapper(object)) {
-								return ModelUtil.getStringWrapperTextValue(object);
+			
+							@Override
+							public String getTextValue() {
+								if (ModelUtil.isStringWrapper(object)) {
+									return ModelUtil.getStringWrapperTextValue(object);
+								}
+								return super.getTextValue();
 							}
-							return super.getTextValue();
-						}
-		        	});
+			        	});
+		        	}
 	        	}
         	}
         	catch (Exception e) {}
         	return adapter;
 		}
 
-        private ExtendedPropertiesAdapter getTargetRuntimeAdapter(EClass eclass) {
-    		ObjectPropertyProvider factoryAdapter = ObjectPropertyProvider.getAdapter(eclass.getEPackage().getEFactoryInstance());
-    		TargetRuntime rt = TargetRuntime.getRuntime(factoryAdapter.getResource());
-
-            PropertyExtensionDescriptor ped = rt.getPropertyExtension(eclass.getInstanceClass());
-            if (ped==null && rt != TargetRuntime.getDefaultRuntime())
-                ped = TargetRuntime.getDefaultRuntime().getPropertyExtension(eclass.getInstanceClass());
-            if (ped!=null)
-                return ped.getAdapter(adapterFactory,eclass);
-            return null;
-        }
+//        private ExtendedPropertiesAdapter getTargetRuntimeAdapter(EClass eclass) {
+//    		ObjectPropertyProvider factoryAdapter = ObjectPropertyProvider.getAdapter(eclass.getEPackage().getEFactoryInstance());
+//    		TargetRuntime rt = TargetRuntime.getRuntime(factoryAdapter.getResource());
+//
+//            PropertyExtensionDescriptor ped = rt.getPropertyExtension(eclass.getInstanceClass());
+//            if (ped==null && rt != TargetRuntime.getDefaultRuntime())
+//                ped = TargetRuntime.getDefaultRuntime().getPropertyExtension(eclass.getInstanceClass());
+//            if (ped!=null)
+//                return ped.getAdapter(adapterFactory,eclass);
+//            return null;
+//        }
 
         private ExtendedPropertiesAdapter getTargetRuntimeAdapter(EObject object) {
-    		ObjectPropertyProvider factoryAdapter = ObjectPropertyProvider.getAdapter(object.eClass().getEPackage().getEFactoryInstance());
-    		TargetRuntime rt = TargetRuntime.getRuntime(factoryAdapter.getResource());
-    		if (rt==null)
-    			rt = TargetRuntime.getRuntime(object);
+        	TargetRuntime rt = ExtendedPropertiesAdapter.getTargetRuntime(object);
 			PropertyExtensionDescriptor ped = rt.getPropertyExtension(object.getClass());
             if (ped==null && rt != TargetRuntime.getDefaultRuntime())
                 ped = TargetRuntime.getDefaultRuntime().getPropertyExtension(object.getClass());

@@ -119,6 +119,18 @@ public class DiagramElementTreeNode extends SimpleTreeIterator<DiagramElementTre
 		}
 	}
 	
+	public void removeChild(DiagramElementTreeNode node) {
+		if (hasChildren()) {
+			for (DiagramElementTreeNode child : children) {
+				if (child == node) {
+					children.remove(child);
+					return;
+				}
+				child.removeChild(node);
+			}
+		}
+	}
+
 	public boolean hasChildren() {
 		return children!=null && children.size()>0;
 	}

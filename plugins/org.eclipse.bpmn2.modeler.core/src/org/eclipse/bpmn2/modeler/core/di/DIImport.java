@@ -48,6 +48,7 @@ import org.eclipse.bpmn2.SubChoreography;
 import org.eclipse.bpmn2.SubProcess;
 import org.eclipse.bpmn2.di.BPMNDiagram;
 import org.eclipse.bpmn2.di.BPMNEdge;
+import org.eclipse.bpmn2.di.BPMNLabel;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.eclipse.bpmn2.di.BPMNShape;
 import org.eclipse.bpmn2.di.BpmnDiFactory;
@@ -727,6 +728,25 @@ public class DIImport {
 		context.setLocation(x, y);
 	}
 	
+	private PictogramElement getPictogramElementFromDiagramElement(DiagramElement de) {
+		BaseElement be = null;
+		if (de instanceof BPMNShape) {
+			be = ((BPMNShape)de).getBpmnElement();
+		}
+		else if (de instanceof BPMNEdge) {
+			be = ((BPMNEdge)de).getBpmnElement();
+		}
+		else if (de instanceof BPMNLabel) {
+			Object o = ((BPMNLabel)de).eContainer();
+			if (o instanceof DiagramElement)
+				return getPictogramElementFromDiagramElement((DiagramElement)o);
+		}
+		
+		if (be!=null)
+			return elements.get(be);
+		return null;
+	}
+	
 	/**
 	 * Find a Graphiti feature for given edge and generate necessary connections and bendpoints.
 	 * 
@@ -740,32 +760,22 @@ public class DIImport {
 		PictogramElement te = null;
 
 		// for some reason connectors don't have a common interface
-		if (bpmnElement instanceof MessageFlow) {
-			source = ((MessageFlow) bpmnElement).getSourceRef();
-			target = ((MessageFlow) bpmnElement).getTargetRef();
-			se = elements.get(source);
-			te = elements.get(target);
-		} else if (bpmnElement instanceof SequenceFlow) {
-			source = ((SequenceFlow) bpmnElement).getSourceRef();
-			target = ((SequenceFlow) bpmnElement).getTargetRef();
-			se = elements.get(source);
-			te = elements.get(target);
+		if (bpmnElement instanceof MessageFlow ||
+				bpmnElement instanceof SequenceFlow ||
+				bpmnElement instanceof ConversationLink) {
+			se = getPictogramElementFromDiagramElement(bpmnEdge.getSourceElement());
+			te = getPictogramElementFromDiagramElement(bpmnEdge.getTargetElement());
 		} else if (bpmnElement instanceof Association) {
-			source = ((Association) bpmnElement).getSourceRef();
-			target = ((Association) bpmnElement).getTargetRef();
-			se = elements.get(source);
-			te = elements.get(target);
+			se = getPictogramElementFromDiagramElement(bpmnEdge.getSourceElement());
+			te = getPictogramElementFromDiagramElement(bpmnEdge.getTargetElement());
 			if (se==null) {
+				source = ((Association) bpmnElement).getSourceRef();
 				se = getContainerShape((BaseElement)source);
 			}
 			if (te==null) {
+				target = ((Association) bpmnElement).getTargetRef();
 				te = getContainerShape((BaseElement)target);
 			}
-		} else if (bpmnElement instanceof ConversationLink) {
-			source = ((ConversationLink) bpmnElement).getSourceRef();
-			target = ((ConversationLink) bpmnElement).getTargetRef();
-			se = elements.get(source);
-			te = elements.get(target);
 		} else if (bpmnElement instanceof DataAssociation) {
 			// Data Association allows connections for multiple starting points, we don't support it yet
 			List<ItemAwareElement> sourceRef = ((DataAssociation) bpmnElement).getSourceRef();
@@ -794,13 +804,17 @@ public class DIImport {
 		else {
 			// this could be some custom connection: it must define "sourceRef" and "targetRef"
 			// features so we know how to connect it.
-			EStructuralFeature sf = bpmnElement.eClass().getEStructuralFeature("sourceRef"); //$NON-NLS-1$
-			EStructuralFeature tf = bpmnElement.eClass().getEStructuralFeature("targetRef"); //$NON-NLS-1$
-			if (sf!=null && tf!=null) {
-				source = (EObject) bpmnElement.eGet(sf);
-				target = (EObject) bpmnElement.eGet(tf);
-				se = elements.get(source);
-				te = elements.get(target);
+			se = getPictogramElementFromDiagramElement(bpmnEdge.getSourceElement());
+			te = getPictogramElementFromDiagramElement(bpmnEdge.getTargetElement());
+			if (se==null || te==null) {
+				EStructuralFeature sf = bpmnElement.eClass().getEStructuralFeature("sourceRef"); //$NON-NLS-1$
+				EStructuralFeature tf = bpmnElement.eClass().getEStructuralFeature("targetRef"); //$NON-NLS-1$
+				if (sf!=null && tf!=null) {
+					source = (EObject) bpmnElement.eGet(sf);
+					target = (EObject) bpmnElement.eGet(tf);
+					se = elements.get(source);
+					te = elements.get(target);
+				}
 			}
 		}
 

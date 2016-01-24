@@ -17,8 +17,6 @@ import java.util.Hashtable;
 
 import org.eclipse.bpmn2.Activity;
 import org.eclipse.bpmn2.Bpmn2Package;
-import org.eclipse.bpmn2.DataObject;
-import org.eclipse.bpmn2.Error;
 import org.eclipse.bpmn2.FlowElement;
 import org.eclipse.bpmn2.ItemAwareElement;
 import org.eclipse.bpmn2.Participant;

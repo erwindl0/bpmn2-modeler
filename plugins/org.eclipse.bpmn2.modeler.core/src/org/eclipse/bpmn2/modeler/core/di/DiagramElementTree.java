@@ -96,4 +96,12 @@ public class DiagramElementTree
 		}
 		return text;
 	}
+
+	public boolean contains(BaseElement be) {
+		for (DiagramElementTreeNode node : this) {
+			if (node.getBaseElement() == be)
+				return true;
+		}
+		return false;
+	}
 }

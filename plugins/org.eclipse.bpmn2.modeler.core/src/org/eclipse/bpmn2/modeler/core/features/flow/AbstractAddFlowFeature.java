@@ -29,6 +29,7 @@ import org.eclipse.graphiti.mm.algorithms.Polyline;
 import org.eclipse.graphiti.mm.algorithms.styles.Point;
 import org.eclipse.graphiti.mm.pictograms.Anchor;
 import org.eclipse.graphiti.mm.pictograms.Connection;
+import org.eclipse.graphiti.mm.pictograms.Diagram;
 import org.eclipse.graphiti.mm.pictograms.FreeFormConnection;
 import org.eclipse.graphiti.mm.pictograms.PictogramElement;
 import org.eclipse.graphiti.services.Graphiti;
@@ -62,9 +63,16 @@ public abstract class AbstractAddFlowFeature<T extends BaseElement>
 		T businessObject = getBusinessObject(context);
 		IAddConnectionContext addContext = (IAddConnectionContext) context;
 
-		FreeFormConnection connection = peService.createFreeFormConnection(getDiagram());
 		Anchor sourceAnchor = addContext.getSourceAnchor();
 		Anchor targetAnchor = addContext.getTargetAnchor();
+		Diagram diagram = Graphiti.getPeService().getDiagramForAnchor(sourceAnchor);
+		if (Graphiti.getPeService().getDiagramForAnchor(targetAnchor) != diagram) {
+			throw new IllegalArgumentException("Source and Target for "+businessObject.eClass().getName()+" Connection are not in the same Diagram.");
+		}
+		if (diagram==null)
+			diagram = getDiagram();
+		
+		FreeFormConnection connection = peService.createFreeFormConnection(diagram);
 		connection.setStart(sourceAnchor);
 		connection.setEnd(targetAnchor);
 

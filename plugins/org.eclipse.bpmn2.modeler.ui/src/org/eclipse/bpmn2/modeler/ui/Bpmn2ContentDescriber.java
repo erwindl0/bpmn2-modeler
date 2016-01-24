@@ -75,6 +75,10 @@ public class Bpmn2ContentDescriber implements ITextContentDescriber {
 	}
 
 	private class RootElementParser extends SAXParser {
+		public RootElementParser() {
+			fConfiguration.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+		}
+		
 		@Override
 		public void startElement(QName qName, XMLAttributes attributes, Augmentations augmentations)
 				throws XNIException {

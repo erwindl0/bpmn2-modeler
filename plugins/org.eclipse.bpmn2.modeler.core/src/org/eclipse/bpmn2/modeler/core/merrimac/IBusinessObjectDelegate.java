@@ -18,7 +18,6 @@ import java.util.List;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
-import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 
@@ -32,7 +31,8 @@ public interface IBusinessObjectDelegate {
 	// Object methods
 	public EObject createObject(EClass eClass);
 	public <T extends EObject> T createObject(Class clazz);
-	public EObject createFeature(EObject object, EStructuralFeature feature);
+	public EObject createFeature(EObject object, EStructuralFeature feature, EClass featureClass);
+	public EObject createFeature(EObject object, EStructuralFeature feature, Class featureClass);
 
 	public String getTextValue(EObject object);
 	public boolean setTextValue(EObject object, String value);

@@ -44,6 +44,7 @@ public class IoParameterMappingColumn extends TableColumn {
 			return headerText;
 		
 		return ExtendedPropertiesProvider.getLabel(
+				object.eResource(),
 				Bpmn2Package.eINSTANCE.getDataAssociation(),
 				feature.getName().startsWith("dataInput") ? //$NON-NLS-1$
 					Bpmn2Package.eINSTANCE.getDataAssociation_SourceRef() :

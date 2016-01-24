@@ -75,7 +75,7 @@ public class UpdateChoreographyMessageFlowFeature extends AbstractUpdateBaseElem
 					ChoreographyTask choreographyTask = (ChoreographyTask)eo;
 					for (MessageFlow mf : choreographyTask.getMessageFlowRef()) {
 						if (mf.getMessageRef()==message) {
-							String oldLabel = peService.getPropertyValue(pe, ChoreographyUtil.MESSAGE_NAME);
+							String oldLabel = FeatureSupport.getPropertyValue(pe, ChoreographyUtil.MESSAGE_NAME);
 							if (oldLabel==null || oldLabel.isEmpty())
 								oldLabel = ""; //$NON-NLS-1$
 							String newLabel = ChoreographyUtil.getMessageFlowName(mf);
@@ -156,15 +156,15 @@ public class UpdateChoreographyMessageFlowFeature extends AbstractUpdateBaseElem
 			BPMNShape bpmnShape = BusinessObjectUtil.getFirstElementOfType(band, BPMNShape.class);
 			if (!sources.contains(participant) && bpmnShape.isIsMessageVisible()) {
 				bpmnShape.setIsMessageVisible(false);
-				peService.setPropertyValue(choreographyActivityShape, ChoreographyUtil.MESSAGE_VISIBLE, Boolean.toString(false));
+				FeatureSupport.setPropertyValue(choreographyActivityShape, ChoreographyUtil.MESSAGE_VISIBLE, Boolean.toString(false));
 			} else if (sources.contains(participant) && !bpmnShape.isIsMessageVisible()) {
 				bpmnShape.setIsMessageVisible(true);
-				peService.setPropertyValue(choreographyActivityShape, ChoreographyUtil.MESSAGE_VISIBLE, Boolean.toString(true));
+				FeatureSupport.setPropertyValue(choreographyActivityShape, ChoreographyUtil.MESSAGE_VISIBLE, Boolean.toString(true));
 			}
 		}
 
 		String choreoIds = ChoreographyUtil.getMessageRefIds(choreographyTask);
-		peService.setPropertyValue(choreographyActivityShape, ChoreographyUtil.MESSAGE_REF_IDS, choreoIds);
+		FeatureSupport.setPropertyValue(choreographyActivityShape, ChoreographyUtil.MESSAGE_REF_IDS, choreoIds);
 		return true;
 	}
 }

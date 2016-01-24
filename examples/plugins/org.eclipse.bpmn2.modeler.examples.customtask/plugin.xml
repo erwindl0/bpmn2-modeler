@@ -77,7 +77,7 @@
 			icon="TemporalDepedency.png"
 			id="org.eclipse.bpmn2.modeler.examples.customtask.temporalDependency"
 			name="Temporal Dependency"
-			runtimeId="org.eclipse.bpmn2.modeler.examples.timebpmn.runtime"
+			runtimeId="org.eclipse.bpmn2.modeler.examples.customtask.runtime"
 			type="TemporalDependency">
 			<property name="lagTime" type="EString" value="3hr"/>
 		</customTask>
@@ -89,7 +89,7 @@
 			featureContainer="org.eclipse.bpmn2.modeler.examples.customtask.MessageStartEventFeatureContainer"
 			id="org.eclipse.bpmn2.modeler.examples.customtask.messageStartEvent"
 			name="Message Event"
-			runtimeId="org.eclipse.bpmn2.modeler.examples.timebpmn.runtime"
+			runtimeId="org.eclipse.bpmn2.modeler.examples.customtask.runtime"
 			type="StartEvent">
 		</customTask>
 		

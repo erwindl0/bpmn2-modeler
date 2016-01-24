@@ -116,7 +116,7 @@ public class ShapeDecoratorUtil {
 		Iterator<Shape> iterator = peService.getAllContainedShapes(container).iterator();
 		while (iterator.hasNext()) {
 			Shape shape = iterator.next();
-			String property = peService.getPropertyValue(shape, propertyKey);
+			String property = FeatureSupport.getPropertyValue(shape, propertyKey);
 			if (property != null && new Boolean(property)) {
 				return shape;
 			}
@@ -129,7 +129,7 @@ public class ShapeDecoratorUtil {
 		Iterator<PictogramElement> iterator = peService.getAllContainedPictogramElements(container).iterator();
 		while (iterator.hasNext()) {
 			PictogramElement pe = iterator.next();
-			String property = peService.getPropertyValue(pe, propertyKey);
+			String property = FeatureSupport.getPropertyValue(pe, propertyKey);
 			if (property != null && new Boolean(property)) {
 				pictogramElements.add(pe);
 			}
@@ -162,7 +162,7 @@ public class ShapeDecoratorUtil {
 							gatewayWidth / 2 - generateRatioPointValue(5, widthRatio), gatewayHeight / 2 + generateRatioPointValue(7, heightRatio),
 							gatewayWidth / 2 - generateRatioPointValue(8, widthRatio), gatewayHeight / 2 - generateRatioPointValue(2, heightRatio) });
 							
-		peService.setPropertyValue(pentagonShape, DELETABLE_PROPERTY, "true"); //$NON-NLS-1$
+		FeatureSupport.setPropertyValue(pentagonShape, DELETABLE_PROPERTY, "true"); //$NON-NLS-1$
 		return pentagon;
 	}
 
@@ -185,7 +185,7 @@ public class ShapeDecoratorUtil {
 				 Math.round(width), Math.round(height));
 		ellipse.setFilled(false);
 		ellipse.setLineWidth(1);
-		peService.setPropertyValue(ellipse, DELETABLE_PROPERTY, "true"); //$NON-NLS-1$
+		FeatureSupport.setPropertyValue(ellipse, DELETABLE_PROPERTY, "true"); //$NON-NLS-1$
 		return ellipse;
 	}
 
@@ -205,7 +205,7 @@ public class ShapeDecoratorUtil {
 				generateRatioPointValue(27, heightRatio));
 		ellipse.setFilled(false);
 		ellipse.setLineWidth(1);
-		peService.setPropertyValue(ellipseShape, DELETABLE_PROPERTY, "true"); //$NON-NLS-1$
+		FeatureSupport.setPropertyValue(ellipseShape, DELETABLE_PROPERTY, "true"); //$NON-NLS-1$
 		return ellipse;
 	}
 
@@ -222,7 +222,7 @@ public class ShapeDecoratorUtil {
 				new int[] { generateRatioPointValue(24, widthRatio), generateRatioPointValue(7, heightRatio),
 							generateRatioPointValue(24, widthRatio), generateRatioPointValue(43, heightRatio) });
 		verticalLine.setLineWidth(3);
-		peService.setPropertyValue(verticalShape, DELETABLE_PROPERTY, "false"); //$NON-NLS-1$
+		FeatureSupport.setPropertyValue(verticalShape, DELETABLE_PROPERTY, "false"); //$NON-NLS-1$
 
 		Shape horizontalShape = peService.createShape(container, false);
 		
@@ -230,7 +230,7 @@ public class ShapeDecoratorUtil {
 				new int[] { generateRatioPointValue(7, widthRatio), generateRatioPointValue(24, heightRatio),
 							generateRatioPointValue(43, widthRatio), generateRatioPointValue(24, heightRatio) });
 		horizontalLine.setLineWidth(3);
-		peService.setPropertyValue(horizontalShape, DELETABLE_PROPERTY, "false"); //$NON-NLS-1$
+		FeatureSupport.setPropertyValue(horizontalShape, DELETABLE_PROPERTY, "false"); //$NON-NLS-1$
 
 		Cross cross = new Cross();
 		cross.vertical = verticalLine;
@@ -250,7 +250,7 @@ public class ShapeDecoratorUtil {
 				new int[] { generateRatioPointValue(14, widthRatio), generateRatioPointValue(14, heightRatio),
 							generateRatioPointValue(37, widthRatio), generateRatioPointValue(37, heightRatio) });
 		diagonalDesc.setLineWidth(3);
-		peService.setPropertyValue(diagonalDescShape, DELETABLE_PROPERTY, "true"); //$NON-NLS-1$
+		FeatureSupport.setPropertyValue(diagonalDescShape, DELETABLE_PROPERTY, "true"); //$NON-NLS-1$
 
 		Shape diagonalAscShape = peService.createShape(container, false);
 		
@@ -258,7 +258,7 @@ public class ShapeDecoratorUtil {
 				new int[] { generateRatioPointValue(37, widthRatio), generateRatioPointValue(14, heightRatio),
 							generateRatioPointValue(14, widthRatio), generateRatioPointValue(37, heightRatio) });
 		diagonalAsc.setLineWidth(3);
-		peService.setPropertyValue(diagonalAscShape, DELETABLE_PROPERTY, "true"); //$NON-NLS-1$
+		FeatureSupport.setPropertyValue(diagonalAscShape, DELETABLE_PROPERTY, "true"); //$NON-NLS-1$
 
 		DiagonalCross diagonalCross = new DiagonalCross();
 		diagonalCross.diagonalDesc = diagonalDesc;
@@ -300,7 +300,7 @@ public class ShapeDecoratorUtil {
 		Polygon cross = gaService.createPolygon(crossShape, points);
 		cross.setFilled(false);
 		cross.setLineWidth(1);
-		peService.setPropertyValue(crossShape, DELETABLE_PROPERTY, "true"); //$NON-NLS-1$
+		FeatureSupport.setPropertyValue(crossShape, DELETABLE_PROPERTY, "true"); //$NON-NLS-1$
 		return cross;
 	}
 
@@ -316,28 +316,28 @@ public class ShapeDecoratorUtil {
 				new int[] { generateRatioPointValue(24, widthRatio), generateRatioPointValue(7, heightRatio),
 							generateRatioPointValue(24, widthRatio), generateRatioPointValue(43, heightRatio) });
 		vertical.setLineWidth(3);
-		peService.setPropertyValue(verticalShape, DELETABLE_PROPERTY, "true"); //$NON-NLS-1$
+		FeatureSupport.setPropertyValue(verticalShape, DELETABLE_PROPERTY, "true"); //$NON-NLS-1$
 
 		Shape horizontalShape = peService.createShape(container, false);
 		Polyline horizontal = gaService.createPolyline(horizontalShape,
 				new int[] { generateRatioPointValue(7, widthRatio), generateRatioPointValue(24, heightRatio),
 							generateRatioPointValue(43, widthRatio), generateRatioPointValue(24, heightRatio) });
 		horizontal.setLineWidth(3);
-		peService.setPropertyValue(horizontalShape, DELETABLE_PROPERTY, "true"); //$NON-NLS-1$
+		FeatureSupport.setPropertyValue(horizontalShape, DELETABLE_PROPERTY, "true"); //$NON-NLS-1$
 
 		Shape diagonalDescShape = peService.createShape(container, false);
 		Polyline diagonalDesc = gaService.createPolyline(diagonalDescShape,
 				new int[] { generateRatioPointValue(14, widthRatio), generateRatioPointValue(14, heightRatio),
 							generateRatioPointValue(37, widthRatio), generateRatioPointValue(37, heightRatio) });
 		diagonalDesc.setLineWidth(3);
-		peService.setPropertyValue(diagonalDescShape, DELETABLE_PROPERTY, "true"); //$NON-NLS-1$
+		FeatureSupport.setPropertyValue(diagonalDescShape, DELETABLE_PROPERTY, "true"); //$NON-NLS-1$
 
 		Shape diagonalAscShape = peService.createShape(container, false);
 		Polyline diagonalAsc = gaService.createPolyline(diagonalAscShape,
 				new int[] { generateRatioPointValue(37, widthRatio), generateRatioPointValue(14, heightRatio),
 							generateRatioPointValue(14, widthRatio), generateRatioPointValue(37, heightRatio) });
 		diagonalAsc.setLineWidth(3);
-		peService.setPropertyValue(diagonalAscShape, DELETABLE_PROPERTY, "true"); //$NON-NLS-1$
+		FeatureSupport.setPropertyValue(diagonalAscShape, DELETABLE_PROPERTY, "true"); //$NON-NLS-1$
 
 		Asterisk a = new Asterisk();
 		a.horizontal = horizontal;
@@ -644,7 +644,7 @@ public class ShapeDecoratorUtil {
 		List<PictogramElement> shapes = new ArrayList<PictogramElement>();
 		shapes.addAll(containerShape.getChildren());
 		for (PictogramElement shape : shapes) {
-			String property = peService.getPropertyValue(shape, GraphitiConstants.EVENT_DEFINITION_SHAPE);
+			String property = FeatureSupport.getPropertyValue(shape, GraphitiConstants.EVENT_DEFINITION_SHAPE);
 			if (property != null) {
 				peService.deletePictogramElement(shape);
 			}
@@ -760,7 +760,7 @@ public class ShapeDecoratorUtil {
 
 	
 	private static ContainerShape getActivityMarker(ContainerShape container) {
-		String property = peService.getPropertyValue(container, GraphitiConstants.ACTIVITY_MARKER_CONTAINER);
+		String property = FeatureSupport.getPropertyValue(container, GraphitiConstants.ACTIVITY_MARKER_CONTAINER);
 		if (property != null && new Boolean(property)) {
 			return container;
 		}
@@ -780,8 +780,8 @@ public class ShapeDecoratorUtil {
 			int w = 50;
 			int h = 10;
 			gaService.setLocationAndSize(markerInvisibleRect, x, y, w, h);
-			peService.setPropertyValue(markerContainer, GraphitiConstants.ACTIVITY_MARKER_CONTAINER, Boolean.toString(true));
-			peService.setPropertyValue(markerContainer, GraphitiConstants.ACTIVITY_BORDER, Boolean.toString(true));
+			FeatureSupport.setPropertyValue(markerContainer, GraphitiConstants.ACTIVITY_MARKER_CONTAINER, Boolean.toString(true));
+			FeatureSupport.setPropertyValue(markerContainer, GraphitiConstants.ACTIVITY_BORDER, Boolean.toString(true));
 
 			createActivityMarkerCompensate(markerContainer);
 			createActivityMarkerStandardLoop(markerContainer);
@@ -801,12 +801,12 @@ public class ShapeDecoratorUtil {
 	}
 
 	public static void setActivityMarkerOffest(ContainerShape container, int offset) {
-		peService.setPropertyValue(container, GraphitiConstants.ACTIVITY_MARKER_OFFSET, Integer.toString(offset));
+		FeatureSupport.setPropertyValue(container, GraphitiConstants.ACTIVITY_MARKER_OFFSET, Integer.toString(offset));
 	}
 
 	public static int getActivityMarkerOffest(ContainerShape container) {
 		int offset = 0;
-		String s = peService.getPropertyValue(container, GraphitiConstants.ACTIVITY_MARKER_OFFSET);
+		String s = FeatureSupport.getPropertyValue(container, GraphitiConstants.ACTIVITY_MARKER_OFFSET);
 		if (s!=null) {
 			try {
 				offset = Integer.parseInt(s);
@@ -822,6 +822,9 @@ public class ShapeDecoratorUtil {
 		ContainerShape markerContainer = getActivityMarker(container);
 		if (markerContainer!=null) {
 			int lastX = 0;
+			int markersWidth = 0;
+			int markersHeight = 0;
+			int markersVisible = 0;
 			Iterator<Shape> iterator = peService.getAllContainedShapes(markerContainer).iterator();
 			while (iterator.hasNext()) {
 				Shape marker = iterator.next();
@@ -829,6 +832,10 @@ public class ShapeDecoratorUtil {
 					GraphicsAlgorithm ga = marker.getGraphicsAlgorithm();
 					gaService.setLocation(ga, lastX, 0);
 					lastX += ga.getWidth() + 3;
+					markersWidth += ga.getWidth() + 3;
+					if (ga.getHeight() > markersHeight)
+						markersHeight = ga.getHeight();
+					++markersVisible;
 				}
 			}
 			
@@ -838,7 +845,7 @@ public class ShapeDecoratorUtil {
 			int newHeight = parentGa.getHeight();
 			int x = (newWidth / 2) - (lastX / 2);
 			int y = newHeight - 13 - getActivityMarkerOffest(container);
-			gaService.setLocation(ga, x, y);
+			gaService.setLocationAndSize(ga, x, y, markersWidth, markersHeight);
 		}
 	}
 	
@@ -863,7 +870,7 @@ public class ShapeDecoratorUtil {
 	}
 
 	public static boolean isActivityMarker(PictogramElement pe) {
-		String property = peService.getPropertyValue(pe, GraphitiConstants.ACTIVITY_MARKER_CONTAINER);
+		String property = FeatureSupport.getPropertyValue(pe, GraphitiConstants.ACTIVITY_MARKER_CONTAINER);
 		return new Boolean(property).booleanValue();
 	}
 
@@ -873,13 +880,13 @@ public class ShapeDecoratorUtil {
 		StyleUtil.applyStyle(rect, businessObject);
 		IDimension dim = gaService.calculateSize(containerShape.getGraphicsAlgorithm());
 		gaService.setLocationAndSize(rect, 0, 0, dim.getWidth(), dim.getHeight());
-		peService.setPropertyValue(shape, GraphitiConstants.ACTIVITY_BORDER, Boolean.TRUE.toString());
+		FeatureSupport.setPropertyValue(shape, GraphitiConstants.ACTIVITY_BORDER, Boolean.TRUE.toString());
 		link(shape, businessObject);
 		return shape;
 	}
 	
 	public static boolean isActivityBorder(PictogramElement pe) {
-		String value = peService.getPropertyValue(pe, GraphitiConstants.ACTIVITY_BORDER);
+		String value = FeatureSupport.getPropertyValue(pe, GraphitiConstants.ACTIVITY_BORDER);
 		return new Boolean(value);
 	}
 
@@ -930,7 +937,7 @@ public class ShapeDecoratorUtil {
 		gaService.setLocationAndSize(ga, (parentW / 2) - (totalWidth / 2), parentH-MARKER_WIDTH, totalWidth, MARKER_HEIGHT);
 
 		Shape shape = peService.createShape(markerContainer, false);
-		peService.setPropertyValue(shape, property, Boolean.toString(true));
+		FeatureSupport.setPropertyValue(shape, property, Boolean.toString(true));
 		Rectangle invisibleRect = gaService.createInvisibleRectangle(shape);
 		gaService.setLocationAndSize(invisibleRect, lastX, 0, MARKER_WIDTH, MARKER_HEIGHT);
 
@@ -954,7 +961,7 @@ public class ShapeDecoratorUtil {
 	}
 	
 	public static boolean isValidationDecorator(PictogramElement pe) {
-		String value = peService.getPropertyValue(pe, GraphitiConstants.VALIDATION_DECORATOR);
+		String value = FeatureSupport.getPropertyValue(pe, GraphitiConstants.VALIDATION_DECORATOR);
 		if (new Boolean(value))
 			return true;
 		return false;
@@ -966,7 +973,7 @@ public class ShapeDecoratorUtil {
 				return pe;
 		}
 		PictogramElement decorator = Graphiti.getPeCreateService().createShape(containerShape, true);
-		peService.setPropertyValue(decorator, GraphitiConstants.VALIDATION_DECORATOR, "true"); //$NON-NLS-1$
+		FeatureSupport.setPropertyValue(decorator, GraphitiConstants.VALIDATION_DECORATOR, "true"); //$NON-NLS-1$
 		Rectangle rect = Graphiti.getGaCreateService().createInvisibleRectangle(decorator);
 		rect.setX(-5);
 		rect.setY(-5);
@@ -987,14 +994,14 @@ public class ShapeDecoratorUtil {
 		circle.setFilled(false);
 		if (!isInterrupting)
 			circle.setLineStyle(LineStyle.DASH);
-		peService.setPropertyValue(decoratorShape, GraphitiConstants.EVENT_SUBPROCESS_DECORATOR_CONTAINER, Boolean.TRUE.toString());
+		FeatureSupport.setPropertyValue(decoratorShape, GraphitiConstants.EVENT_SUBPROCESS_DECORATOR_CONTAINER, Boolean.TRUE.toString());
 		gaService.setLocationAndSize(invisibleRect, 1, 1, 20, 20);
 
 		return decoratorShape;
 	}
 	
 	public static boolean isEventSubProcessDecorator(PictogramElement pe) {
-		String property = peService.getPropertyValue(pe, GraphitiConstants.EVENT_SUBPROCESS_DECORATOR_CONTAINER);
+		String property = FeatureSupport.getPropertyValue(pe, GraphitiConstants.EVENT_SUBPROCESS_DECORATOR_CONTAINER);
 		if (property!=null)
 			return true;
 		return false;

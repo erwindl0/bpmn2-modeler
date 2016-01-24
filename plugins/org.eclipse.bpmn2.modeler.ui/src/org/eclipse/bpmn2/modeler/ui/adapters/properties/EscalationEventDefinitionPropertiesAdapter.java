@@ -35,6 +35,10 @@ public class EscalationEventDefinitionPropertiesAdapter extends EventDefinitionP
 	public EscalationEventDefinitionPropertiesAdapter(AdapterFactory adapterFactory, EscalationEventDefinition object) {
 		super(adapterFactory, object);
 		
+    	setProperty(Bpmn2Package.eINSTANCE.getEscalationEventDefinition_EscalationRef(), UI_CAN_CREATE_NEW, Boolean.TRUE);
+    	setProperty(Bpmn2Package.eINSTANCE.getEscalationEventDefinition_EscalationRef(), UI_CAN_EDIT, Boolean.TRUE);
+    	setProperty(Bpmn2Package.eINSTANCE.getEscalationEventDefinition_EscalationRef(), UI_IS_MULTI_CHOICE, Boolean.TRUE);
+
 		EStructuralFeature ref = Bpmn2Package.eINSTANCE.getEscalationEventDefinition_EscalationRef();
 		setFeatureDescriptor(ref, new FeatureDescriptor<EscalationEventDefinition>(this,object,ref) {
 
@@ -44,7 +48,10 @@ public class EscalationEventDefinitionPropertiesAdapter extends EventDefinitionP
 				Escalation escalation = object.getEscalationRef();
 				if (escalation!=null) {
 					ItemDefinition itemDefinition = escalation.getStructureRef();
-					ExtendedPropertiesProvider.setValue(escalation, Bpmn2Package.eINSTANCE.getEscalation_StructureRef(), itemDefinition);
+					// propagate the structureRef of this Escalation to Activity DataInputs and DataOutputs
+					// but only if it is define (not null)
+					if (itemDefinition!=null)
+						ExtendedPropertiesProvider.setValue(escalation, Bpmn2Package.eINSTANCE.getEscalation_StructureRef(), itemDefinition);
 				}
 			}
 

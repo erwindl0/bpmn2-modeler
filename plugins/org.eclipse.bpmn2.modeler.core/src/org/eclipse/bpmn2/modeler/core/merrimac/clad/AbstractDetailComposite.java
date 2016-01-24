@@ -14,7 +14,6 @@
 package org.eclipse.bpmn2.modeler.core.merrimac.clad;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -358,6 +357,7 @@ public abstract class AbstractDetailComposite extends ListAndDetailCompositeBase
 				if (prefKey!=null) {
 					preferenceStore.setValue(prefKey, e.getState());
 				}
+				redrawPage();
 			}
 		});
 		
@@ -560,7 +560,7 @@ public abstract class AbstractDetailComposite extends ListAndDetailCompositeBase
 				Object v = getBusinessObjectDelegate().getValue(object,reference);
 				EObject value = (EObject)v;
 				if (value==null) {
-					value = getBusinessObjectDelegate().createFeature(object,reference);
+					value = getBusinessObjectDelegate().createFeature(object,reference,(EClass)null);
 					InsertionAdapter.add(object, reference, value);
 				}
 				AbstractDetailComposite detailComposite = PropertiesCompositeFactory.INSTANCE.createDetailComposite(eClass.getInstanceClass(), this, getTargetRuntime(), SWT.NONE);
@@ -639,21 +639,22 @@ public abstract class AbstractDetailComposite extends ListAndDetailCompositeBase
 					if (section!=null && section.getTabbedPropertySheetPage()!=null) {
 						parent = (Composite)section.getTabbedPropertySheetPage().getControl();
 					}
-				}
-				catch (Exception e) {
-				}
-				// Send a notification to all listeners about this refresh event.
-				// This will cause all children to be refreshed when a property tab switch happens.
-				Notification n = new ENotificationImpl(null, -1, -1, 0, 0);
-				getAllChildWidgets(parent, kids);
-				for (Control c : kids) {
-					if (!c.isDisposed()) {
-						INotifyChangedListener listener = (INotifyChangedListener)c.getData(
-								IConstants.NOTIFY_CHANGE_LISTENER_KEY);
-						if (listener!=null) {
-							listener.notifyChanged(n);
+
+					// Send a notification to all listeners about this refresh event.
+					// This will cause all children to be refreshed when a property tab switch happens.
+					Notification n = new ENotificationImpl(null, -1, -1, 0, 0);
+					getAllChildWidgets(parent, kids);
+					for (Control c : kids) {
+						if (!c.isDisposed()) {
+							INotifyChangedListener listener = (INotifyChangedListener)c.getData(
+									IConstants.NOTIFY_CHANGE_LISTENER_KEY);
+							if (listener!=null) {
+								listener.notifyChanged(n);
+							}
 						}
 					}
+				}
+				catch (Exception e) {
 				}
 			}
 		});

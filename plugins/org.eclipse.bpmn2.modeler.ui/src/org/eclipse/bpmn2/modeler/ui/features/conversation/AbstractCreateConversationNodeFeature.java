@@ -23,6 +23,7 @@ import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
 import org.eclipse.bpmn2.modeler.core.utils.ModelUtil;
 import org.eclipse.bpmn2.modeler.ui.ImageProvider;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.graphiti.features.IFeatureProvider;
 import org.eclipse.graphiti.features.context.ICreateContext;
 import org.eclipse.graphiti.mm.pictograms.PictogramElement;
@@ -72,8 +73,9 @@ public abstract class AbstractCreateConversationNodeFeature<T extends Conversati
 	@Override
 	public T createBusinessObject(ICreateContext context) {
 		ModelHandler mh = ModelHandler.getInstance(getDiagram());
-		
-		T businessObject = (T) Bpmn2ModelerFactory.eINSTANCE.create(getBusinessObjectClass());
+		Resource resource = mh.getResource();
+
+		T businessObject = (T) Bpmn2ModelerFactory.create(resource, getBusinessObjectClass());
         BPMNDiagram bpmnDiagram = BusinessObjectUtil.getFirstElementOfType(context.getTargetContainer(), BPMNDiagram.class);
         mh.addConversationNode(bpmnDiagram,businessObject);
 		ModelUtil.setID(businessObject);

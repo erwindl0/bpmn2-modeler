@@ -17,7 +17,6 @@ import org.eclipse.bpmn2.LaneSet;
 import org.eclipse.bpmn2.Process;
 import org.eclipse.graphiti.features.IFeatureProvider;
 import org.eclipse.graphiti.features.context.IMoveShapeContext;
-import org.eclipse.graphiti.mm.pictograms.ContainerShape;
 
 public class MoveFromParticipantToLaneFeature extends MoveLaneFeature {
 

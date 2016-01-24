@@ -134,7 +134,7 @@ public class AddChoreographyParticipantFeature extends AbstractCustomFeature {
 				
 				Participant participant = null;
 				List<Participant> participantList = new ArrayList<Participant>();
-				participant = Bpmn2ModelerFactory.create(choreographyActivity.eResource(), Participant.class);
+				participant = Bpmn2ModelerFactory.createObject(choreographyActivity.eResource(), Participant.class);
 				participant.setName(Messages.AddChoreographyParticipantFeature_New_Participant);
 				ModelUtil.setID(participant, choreographyActivity.eResource());
 				

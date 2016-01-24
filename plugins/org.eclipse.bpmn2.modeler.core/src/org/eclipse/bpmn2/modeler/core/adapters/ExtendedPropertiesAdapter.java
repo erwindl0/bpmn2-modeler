@@ -18,18 +18,55 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.eclipse.bpmn2.Activity;
+import org.eclipse.bpmn2.CallableElement;
+import org.eclipse.bpmn2.CatchEvent;
+import org.eclipse.bpmn2.ChoreographyActivity;
+import org.eclipse.bpmn2.ConversationNode;
+import org.eclipse.bpmn2.Event;
+import org.eclipse.bpmn2.EventDefinition;
 import org.eclipse.bpmn2.ExtensionAttributeValue;
+import org.eclipse.bpmn2.FlowElement;
+import org.eclipse.bpmn2.FlowElementsContainer;
+import org.eclipse.bpmn2.FlowNode;
+import org.eclipse.bpmn2.Gateway;
+import org.eclipse.bpmn2.InteractionNode;
+import org.eclipse.bpmn2.LoopCharacteristics;
+import org.eclipse.bpmn2.ThrowEvent;
+import org.eclipse.bpmn2.impl.ActivityImpl;
+import org.eclipse.bpmn2.impl.CallableElementImpl;
+import org.eclipse.bpmn2.impl.CatchEventImpl;
+import org.eclipse.bpmn2.impl.ChoreographyActivityImpl;
+import org.eclipse.bpmn2.impl.ConversationNodeImpl;
+import org.eclipse.bpmn2.impl.EventDefinitionImpl;
+import org.eclipse.bpmn2.impl.EventImpl;
+import org.eclipse.bpmn2.impl.FlowElementImpl;
+import org.eclipse.bpmn2.impl.FlowElementsContainerImpl;
+import org.eclipse.bpmn2.impl.FlowNodeImpl;
+import org.eclipse.bpmn2.impl.GatewayImpl;
+import org.eclipse.bpmn2.impl.InteractionNodeImpl;
+import org.eclipse.bpmn2.impl.LoopCharacteristicsImpl;
+import org.eclipse.bpmn2.impl.ThrowEventImpl;
 import org.eclipse.bpmn2.modeler.core.ToolTipProvider;
+import org.eclipse.bpmn2.modeler.core.model.Bpmn2ModelerFactory;
+import org.eclipse.bpmn2.modeler.core.runtime.ITargetRuntimeProvider;
+import org.eclipse.bpmn2.modeler.core.runtime.PropertyExtensionDescriptor;
+import org.eclipse.bpmn2.modeler.core.runtime.TargetRuntime;
+import org.eclipse.bpmn2.modeler.core.runtime.TargetRuntimeAdapter;
 import org.eclipse.bpmn2.modeler.core.utils.ModelUtil;
+import org.eclipse.bpmn2.util.Bpmn2Resource;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.Notifier;
 import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
+import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EFactory;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.domain.IEditingDomainProvider;
 import org.eclipse.emf.edit.provider.ComposeableAdapterFactory;
@@ -46,7 +83,7 @@ import org.eclipse.emf.transaction.TransactionalEditingDomain;
  * {@code org.eclipse.bpmn2.modeler.runtime} extension point documentation for
  * more details.
  */
-public class ExtendedPropertiesAdapter<T extends EObject> extends ObjectPropertyProvider {
+public class ExtendedPropertiesAdapter<T extends EObject> extends AdapterImpl implements IResourceProvider, ITargetRuntimeProvider {
 
 	/** Property key for the verbose description of this model object */
 	public final static String LONG_DESCRIPTION = "long.description"; //$NON-NLS-1$
@@ -97,14 +134,8 @@ public class ExtendedPropertiesAdapter<T extends EObject> extends ObjectProperty
 	 * valid source/target objects in scope for the Association.
 	 */
 	public final static String UI_SHOW_ITEMS_IN_SCOPE = "show.items.in.scope"; //$NON-NLS-1$
-	
-	/**
-	 * An {@code ExtendedPropertiesAdapter} may be created with a type (EClass) and then later
-	 * receive the actual object that is to be adapted {@see ExtendedPropertiesAdapter#setTarget(Notifier)}.
-	 * Since we can't actually adapt the EClass itself, we need to construct dummy objects
-	 * that will temporarily hold the adapter until it can receive the actual target object.  
-	 */
-	private static Hashtable<EClass,EObject> dummyObjects = new Hashtable<EClass,EObject>();
+
+	protected Hashtable<String, Object> properties = new Hashtable<String, Object>();
 
 	/**
 	 * The map of EStructuralFeatures that need {@code FeatureDescriptor}
@@ -128,7 +159,6 @@ public class ExtendedPropertiesAdapter<T extends EObject> extends ObjectProperty
 	 * @param object the object to be adapted.
 	 */
 	public ExtendedPropertiesAdapter(AdapterFactory adapterFactory, T object) {
-		super(object.eResource());
 		this.adapterFactory = adapterFactory;
 		setTarget(object);
 	}
@@ -142,23 +172,28 @@ public class ExtendedPropertiesAdapter<T extends EObject> extends ObjectProperty
 	 */
 	@SuppressWarnings("rawtypes")
 	public static ExtendedPropertiesAdapter adapt(Object object) {
-		return adapt(object,null);
+		if (object instanceof EClass) {
+			object = getDummyObject((EClass)object);
+		}
+		if (object instanceof EObject)
+			return adapt((EObject)object);
+		return null;
 	}
 
-	public static ExtendedPropertiesAdapter adapt(Resource resource, EClass eclass) {
-		if (resource!=null) {
-			ObjectPropertyProvider factoryAdapter = ObjectPropertyProvider.getAdapter(eclass.getEPackage().getEFactoryInstance());
-			if (factoryAdapter==null) {
-				ObjectPropertyProvider.adapt(eclass, resource);
-			}
-			else {
-				factoryAdapter.setResource(resource);
-			}
-		}
-		ExtendedPropertiesAdapter adapter = (ExtendedPropertiesAdapter) AdapterUtil.adapt(eclass, ExtendedPropertiesAdapter.class);
-		if (adapter==null) {
-			adapter = new ExtendedPropertiesAdapter(new AdapterFactoryImpl(), eclass);
-		}
+	@SuppressWarnings("rawtypes")
+	public static ExtendedPropertiesAdapter adapt(Resource resource, EClass eClass) {
+		TargetRuntime rt = getTargetRuntime(resource);
+        PropertyExtensionDescriptor ped = rt.getPropertyExtension(eClass.getInstanceClass());
+        if (ped==null && rt != TargetRuntime.getDefaultRuntime())
+            ped = TargetRuntime.getDefaultRuntime().getPropertyExtension(eClass.getInstanceClass());
+        if (ped!=null)
+            return ped.getAdapter(new AdapterFactoryImpl(), eClass);
+        
+		EObject object = getDummyObject(eClass);
+		TargetRuntimeAdapter.adapt(object, rt);
+		ExtendedPropertiesAdapter adapter = adapt(object);
+		adapter.setResource(resource);
+		adapter.setTargetRuntime(rt);
 		return adapter;
 	}
 	
@@ -171,53 +206,58 @@ public class ExtendedPropertiesAdapter<T extends EObject> extends ObjectProperty
 	 * @return the {@code ExtendedPropertiesAdapter}
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static ExtendedPropertiesAdapter adapt(Object object, EStructuralFeature feature) {
+	public static ExtendedPropertiesAdapter adapt(Resource resource, EObject object, EStructuralFeature feature) {
+		Assert.isTrue(feature!=null);
+		if (object instanceof EClass) {
+			object = getDummyObject((EClass)object);
+		}
+		else if (resource==null)
+			resource = getResource(object);
+		
 		ExtendedPropertiesAdapter adapter = null;
-		if (object instanceof ExtensionAttributeValue)
-			object = ((ExtensionAttributeValue) object).eContainer();
-		if (object instanceof EObject) {
-			// If the EObject already has one of these adapters, find the "best" one for
-			// the given feature. The "best" means the adapter will have defined a FeatureDescriptor
-			// for the given feature.
-			EObject eObject = (EObject) object;
-			ExtendedPropertiesAdapter genericAdapter = null;
-			for (Adapter a : eObject.eAdapters()) {
-				if (a instanceof ExtendedPropertiesAdapter && ((ExtendedPropertiesAdapter)a).canAdapt(eObject, feature)) {
-					if (a.getClass() == ExtendedPropertiesAdapter.class)
-						genericAdapter = (ExtendedPropertiesAdapter) a;
-					else
-						adapter = (ExtendedPropertiesAdapter) a;
-				}
-			}
-			// if no "best" adapter is found, use the generic adapter if one has been created for this EObject
-			if (adapter==null && genericAdapter!=null)
-				adapter = genericAdapter;
-			
-			EObject eclass = getFeatureClass(eObject,feature);
-			if (adapter==null) {
-				adapter = (ExtendedPropertiesAdapter) AdapterUtil.adapt(eclass, ExtendedPropertiesAdapter.class);
-				if (adapter==null) {
-					adapter = new ExtendedPropertiesAdapter(new AdapterFactoryImpl(), eObject);
-				}
-			}
-			if (adapter!=null) {
-				if (eObject instanceof EClass) {
-					EObject dummy = getDummyObject((EClass)eObject);
-					if (dummy!=null)
-						eObject = dummy;
-				}
-				adapter.setTarget(eObject);
-				adapter.getObjectDescriptor().setObject(eObject);
-				if (feature!=null)
-					adapter.getFeatureDescriptor(feature).setObject(eObject);
-				
-				// load the description for this object from Messages
-//				if (adapter.getProperty(LONG_DESCRIPTION)==null) {
-//					String description = getDescription(adapter.adapterFactory, eObject);
-//					if (description!=null && !description.isEmpty())
-//						adapter.setProperty(LONG_DESCRIPTION, description);
-//				}
-			}
+		TargetRuntime rt = null;
+		if (resource!=null) {
+			rt = TargetRuntimeAdapter.getTargetRuntime(resource);
+			if (rt!=null)
+				TargetRuntimeAdapter.adapt(object, rt);
+		}
+		adapter = (ExtendedPropertiesAdapter) AdapterUtil.adapt(object, ExtendedPropertiesAdapter.class);
+		
+		if (adapter==null)
+			adapter = new ExtendedPropertiesAdapter(new AdapterFactoryImpl(), object);
+
+		if (adapter!=null) {
+			adapter.setTarget(object);
+			adapter.getObjectDescriptor().setObject(object);
+			adapter.getFeatureDescriptor(feature).setObject(object);
+		}
+		
+		return adapter;
+	}
+	
+	@Deprecated
+	public static ExtendedPropertiesAdapter adapt(EClass object) {
+		throw new IllegalArgumentException("ExtendedPropertiesAdapter: Can't adapt "+((EClass)object).getName());
+	}
+	
+	public static ExtendedPropertiesAdapter adapt(EObject object) {
+		if (object==null)
+			return null;
+		
+		if (object instanceof EClass) {
+			throw new IllegalArgumentException("ExtendedPropertiesAdapter: Can't adapt "+((EClass)object).getName());
+		}
+		if (object instanceof ExtensionAttributeValue) {
+			if (object.eContainer()!=null)
+				object = object.eContainer();
+		}
+
+		ExtendedPropertiesAdapter adapter = (ExtendedPropertiesAdapter) AdapterUtil.adapt(object, ExtendedPropertiesAdapter.class);
+		if (adapter==null)
+			adapter = new ExtendedPropertiesAdapter(new AdapterFactoryImpl(), object);
+		if (adapter!=null) {
+			adapter.setTarget(object);
+			adapter.getObjectDescriptor().setObject(object);
 		}
 		return adapter;
 	}
@@ -234,19 +274,64 @@ public class ExtendedPropertiesAdapter<T extends EObject> extends ObjectProperty
 	 * @param eclass EClass of the object to create.
 	 * @return an orphan EObject of the given EClass type.
 	 */
-	public static EObject getDummyObject(EClass eclass) {
-		EObject object = dummyObjects.get(eclass);
-		if (object==null && eclass.eContainer() instanceof EPackage && !eclass.isAbstract()) {
-			Resource resource = null;
-    		ObjectPropertyProvider factoryAdapter = ObjectPropertyProvider.getAdapter(eclass.getEPackage().getEFactoryInstance());
-    		if (factoryAdapter!=null)
-    			resource = factoryAdapter.getResource();
-	    	EPackage pkg = (EPackage)eclass.eContainer();
-	    	object = pkg.getEFactoryInstance().create(eclass);
-			dummyObjects.put(eclass, object);
-			if (factoryAdapter!=null && resource!=null)
-				factoryAdapter.setResource(resource);
+	public static EObject getDummyObject(EClass eClass) {
+		EObject object = null;
+		EFactory factory = eClass.getEPackage().getEFactoryInstance();
+		if (factory instanceof Bpmn2ModelerFactory) {
+			if (eClass.isAbstract()) {
+    	    	// These are abstract types that are supported by {@see Bpmn2ModelerFactory#create(EClass)}
+    	    	// Additional abstract types can be added here:
+    	    	if (eClass.getInstanceClass()==Activity.class) {
+    	    		object = new ActivityImpl() {};
+    	    	}
+    	    	else if (eClass.getInstanceClass()==CallableElement.class) {
+    	    		object = new CallableElementImpl() {};
+    	    	}
+    	    	else if (eClass.getInstanceClass()==CatchEvent.class) {
+    	    		object = new CatchEventImpl() {};
+    	    	}
+    	    	else if (eClass.getInstanceClass()==ChoreographyActivity.class) {
+    	    		object = new ChoreographyActivityImpl() {};
+    	    	}
+    	    	else if (eClass.getInstanceClass()==ConversationNode.class) {
+    	    		object = new ConversationNodeImpl() {};
+    	    	}
+    	    	else if (eClass.getInstanceClass()==Event.class) {
+    	    		object = new EventImpl() {};
+    	    	}
+    	    	else if (eClass.getInstanceClass()==EventDefinition.class) {
+    	    		object = new EventDefinitionImpl() {};
+    	    	}
+    	    	else if (eClass.getInstanceClass()==FlowElement.class) {
+    	    		object = new FlowElementImpl() {};
+    	    	}
+    	    	else if (eClass.getInstanceClass()==FlowElementsContainer.class) {
+    	    		object = new FlowElementsContainerImpl() {};
+    	    	}
+    	    	else if (eClass.getInstanceClass()==FlowNode.class) {
+    	    		object = new FlowNodeImpl() {};
+    	    	}
+    	    	else if (eClass.getInstanceClass()==Gateway.class) {
+    	    		object = new GatewayImpl() {};
+    	    	}
+    	    	else if (eClass.getInstanceClass()==InteractionNode.class) {
+    	    		object = new InteractionNodeImpl() {};
+    	    	}
+    	    	else if (eClass.getInstanceClass()==LoopCharacteristics.class) {
+    	    		object = new LoopCharacteristicsImpl() {};
+    	    	}
+    	    	else if (eClass.getInstanceClass()==ThrowEvent.class) {
+    	    		object = new ThrowEventImpl() {};
+    	    	}
+    	    	else {
+    	    		System.err.println("The abstract BPMN2 type "+eClass.getName()+" can not be constructed");
+    	    	}
+			}
+			else
+				object = ((Bpmn2ModelerFactory)factory).createInternal(eClass);
 		}
+		else
+			object = factory.create(eClass);
 		return object;
 	}
 
@@ -269,25 +354,6 @@ public class ExtendedPropertiesAdapter<T extends EObject> extends ObjectProperty
 	public void setObjectDescriptor(ObjectDescriptor<T> od) {
 		setProperty(OBJECT_DESCRIPTOR,od);
 		od.setOwner(this);
-	}
-
-	/**
-	 * Returns the EClass of the given object's feature. If the EClass is
-	 * abstract, returns the EObject itself.
-	 * 
-	 * @param object an EObject
-	 * @param feature an EStructuralFeature of the object
-	 * @return a feature EClass, or the object if the feature is abstract.
-	 */
-	private static EObject getFeatureClass(EObject object, EStructuralFeature feature) {
-		EClass eclass = null;
-		if (feature!=null && feature.eContainer() instanceof EClass) {
-			eclass = (EClass)feature.eContainer();
-		}
-		if (eclass==null || eclass.isAbstract()) {
-			return object;
-		}
-		return eclass;
 	}
 
 	/**
@@ -435,6 +501,11 @@ public class ExtendedPropertiesAdapter<T extends EObject> extends ObjectProperty
 		return getObjectProperties().get(key);
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T extends Object> T getProperty(Class<T> clazz) {
+		return (T) getProperty(clazz.getName());
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.bpmn2.modeler.core.adapters.ObjectPropertyProvider#setProperty(java.lang.String, java.lang.Object)
 	 * 
@@ -448,6 +519,10 @@ public class ExtendedPropertiesAdapter<T extends EObject> extends ObjectProperty
 			getObjectProperties().remove(key);
 		else
 			getObjectProperties().put(key, value);
+	}
+
+	public <T extends Object> void setProperty(Class<T> clazz, Object value) {
+		setProperty(clazz.getName(), value);
 	}
 
 	/**
@@ -523,33 +598,179 @@ public class ExtendedPropertiesAdapter<T extends EObject> extends ObjectProperty
 					return;
 			}
 			object.eAdapters().add(this);
+			setResource(getResource(object));
 		}
-	}
-
-	/**
-	 * Check if the given object feature can be adapted.
-	 *
-	 * @param object the object
-	 * @param feature the feature
-	 * @return true, if the object has a Feature Descriptor for the given feature.
-	 */
-	public boolean canAdapt(EObject object, EStructuralFeature feature) {
-		if (object!=null) {
-			if (getObjectDescriptor().object.eClass() == object.eClass()) {
-				if (feature==null)
-					return true;
-				// only TRUE if this adapter already has a FeatureDescriptor for this feature 
-				Hashtable<String,Object> props = featureProperties.get(feature);
-				if (props!=null) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	public String getDescription(EObject object) {
 		return ToolTipProvider.INSTANCE.getLongDescription(adapterFactory,object);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.bpmn2.modeler.core.adapters.ObjectPropertyProvider#getResource()
+	 */
+	@Override
+	public Resource getResource() {
+		Resource resource = getProperty(Resource.class);
+		if (resource==null) {
+			ObjectDescriptor<T> od = (ObjectDescriptor<T>) getProperty(OBJECT_DESCRIPTOR);
+			if (od!=null) {
+				IResourceProvider rp = AdapterRegistry.INSTANCE.adapt(od.object.eContainer(), IResourceProvider.class);
+				if (rp!=null && rp!=this) {
+					resource = rp.getResource();
+					setResource(resource);
+				}
+			}
+		}
+		return resource;
+	}
+	
+	@Override
+	public void setResource(Resource resource) {
+		setProperty(Resource.class, resource);
+	}
+
+	@Override
+	public TargetRuntime getTargetRuntime() {
+		TargetRuntime rt = getProperty(TargetRuntime.class);
+		if (rt==null) {
+			Resource resource = getResource();
+			rt = getTargetRuntime(resource);
+			if (rt!=null) {
+				setTargetRuntime(rt);
+			}
+		}
+		return rt;
+	}
+	
+	@Override
+	public void setTargetRuntime(TargetRuntime rt) {
+		setProperty(TargetRuntime.class, rt);
+	}
+
+	/**
+	 * Given an EObject always returns the BPMN2 Resource that is associated
+	 * with that object. This may involve searching for all Resources in the
+	 * ResourceSet that the EObject belongs to. This also searches for a
+	 * Resource in the object's {@link InsertionAdapter} if the object is not
+	 * yet contained in any Resource.
+	 * 
+	 * @param object
+	 * @return
+	 */
+	public static Resource getResource(Notifier object) {
+		if (object==null)
+			return null;
+		
+		Resource resource = null;
+		EObject eObject = null;
+		
+		if (object instanceof EObject) {
+			eObject = (EObject) object;
+			resource = ((EObject)object).eResource();
+		}
+		
+		if (object instanceof Resource) {
+			resource = (Resource) object;
+		}
+
+		if (object instanceof ResourceSet) {
+			ResourceSet rs = (ResourceSet) object;
+			if (rs.getResources().size()>0)
+				resource = rs.getResources().get(0);
+		}
+		
+		if (resource==null) {
+			IResourceProvider rp = AdapterRegistry.INSTANCE.adapt(object, IResourceProvider.class);
+			if (rp!=null)
+				resource = rp.getResource();
+		}
+		
+		if (resource==null && eObject!=null) {
+			for (Adapter a : eObject.eAdapters()) {
+				if (a instanceof IResourceProvider) {
+					resource = ((IResourceProvider)a).getResource();
+					if (resource!=null)
+						break;
+				}
+			}
+		}
+			
+		// make sure we get a BPMN2 Resource
+		if (resource!=null && !(resource instanceof Bpmn2Resource)) {
+			ResourceSet rs = resource.getResourceSet();
+			if (rs!=null) {
+				for (Resource r : rs.getResources()) {
+					if (r instanceof Bpmn2Resource) {
+						return r;
+					}
+				}
+			}
+			return null;
+		}
+		
+		return resource;
+	}
+	
+	public static TargetRuntime getTargetRuntime(Notifier object) {
+		if (object==null)
+			return null;
+		
+		TargetRuntime rt = null;
+		
+		if (object instanceof ResourceSet) {
+			Resource resource = getResource(object);
+			if (resource!=null)
+				object = resource;
+		}
+		
+		for (Adapter a : object.eAdapters()) {
+			if (a instanceof ITargetRuntimeProvider) {
+				rt = ((ITargetRuntimeProvider) a).getTargetRuntime();
+				if (rt!=null)
+					return rt;
+			}
+		}
+		
+		// last chance: can we find the resource this object belongs to?
+		if (!(object instanceof Resource)) {
+			Resource resource = getResource(object);
+			if (resource!=null) {
+				for (Adapter a : resource.eAdapters()) {
+					if (a instanceof ITargetRuntimeProvider) {
+						rt = ((ITargetRuntimeProvider)a).getTargetRuntime();
+						if (rt!=null)
+							return rt;
+					}
+				}
+			}
+		}
+			
+		
+		return null;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.bpmn2.modeler.core.adapters.ObjectPropertyProvider#getEditingDomain()
+	 */
+	public TransactionalEditingDomain getEditingDomain() {
+		EditingDomain result = null;
+		if (adapterFactory instanceof IEditingDomainProvider) {
+			result = ((IEditingDomainProvider) adapterFactory).getEditingDomain();
+		}
+		if (result == null) {
+			if (adapterFactory instanceof ComposeableAdapterFactory) {
+				AdapterFactory rootAdapterFactory = ((ComposeableAdapterFactory) adapterFactory)
+						.getRootAdapterFactory();
+				if (rootAdapterFactory instanceof IEditingDomainProvider) {
+					result = ((IEditingDomainProvider) rootAdapterFactory).getEditingDomain();
+				}
+			}
+		}
+		// it's gotta be a Transactional Editing Domain or nothing!
+		if (result instanceof TransactionalEditingDomain)
+			return (TransactionalEditingDomain)result;
+		return null;
 	}
 
 	/**
@@ -608,48 +829,5 @@ public class ExtendedPropertiesAdapter<T extends EObject> extends ObjectProperty
 			}
 		}
 		return true;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.bpmn2.modeler.core.adapters.ObjectPropertyProvider#getResource()
-	 */
-	@Override
-	public Resource getResource() {
-		Resource resource = super.getResource();
-		if (resource==null) {
-			ObjectDescriptor<T> od = (ObjectDescriptor<T>) getProperty(OBJECT_DESCRIPTOR);
-			if (od!=null) {
-				IResourceProvider rp = AdapterRegistry.INSTANCE.adapt(od.object.eContainer(), IResourceProvider.class);
-				if (rp!=null && rp!=this)
-					resource = rp.getResource();
-			}
-		}
-		if (resource==null)
-			return super.getResource();
-		return resource;
-	}
-	
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.bpmn2.modeler.core.adapters.ObjectPropertyProvider#getEditingDomain()
-	 */
-	public TransactionalEditingDomain getEditingDomain() {
-		EditingDomain result = null;
-		if (adapterFactory instanceof IEditingDomainProvider) {
-			result = ((IEditingDomainProvider) adapterFactory).getEditingDomain();
-		}
-		if (result == null) {
-			if (adapterFactory instanceof ComposeableAdapterFactory) {
-				AdapterFactory rootAdapterFactory = ((ComposeableAdapterFactory) adapterFactory)
-						.getRootAdapterFactory();
-				if (rootAdapterFactory instanceof IEditingDomainProvider) {
-					result = ((IEditingDomainProvider) rootAdapterFactory).getEditingDomain();
-				}
-			}
-		}
-		// it's gotta be a Transactional Editing Domain or nothing!
-		if (result instanceof TransactionalEditingDomain)
-			return (TransactionalEditingDomain)result;
-		return null;
 	}
 }

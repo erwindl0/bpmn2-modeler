@@ -18,16 +18,17 @@ import java.util.List;
 import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesProvider;
 import org.eclipse.bpmn2.modeler.core.merrimac.providers.ColumnTableProvider;
 import org.eclipse.bpmn2.modeler.core.utils.ModelUtil;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.edit.ui.provider.PropertyDescriptor.EDataTypeCellEditor;
 import org.eclipse.emf.transaction.TransactionalEditingDomain;
 import org.eclipse.graphiti.ui.editor.DiagramEditor;
-import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
@@ -38,7 +39,6 @@ import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.core.runtime.Assert;
 
 public class TableColumn extends ColumnTableProvider.Column implements ILabelProvider, ICellModifier {
 
@@ -83,6 +83,10 @@ public class TableColumn extends ColumnTableProvider.Column implements ILabelPro
 		headerText = text;
 	}
 	
+	public Resource getResource() {
+		return (Resource) listComposite.getDiagramEditor().getAdapter(Resource.class);
+	}
+	
 	@Override
 	public String getHeaderText() {
 		if (headerText!=null)
@@ -92,7 +96,7 @@ public class TableColumn extends ColumnTableProvider.Column implements ILabelPro
 		if (feature!=null) {
 			if (feature.eContainer() instanceof EClass) {
 				EClass eclass = this.listComposite.getListItemClass();
-				text = ExtendedPropertiesProvider.getLabel(eclass, feature);
+				text = ExtendedPropertiesProvider.getLabel(getResource(), eclass, feature);
 			}
 			else
 				text = ModelUtil.toCanonicalString(feature.getName());
@@ -163,7 +167,7 @@ public class TableColumn extends ColumnTableProvider.Column implements ILabelPro
 			else if (ec instanceof EEnum) {
 				ce = new CustomComboBoxCellEditor(parent, feature);
 			}
-			else if (ExtendedPropertiesProvider.isMultiChoice(feature.eContainer(), feature)) {
+			else if (ExtendedPropertiesProvider.isMultiChoice(getResource(), (EClass)feature.eContainer(), feature)) {
 				ce = new CustomComboBoxCellEditor(parent, feature);
 			}
 			else if (ec instanceof EDataType) {

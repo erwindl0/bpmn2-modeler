@@ -15,16 +15,12 @@ package org.eclipse.bpmn2.modeler.core.features;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.graphiti.features.IFeatureProvider;
 import org.eclipse.graphiti.features.IReason;
 import org.eclipse.graphiti.features.IUpdateFeature;
 import org.eclipse.graphiti.features.context.IUpdateContext;
 import org.eclipse.graphiti.features.impl.AbstractUpdateFeature;
 import org.eclipse.graphiti.features.impl.Reason;
-import org.eclipse.graphiti.mm.pictograms.PictogramElement;
-import org.eclipse.graphiti.ui.editor.DiagramBehavior;
-import org.eclipse.ui.views.properties.IPropertySheetPage;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -127,7 +123,7 @@ public class MultiUpdateFeature extends AbstractUpdateFeature {
 		
 		int i = 0;
 		for (IUpdateFeature f : features) {
-			if ((updateNeeded[i] || forceUpdate) && f.update(context)) {
+			if ((updateNeeded[i] || forceUpdate) && canUpdate[i] && f.update(context)) {
 				updated = true;
 			}
 			++i;

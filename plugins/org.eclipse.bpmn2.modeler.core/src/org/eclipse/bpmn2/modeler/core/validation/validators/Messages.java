@@ -67,6 +67,7 @@ public class Messages extends NLS {
 	public static String ProcessValidator_No_EndEvent;
 	public static String ProcessValidator_No_Name;
 	public static String ProcessValidator_No_StartEvent;
+	public static String ProcessValidator_Multiple_UntriggeredStartEvents;
 	public static String SequenceFlowValidator_SequenceFlow_No_Source;
 	public static String SequenceFlowValidator_SequenceFlow_No_Target;
 	public static String StandardLoopCharacteristicsValidator_No_Loop_Condition;

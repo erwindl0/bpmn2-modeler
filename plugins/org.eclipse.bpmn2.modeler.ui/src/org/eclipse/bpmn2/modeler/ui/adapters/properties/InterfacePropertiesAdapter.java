@@ -22,7 +22,6 @@ import org.eclipse.bpmn2.Operation;
 import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesAdapter;
 import org.eclipse.bpmn2.modeler.core.adapters.FeatureDescriptor;
-import org.eclipse.bpmn2.modeler.core.adapters.ObjectPropertyProvider;
 import org.eclipse.bpmn2.modeler.core.merrimac.dialogs.QNameObjectEditor;
 import org.eclipse.bpmn2.modeler.core.model.Bpmn2ModelerFactory;
 import org.eclipse.bpmn2.modeler.core.utils.ModelUtil;
@@ -56,7 +55,7 @@ public class InterfacePropertiesAdapter extends ExtendedPropertiesAdapter<Interf
 
 			@Override
 			public EObject createFeature(Resource resource, EClass eclass) {
-				Operation operation = Bpmn2ModelerFactory.create(resource, Operation.class);
+				Operation operation = Bpmn2ModelerFactory.createObject(resource, Operation.class);
 				ModelUtil.setID(operation, resource);
 				operation.setName( ModelUtil.toCanonicalString(operation.getId()) );
 //				InsertionAdapter.add(intf, Bpmn2Package.eINSTANCE.getInterface_Operations(), operation);
@@ -100,7 +99,7 @@ public class InterfacePropertiesAdapter extends ExtendedPropertiesAdapter<Interf
 
 		@Override
 		public String getTextValue() {
-			Resource resource = ObjectPropertyProvider.getResource(object);
+			Resource resource = ExtendedPropertiesAdapter.getResource(object);
 			String text = null;
 			EObject value = (EObject)object.eGet(feature);
 			if (value!=null) {
@@ -155,7 +154,7 @@ public class InterfacePropertiesAdapter extends ExtendedPropertiesAdapter<Interf
 
 		@Override
 		protected void internalSet(T object, EStructuralFeature feature, Object value, int index) {
-			Resource resource = ObjectPropertyProvider.getResource(object);
+			Resource resource = ExtendedPropertiesAdapter.getResource(object);
 			
 			if (value==null)
 				value = ""; //$NON-NLS-1$

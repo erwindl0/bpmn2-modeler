@@ -51,15 +51,15 @@ import org.eclipse.bpmn2.di.BPMNShape;
 import org.eclipse.bpmn2.di.BpmnDiFactory;
 import org.eclipse.bpmn2.di.ParticipantBandKind;
 import org.eclipse.bpmn2.modeler.core.Messages;
+import org.eclipse.bpmn2.modeler.core.di.DIUtils;
 import org.eclipse.bpmn2.modeler.core.di.ImportDiagnostics;
-import org.eclipse.bpmn2.modeler.core.features.containers.participant.AddParticipantFeature;
 import org.eclipse.bpmn2.modeler.core.preferences.Bpmn2Preferences;
 import org.eclipse.bpmn2.modeler.core.preferences.ShapeStyle;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
 import org.eclipse.bpmn2.modeler.core.utils.FixDuplicateIdsDialog;
-import org.eclipse.bpmn2.modeler.core.utils.ShapeDecoratorUtil;
 import org.eclipse.bpmn2.modeler.core.utils.ModelUtil;
 import org.eclipse.bpmn2.modeler.core.utils.ModelUtil.Bpmn2DiagramType;
+import org.eclipse.bpmn2.modeler.core.utils.ShapeDecoratorUtil;
 import org.eclipse.bpmn2.modeler.core.utils.Tuple;
 import org.eclipse.bpmn2.util.Bpmn2ResourceImpl;
 import org.eclipse.core.runtime.IStatus;
@@ -95,8 +95,8 @@ public class ModelHandler {
 			TransactionalEditingDomain domain = TransactionUtil.getEditingDomain(resource);
 
 			if (domain != null) {
-				final DocumentRoot docRoot = create(DocumentRoot.class);
-				final Definitions definitions = create(Definitions.class);
+				final DocumentRoot docRoot = createObject(DocumentRoot.class);
+				final Definitions definitions = createObject(Definitions.class);
 
 				domain.getCommandStack().execute(new RecordingCommand(domain) {
 					@Override
@@ -149,7 +149,7 @@ public class ModelHandler {
 					BPMNPlane plane = BpmnDiFactory.eINSTANCE.createBPMNPlane();
 					ModelUtil.setID(plane,resource);
 
-					Process process = createProcess();
+					Process process = createProcess(null);
 					process.setName(name+Messages.ModelHandler_Process);
 					// the Process ID should be the same as the resource name
 					String filename = resource.getURI().lastSegment();
@@ -158,16 +158,16 @@ public class ModelHandler {
 					process.setId( ModelUtil.generateID(process,resource,filename) );
 
 					// create StartEvent
-					StartEvent startEvent = create(StartEvent.class);
+					StartEvent startEvent = createObject(StartEvent.class);
 //					startEvent.setName("Start Event");
 					process.getFlowElements().add(startEvent);
 					
 					// create SequenceFlow
-					SequenceFlow flow = create(SequenceFlow.class);
+					SequenceFlow flow = createObject(SequenceFlow.class);
 					process.getFlowElements().add(flow);
 					
 					// create EndEvent
-					EndEvent endEvent = create(EndEvent.class);
+					EndEvent endEvent = createObject(EndEvent.class);
 //					endEvent.setName("End Event");
 					process.getFlowElements().add(endEvent);
 					
@@ -255,19 +255,19 @@ public class ModelHandler {
 					Collaboration collaboration = createCollaboration();
 					collaboration.setName(name+Messages.ModelHandler_Collaboration);
 
-					Process initiatingProcess = createProcess();
+					Process initiatingProcess = createProcess(null);
 					initiatingProcess.setName(Messages.ModelHandler_Initiating_Process);
 					initiatingProcess.setDefinitionalCollaborationRef(collaboration);
 					
-					Participant initiatingParticipant = create(Participant.class);
+					Participant initiatingParticipant = Bpmn2ModelerFactory.create(getResource(), Participant.class);
 					initiatingParticipant.setName(Messages.ModelHandler_Initiating_Pool);
 					initiatingParticipant.setProcessRef(initiatingProcess);
 					
-					Process nonInitiatingProcess = createProcess();
+					Process nonInitiatingProcess = createProcess(null);
 					nonInitiatingProcess.setName(Messages.ModelHandler_Non_Initiating_Process);
 					nonInitiatingProcess.setDefinitionalCollaborationRef(collaboration);
 					
-					Participant nonInitiatingParticipant = create(Participant.class);
+					Participant nonInitiatingParticipant = Bpmn2ModelerFactory.create(getResource(), Participant.class);
 					nonInitiatingParticipant.setName(Messages.ModelHandler_Non_Initiating_Pool);
 					nonInitiatingParticipant.setProcessRef(nonInitiatingProcess);
 					
@@ -355,14 +355,14 @@ public class ModelHandler {
 					Choreography choreography = createChoreography();
 					choreography.setName(name+Messages.ModelHandler_Choreography);
 					
-					Participant initiatingParticipant = create(Participant.class);
+					Participant initiatingParticipant = Bpmn2ModelerFactory.create(getResource(), Participant.class);
 					initiatingParticipant.setName(Messages.ModelHandler_Initiating_Participant);
 
 //					Process initiatingProcess = createProcess();
 //					initiatingProcess.setName(name+" Initiating Process");
 //					initiatingParticipant.setProcessRef(initiatingProcess);
 					
-					Participant nonInitiatingParticipant = create(Participant.class);
+					Participant nonInitiatingParticipant = Bpmn2ModelerFactory.create(getResource(), Participant.class);
 					nonInitiatingParticipant.setName(Messages.ModelHandler_Non_Initiating_Participant);
 
 //					Process nonInitiatingProcess = createProcess();
@@ -372,7 +372,7 @@ public class ModelHandler {
 					choreography.getParticipants().add(initiatingParticipant);
 					choreography.getParticipants().add(nonInitiatingParticipant);
 					
-					ChoreographyTask task = create(ChoreographyTask.class);
+					ChoreographyTask task = createObject(ChoreographyTask.class);
 					task.setName(Messages.ModelHandler_Choreography_Task);
 					task.getParticipantRefs().add(initiatingParticipant);
 					task.getParticipantRefs().add(nonInitiatingParticipant);
@@ -466,7 +466,8 @@ public class ModelHandler {
 	}
 
 	public <T extends RootElement> T addRootElement(T element) {
-		getDefinitions().getRootElements().add(element);
+		if (!getDefinitions().getRootElements().contains(element))
+			getDefinitions().getRootElements().add(element);
 		return element;
 	}
 
@@ -510,7 +511,7 @@ public class ModelHandler {
 	private InputOutputSpecification getOrCreateIOSpecification(Object target) {
 		Process process = getOrCreateProcess(getParticipant(target));
 		if (process.getIoSpecification() == null) {
-			InputOutputSpecification ioSpec = create(InputOutputSpecification.class);
+			InputOutputSpecification ioSpec = createObject(InputOutputSpecification.class);
 			process.setIoSpecification(ioSpec);
 		}
 		return process.getIoSpecification();
@@ -533,15 +534,17 @@ public class ModelHandler {
 		Participant participant = null;
 		Collaboration collaboration = getParticipantContainer(bpmnDiagram);
 		if (collaboration!=null) {
-			participant = create(Participant.class);
+			participant = createObject(Participant.class);
 			collaboration.getParticipants().add(participant);
 		}
 		return participant;
 	}
 
-	public Process createProcess() {
-		Process process = create(Process.class);
-		getDefinitions().getRootElements().add(process);
+	public Process createProcess(Participant participant) {
+		Process process = Bpmn2ModelerFactory.create(getResource(),Process.class);
+		if (participant!=null)
+			participant.setProcessRef(process);
+		addRootElement(process);
 		return process;
 	}
 	
@@ -562,14 +565,12 @@ public class ModelHandler {
 		}
 		
 		if (process == null) {
-			process = create(Process.class);
-			getDefinitions().getRootElements().add(process);
+			process = createProcess(participant);
 			if (participant!=null) {
 				process.setName(participant.getName() + Messages.ModelHandler_Process_Label);
 				if (participant.eContainer() instanceof Collaboration) {
 					process.setDefinitionalCollaborationRef((Collaboration)participant.eContainer());
 				}
-				participant.setProcessRef(process);
 			}
 		}
 
@@ -578,10 +579,10 @@ public class ModelHandler {
 
 	public static Lane createLane(Lane targetLane) {
 		Resource resource = targetLane.eResource();
-		Lane lane = create(resource, Lane.class);
+		Lane lane = createObject(resource, Lane.class);
 
 		if (targetLane.getChildLaneSet() == null) {
-			targetLane.setChildLaneSet(create(resource, LaneSet.class));
+			targetLane.setChildLaneSet(createObject(resource, LaneSet.class));
 		}
 
 		LaneSet targetLaneSet = targetLane.getChildLaneSet();
@@ -594,10 +595,10 @@ public class ModelHandler {
 	}
 
 	public Lane createLane(Object target) {
-		Lane lane = create(Lane.class);
+		Lane lane = createObject(Lane.class);
 		FlowElementsContainer container = getFlowElementContainer(target);
 		if (container.getLaneSets().isEmpty()) {
-			LaneSet laneSet = create(LaneSet.class);
+			LaneSet laneSet = createObject(LaneSet.class);
 			laneSet.setName(Messages.ModelHandler_Lane_Set+ModelUtil.getIDNumber( laneSet.getId() ));
 			container.getLaneSets().add(laneSet);
 		}
@@ -606,7 +607,7 @@ public class ModelHandler {
 	}
 
 	public SequenceFlow createSequenceFlow(FlowNode source, FlowNode target) {
-		SequenceFlow sequenceFlow = create(SequenceFlow.class);
+		SequenceFlow sequenceFlow = createObject(SequenceFlow.class);
 
 		addFlowElement(source.eContainer(), sequenceFlow);
 		sequenceFlow.setSourceRef(source);
@@ -618,7 +619,7 @@ public class ModelHandler {
 		MessageFlow messageFlow = null;
 		Participant participant = getParticipant(source);
 		if (participant!=null) {
-			messageFlow = create(MessageFlow.class);
+			messageFlow = createObject(MessageFlow.class);
 			messageFlow.setSourceRef(source);
 			messageFlow.setTargetRef(target);
 			if (participant.eContainer() instanceof Collaboration)
@@ -631,7 +632,7 @@ public class ModelHandler {
 		ConversationLink link = null;
 		Participant participant = getParticipant(source);
 		if (participant!=null) {
-			link = create(ConversationLink.class);
+			link = createObject(ConversationLink.class);
 			link.setSourceRef(source);
 			link.setTargetRef(target);
 			if (participant.eContainer() instanceof Collaboration)
@@ -649,7 +650,7 @@ public class ModelHandler {
 		} else {
 			e = getInternalParticipant();
 		}
-		Association association = create(Association.class);
+		Association association = createObject(Association.class);
 		addArtifact(e, association);
 		association.setSourceRef(source);
 		association.setTargetRef(target);
@@ -668,8 +669,8 @@ public class ModelHandler {
 	}
 	
 	public Collaboration createCollaboration() {
-		Collaboration collaboration = create(Collaboration.class);
-		getDefinitions().getRootElements().add(collaboration);
+		Collaboration collaboration = createObject(Collaboration.class);
+		addRootElement(collaboration);
 		return collaboration;
 	}
 	
@@ -702,8 +703,8 @@ public class ModelHandler {
 	}
 	
 	public Choreography createChoreography() {
-		Choreography choreography = create(Choreography.class);
-		getDefinitions().getRootElements().add(choreography);
+		Choreography choreography = createObject(Choreography.class);
+		addRootElement(choreography);
 		return choreography;
 	}
 
@@ -780,34 +781,22 @@ public class ModelHandler {
 			if (be != null && be instanceof FlowElementsContainer) {
 				return (FlowElementsContainer)be;
 			}
-			else {
-				// find an elligible Process for this FlowElement,
+			else if (be instanceof Collaboration) {
+				// find an eligible Process for this FlowElement,
 				// one that is not referenced by a Pool
-				List<Participant> pools = getAll(Participant.class);
-				for (Process process : getAll(Process.class)) {
-					boolean isProcessForPool = false;
-					for (Participant pool : pools) {
-						if (pool.getProcessRef() == process) {
-							isProcessForPool = true;
-							break;
-						}
+				Collaboration collaboration = (Collaboration) be;
+				for (Participant participant : collaboration.getParticipants()) {
+					if (DIUtils.findBPMNShape(participant)==null) {
+						return getOrCreateProcess(participant);
 					}
-					if (!isProcessForPool)
-						return process;
 				}
-				// create a default Process.
-				// The BPMNDiagram now becomes a Process Diagram
-				try {
-					Process process = create(Process.class);
-					bpmnDiagram.getPlane().setBpmnElement(process);
-					Definitions definitions = ModelUtil.getDefinitions(bpmnDiagram);
-					if (!definitions.getRootElements().contains(process))
-						definitions.getRootElements().add(process);
-					return process;
-				}
-				catch (IllegalStateException e) {
-				}
-				return null;
+				// create a default Participant.
+				Participant defaultParticipant = createObject(Participant.class);
+				defaultParticipant.setName(Messages.ModelHandler_Default_Pool);
+				return getOrCreateProcess(defaultParticipant);
+			}
+			else if (be instanceof FlowElementsContainer) {
+				return (FlowElementsContainer) be;
 			}
 		}
 		if (o instanceof Participant) {
@@ -911,22 +900,22 @@ public class ModelHandler {
 	/**
 	 * General-purpose factory method that sets appropriate default values for new objects.
 	 */
-	public EObject create(EClass eClass) {
-		return create(this.resource, eClass);
+	public EObject createObject(EClass eClass) {
+		return createObject(this.resource, eClass);
 	}
 
-	public <T extends EObject> T create(Class<T> clazz) {
-		return (T) create(this.resource, clazz);
+	public <T extends EObject> T createObject(Class<T> clazz) {
+		return (T) createObject(this.resource, clazz);
 	}
 	
 	////////////////////////////////////////////////////////////////////////////
 	// static versions of the above, for convenience
 	
-	public static EObject create(Resource resource, EClass eClass) {
-		return Bpmn2ModelerFactory.create(resource, eClass);
+	public static EObject createObject(Resource resource, EClass eClass) {
+		return Bpmn2ModelerFactory.createObject(resource, eClass);
 	}
 
-	public static <T extends EObject> T create(Resource resource, Class<T> clazz) {
-		return (T) Bpmn2ModelerFactory.create(resource, clazz);
+	public static <T extends EObject> T createObject(Resource resource, Class<T> clazz) {
+		return (T) Bpmn2ModelerFactory.createObject(resource, clazz);
 	}
 }

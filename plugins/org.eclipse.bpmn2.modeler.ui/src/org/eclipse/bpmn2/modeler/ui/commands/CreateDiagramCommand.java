@@ -12,13 +12,11 @@ package org.eclipse.bpmn2.modeler.ui.commands;
 
 import java.util.List;
 
-import org.eclipse.bpmn2.BaseElement;
-import org.eclipse.bpmn2.Bpmn2Package;
-import org.eclipse.bpmn2.Definitions;
-import org.eclipse.bpmn2.RootElement;
-import org.eclipse.bpmn2.Process;
-import org.eclipse.bpmn2.Collaboration;
 import org.eclipse.bpmn2.Choreography;
+import org.eclipse.bpmn2.Collaboration;
+import org.eclipse.bpmn2.Definitions;
+import org.eclipse.bpmn2.Process;
+import org.eclipse.bpmn2.RootElement;
 import org.eclipse.bpmn2.di.BPMNDiagram;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.eclipse.bpmn2.di.BpmnDiFactory;
@@ -38,7 +36,6 @@ import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.widgets.Shell;
 
 public class CreateDiagramCommand extends AbstractHandler {
 

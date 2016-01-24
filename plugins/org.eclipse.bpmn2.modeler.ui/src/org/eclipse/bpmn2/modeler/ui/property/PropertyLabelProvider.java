@@ -13,6 +13,8 @@
 
 package org.eclipse.bpmn2.modeler.ui.property;
 
+import org.eclipse.bpmn2.di.BPMNEdge;
+import org.eclipse.bpmn2.di.BPMNShape;
 import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesProvider;
 import org.eclipse.bpmn2.modeler.core.runtime.CustomTaskDescriptor;
 import org.eclipse.bpmn2.modeler.core.runtime.TargetRuntime;
@@ -48,6 +50,14 @@ public class PropertyLabelProvider extends LabelProvider {
 	public String getText(Object element) {
 		EObject object = getBusinessObject(element);
 		if (object!=null) {
+			if (object instanceof BPMNShape) {
+				BPMNShape s = (BPMNShape) object;
+				object = s.getBpmnElement();
+			}
+			else if (object instanceof BPMNEdge) {
+				BPMNEdge e = (BPMNEdge) object;
+				object = e.getBpmnElement();
+			}
 			String text = ExtendedPropertiesProvider.getTextValue(object);
 			// check if this is a CustomTask
 			CustomTaskDescriptor ctd = getCustomTaskDescriptor(object); 

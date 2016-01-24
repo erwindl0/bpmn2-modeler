@@ -485,7 +485,7 @@ public abstract class AbstractAppendNodeFeature<T extends FlowNode> extends Abst
 		FlowNode newObject = BusinessObjectUtil.getFirstElementOfType(newShape, FlowNode.class);
 
 		// create a new SequenceFlow to connect the old and new FlowNodes
-		SequenceFlow sequenceFlow = Bpmn2ModelerFactory.create(oldObject.eResource(), SequenceFlow.class);
+		SequenceFlow sequenceFlow = Bpmn2ModelerFactory.createObject(oldObject.eResource(), SequenceFlow.class);
 		FlowElementsContainer container = (FlowElementsContainer) oldObject.eContainer();
 		container.getFlowElements().add(sequenceFlow);
 		sequenceFlow.setSourceRef(oldObject);

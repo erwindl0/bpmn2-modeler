@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.bpmn2.modeler.ui.property.tasks;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 

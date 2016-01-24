@@ -13,56 +13,40 @@
 
 package org.eclipse.bpmn2.modeler.ui.features.activity.subprocess;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.bpmn2.BaseElement;
-import org.eclipse.bpmn2.Definitions;
 import org.eclipse.bpmn2.FlowElement;
 import org.eclipse.bpmn2.FlowElementsContainer;
+import org.eclipse.bpmn2.Lane;
+import org.eclipse.bpmn2.LaneSet;
 import org.eclipse.bpmn2.Participant;
 import org.eclipse.bpmn2.di.BPMNDiagram;
-import org.eclipse.bpmn2.di.BPMNEdge;
-import org.eclipse.bpmn2.di.BPMNPlane;
-import org.eclipse.bpmn2.di.BPMNShape;
 import org.eclipse.bpmn2.modeler.core.di.DIUtils;
-import org.eclipse.bpmn2.modeler.core.features.GraphitiConstants;
 import org.eclipse.bpmn2.modeler.core.features.choreography.ChoreographyUtil;
-import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
 import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
+import org.eclipse.bpmn2.modeler.core.utils.GraphicsUtil;
 import org.eclipse.bpmn2.modeler.core.utils.ModelUtil;
-import org.eclipse.bpmn2.modeler.core.utils.StyleUtil;
 import org.eclipse.bpmn2.modeler.ui.ImageProvider;
 import org.eclipse.dd.di.DiagramElement;
-import org.eclipse.emf.common.util.TreeIterator;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.graphiti.datatypes.ILocation;
+import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.graphiti.features.IFeatureProvider;
 import org.eclipse.graphiti.features.context.IContext;
 import org.eclipse.graphiti.features.context.ICustomContext;
-import org.eclipse.graphiti.features.custom.AbstractCustomFeature;
-import org.eclipse.graphiti.mm.algorithms.styles.Color;
-import org.eclipse.graphiti.mm.algorithms.styles.Font;
 import org.eclipse.graphiti.mm.algorithms.styles.Point;
-import org.eclipse.graphiti.mm.algorithms.styles.Style;
 import org.eclipse.graphiti.mm.pictograms.Connection;
-import org.eclipse.graphiti.mm.pictograms.ConnectionDecorator;
 import org.eclipse.graphiti.mm.pictograms.ContainerShape;
 import org.eclipse.graphiti.mm.pictograms.Diagram;
-import org.eclipse.graphiti.mm.pictograms.FreeFormConnection;
 import org.eclipse.graphiti.mm.pictograms.PictogramElement;
-import org.eclipse.graphiti.mm.pictograms.PictogramLink;
 import org.eclipse.graphiti.mm.pictograms.Shape;
-import org.eclipse.graphiti.services.Graphiti;
 import org.eclipse.osgi.util.NLS;
 
 /**
  * @author Bob Brodt
  *
  */
-public class PushdownFeature extends AbstractCustomFeature {
+public class PushdownFeature extends AbstractPushPullFeature {
 
-	protected String description;
 	
 	/**
 	 * @param fp
@@ -113,6 +97,8 @@ public class PushdownFeature extends AbstractCustomFeature {
 			description = NLS.bind(Messages.PushdownFeature_Description_1,ModelUtil.getLabel(bo));
 			
 			if (bo instanceof Participant) {
+				if (FeatureSupport.isParticipantReference(getDiagram(), (Participant)bo))
+					return false;
 				bo = ((Participant)bo).getProcessRef();
 			}
 			if (bo instanceof FlowElementsContainer) {
@@ -128,104 +114,131 @@ public class PushdownFeature extends AbstractCustomFeature {
 	@Override
 	public void execute(ICustomContext context) {
 		// we already know there's one and only one PE element in canExecute() and that it's
-		// a ContainerShape for an expandable activity
-		ContainerShape shape = (ContainerShape)context.getPictogramElements()[0];
-		Object bo = getBusinessObjectForPictogramElement(shape);
-		BPMNDiagram bpmnDiagram = DIUtils.findBPMNDiagram(shape);
-		BPMNShape bpmnShape = null;
+		// a ContainerShape for a Flow Elements Container object (e.g. a Pool or SubProcess)
+		containerShape = (ContainerShape)context.getPictogramElements()[0];
+		
+		// get the BPMN Diagram that this container lives in
+		oldBpmnDiagram = DIUtils.findBPMNDiagram(containerShape);
+
+		// get the BPMNShape for the container
+		bpmnShape = null;
+		Object bo = getBusinessObjectForPictogramElement(containerShape);
 		if (bo instanceof Participant) {
-			bpmnShape = DIUtils.findBPMNShape(bpmnDiagram, (Participant)bo);
-			bo = ((Participant)bo).getProcessRef();
+			bpmnShape = DIUtils.findBPMNShape(oldBpmnDiagram, (Participant)bo);
+			// the business object for a Pool is its referenced Process
+			businessObject = ((Participant)bo).getProcessRef();
 		}
 		else if (bo instanceof FlowElementsContainer) {
-			bpmnShape = DIUtils.findBPMNShape(bpmnDiagram, (FlowElementsContainer)bo);
+			businessObject = (FlowElementsContainer)bo;
+			bpmnShape = DIUtils.findBPMNShape(oldBpmnDiagram, businessObject);
 		}
-		FlowElementsContainer container = (FlowElementsContainer)bo;
-		Definitions definitions = ModelUtil.getDefinitions(container);
 		
-		BPMNDiagram oldBpmnDiagram = DIUtils.getBPMNDiagram(bpmnShape);
-		Diagram oldDiagram = DIUtils.findDiagram(getDiagramBehavior(), oldBpmnDiagram);
-		
-		// the contents of this expandable element is in the flowElements list 
-        BPMNDiagram newBpmnDiagram = DIUtils.createBPMNDiagram(definitions, container);
-		BPMNPlane newPlane = newBpmnDiagram.getPlane();
+		oldDiagram = DIUtils.findDiagram(getDiagramBehavior(), oldBpmnDiagram);
 
-		Diagram newDiagram = DIUtils.getOrCreateDiagram(getDiagramBehavior(), newBpmnDiagram);
-		ILocation loc = Graphiti.getLayoutService().getLocationRelativeToDiagram(shape);
-		List <EObject> moved = new ArrayList<EObject>();
+		// create the new BPMNDiagram and its Graphiti Diagram
+        newBpmnDiagram = DIUtils.createBPMNDiagram(businessObject);
+		newDiagram = DIUtils.getOrCreateDiagram(getDiagramBehavior(), newBpmnDiagram);
 		
-		for (FlowElement fe : container.getFlowElements()) {
-			DiagramElement de = DIUtils.findDiagramElement(bpmnDiagram, fe);
-			if (de==null)
-				continue; // Diagram Element does not exist
-			
-			newPlane.getPlaneElement().add(de);
-			
-			List <PictogramElement> pes = Graphiti.getLinkService().getPictogramElements(oldDiagram, fe);
-			for (PictogramElement pe : pes) {
-				PictogramElement pictogramElement = null;
-				if (pe instanceof ConnectionDecorator) {
-					// this will be moved as part of the connection
-					continue;
-				}
-				else if (pe instanceof Shape) {
-					if (BusinessObjectUtil.getFirstElementOfType(pe, BPMNShape.class)!=null) {
-						newDiagram.getChildren().add((Shape)pe);
-						pictogramElement = pe;
-					}
-					else if (FeatureSupport.isLabelShape(pe)) {
-						newDiagram.getChildren().add((Shape)pe);
-						pictogramElement = pe;
-					}
-				}
-				else if (pe instanceof Connection) {
-					if (BusinessObjectUtil.getFirstElementOfType(pe, BPMNEdge.class)!=null) {
-						newDiagram.getConnections().add((Connection)pe);
-						pictogramElement = pe;
-						if (pe instanceof FreeFormConnection) {
-							// adjust connection bendpoints
-							FreeFormConnection ffc = (FreeFormConnection)pe;
-							for (Point p : ffc.getBendpoints()) {
-								p.setX( p.getX() - loc.getX() );
-								p.setY( p.getY() - loc.getY() );
-							}
-						}
-					}
-				}
-				if (pictogramElement!=null) {
-					TreeIterator<EObject> iter = pictogramElement.eAllContents();
-					while (iter.hasNext()) {
-						EObject o = iter.next();
-						if (o instanceof PictogramLink) {
-							newDiagram.getPictogramLinks().add((PictogramLink)o);
-							moved.add(o);
-						}
-//						else if (o instanceof Color) {
-//							newDiagram.getColors().add((Color)o);
-//							moved.add(o);
-//						}
-//						else if (o instanceof Font) {
-//							newDiagram.getFonts().add((Font)o);
-//							moved.add(o);
-//						}
-//						else if (o instanceof Style) {
-//							newDiagram.getStyles().add((Style)o);
-//							moved.add(o);
-//						}
-					}
-				}
-			}
-		}
-		oldDiagram.getPictogramLinks().removeAll(moved);
-//		oldDiagram.getColors().removeAll(moved);
-//		oldDiagram.getFonts().removeAll(moved);
-//		oldDiagram.getStyles().removeAll(moved);
+		// copy the BPMN DI elements into the new BPMNDiagram
+		collectDiagramElements(businessObject, oldBpmnDiagram);
 
-		// collapse the sub process
-		if (FeatureSupport.isExpandableElement(container)) {
+		// collect all Shapes and Connections from old Diagram
+		collectShapes(containerShape);
+		collectConnections(containerShape);
+
+		// calculate a bounding rectangle which contains the source container's descendants...
+		boundingRectangle = calculateBoundingRectangle(containerShape, childShapes);
+		// ...and move shapes from container into new Diagram
+		moveShapes(oldDiagram, newDiagram, boundingRectangle.x, boundingRectangle.y);
+		// update bounding rectangle after the move
+		boundingRectangle = GraphicsUtil.getBoundingRectangle(childShapes);
+		
+		// move Connections from old Diagram to new Diagram
+		moveConnections(containerShape, newDiagram);
+		moveDiagramElements(oldBpmnDiagram, newBpmnDiagram);
+
+		// move associated Graphiti data structures
+		moveGraphitiData(oldDiagram, newDiagram);
+
+		// collapse the SubProcess if applicable
+		if (FeatureSupport.isExpandableElement(businessObject)) {
 			bpmnShape.setIsExpanded(true);
 			CollapseFlowNodeFeature collapseFeature = new CollapseFlowNodeFeature(getFeatureProvider());
 			collapseFeature.execute(context);
 		}
+
+		// let the feature provider know there's a new diagram now
+		getFeatureProvider().getDiagramTypeProvider().resourceReloaded(newDiagram);
+		
+//		GraphicsUtil.debug = true;
+		FeatureSupport.updateConnections(getFeatureProvider(), internalConnections, true);
+//		GraphicsUtil.debug = false;
+	}
+	
+	@Override
+	protected void collectDiagramElements(FlowElementsContainer businessObject, BPMNDiagram source) {
+		for (LaneSet ls : businessObject.getLaneSets()) {
+			for (Lane l : ls.getLanes()) {
+				DiagramElement de = DIUtils.findDiagramElement(source, l);
+				if (de!=null)
+					diagramElements.add(de);
+			}
+		}
+		// super
+		for (FlowElement fe : businessObject.getFlowElements()) {
+			DiagramElement de = DIUtils.findDiagramElement(source, fe);
+			if (de!=null)
+				diagramElements.add(de);
+			if (fe instanceof FlowElementsContainer) {
+				collectDiagramElements((FlowElementsContainer)fe, source);
+			}
+		}
+	}
+
+	@Override
+	protected void collectShapes(ContainerShape source) {
+		for (Shape s : source.getChildren()) {
+			if (s instanceof ContainerShape) {
+				childShapes.add(s);
+				Shape l = FeatureSupport.getLabelShape(s);
+				if (l!=null)
+					childShapes.add(l);
+			}
+		}
+	}
+	
+	@Override
+	protected void moveGraphitiData(Diagram source, Diagram target) {
+		for (Shape s : childShapes) {
+			// PictogramLinks is not a containment list, so each link needs to be
+			// explicitly removed from the old Diagram and added to the new one.
+			if (s.getLink()!=null) {
+				source.getPictogramLinks().remove(s.getLink());
+				target.getPictogramLinks().add(s.getLink());
+			}
+		}
+		for (Connection c : internalConnections) {
+			if (c.getLink()!=null) {
+				source.getPictogramLinks().remove(c.getLink());
+				target.getPictogramLinks().add(c.getLink());
+			}
+		}
+		// Colors, Fonts and Styles on the other hand, are containment lists so we
+		// need to make copies of these.
+	}
+
+	@Override
+	protected Point getChildOffset(ContainerShape targetContainerShape) {
+		return GraphicsUtil.createPoint(50, 50);
+	}
+	
+	@Override
+	protected Rectangle calculateBoundingRectangle(ContainerShape containerShape, List<Shape> childShapes) {
+		// calculate bounding rectangle for all children shapes
+		Point offset = getChildOffset(containerShape);
+		Rectangle rect = GraphicsUtil.getBoundingRectangle(childShapes);
+		rect.x -= offset.getX();
+		rect.y -= offset.getY();
+		return rect;
 	}
 }

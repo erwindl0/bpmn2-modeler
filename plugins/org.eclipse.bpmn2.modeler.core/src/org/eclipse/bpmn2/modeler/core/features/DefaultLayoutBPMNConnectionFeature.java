@@ -20,6 +20,7 @@ import org.eclipse.bpmn2.modeler.core.LifecycleEvent.EventType;
 import org.eclipse.bpmn2.modeler.core.preferences.Bpmn2Preferences;
 import org.eclipse.bpmn2.modeler.core.runtime.TargetRuntime;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.graphiti.features.IFeatureProvider;
 import org.eclipse.graphiti.features.context.IContext;
 import org.eclipse.graphiti.features.context.ILayoutContext;
@@ -93,9 +94,9 @@ public class DefaultLayoutBPMNConnectionFeature extends AbstractLayoutFeature {
 		if (canLayout(context)) {
 			Connection connection = (Connection) context.getPictogramElement();
 			if (context.getProperty(GraphitiConstants.INITIAL_UPDATE) == Boolean.TRUE)
-				Graphiti.getPeService().setPropertyValue(connection, GraphitiConstants.INITIAL_UPDATE, Boolean.TRUE.toString());
+				FeatureSupport.setPropertyValue(connection, GraphitiConstants.INITIAL_UPDATE, Boolean.TRUE.toString());
 
-			diagram = getFeatureProvider().getDiagramTypeProvider().getDiagram();
+			diagram = Graphiti.getPeService().getDiagramForPictogramElement(connection);
 			IConnectionRouter router = getRouter(connection);
 			if (router.canRoute(connection) && router.routingNeeded(connection)) {
 				hasDoneChanges |= router.route(connection);

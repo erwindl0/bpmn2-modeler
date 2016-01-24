@@ -17,8 +17,10 @@ import org.eclipse.graphiti.features.context.IContext;
 import org.eclipse.graphiti.mm.algorithms.GraphicsAlgorithm;
 import org.eclipse.graphiti.mm.algorithms.Image;
 import org.eclipse.graphiti.mm.algorithms.styles.Point;
+import org.eclipse.graphiti.mm.pictograms.FixPointAnchor;
 import org.eclipse.graphiti.mm.pictograms.PictogramElement;
 import org.eclipse.graphiti.mm.pictograms.Shape;
+import org.eclipse.graphiti.tb.IContextMenuEntry;
 
 /**
  * Keys used to store Graphiti Shape and Context properties.
@@ -239,7 +241,7 @@ public interface GraphitiConstants {
 	 * copied to the AddContext and picked up by the AddFeature which duplicates
 	 * the copied shape's size and other attributes.
 	 */
-	public static final String COPIED_BPMN_SHAPE = "copied.bpmn.shape"; //$NON-NLS-1$
+	public static final String COPIED_BPMN_DI_ELEMENT = "copied.bpmn.shape"; //$NON-NLS-1$
 
 	/** The key used to store the copied business object in the Paste Context. */
 	public static final String COPIED_BPMN_OBJECT = "copied.bpmn.object"; //$NON-NLS-1$
@@ -285,6 +287,14 @@ public interface GraphitiConstants {
 
 	public static final String EVENT_SUBPROCESS_DECORATOR = "event.subprocess.decorator"; //$NON-NLS-1$
 
+	/*
+	 * The {@link PictogramElement} property key that indicates the old state of
+	 * a collapsible shape's "isExpanded" state. This is used to indicate whether
+	 * the visual presentation of a SubProcess (for example) needs to be updated 
+	 * after it is expanded or collapsed. The BPMNShape.isExpanded attribute for
+	 * the SubProcess will be changed before the property's value is changed.
+	 * After the update occurs, this property will again be in sync with "isExpanded"
+	 */
 	public static final String IS_EXPANDED = "is.expanded"; //$NON-NLS-1$
 	public static final String EXPANDED_SIZE = "expanded.size"; //$NON-NLS-1$
 	public static final String COLLAPSED_SIZE = "collapsed.size"; //$NON-NLS-1$

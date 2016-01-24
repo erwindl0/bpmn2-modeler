@@ -16,7 +16,6 @@ package org.eclipse.bpmn2.modeler.ui.property.providers;
 import java.util.List;
 
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeParameter;
 
 /**
  * @author Bob Brodt

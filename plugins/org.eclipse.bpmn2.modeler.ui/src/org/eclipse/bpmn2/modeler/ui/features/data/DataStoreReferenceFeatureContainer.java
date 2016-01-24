@@ -28,7 +28,6 @@ import org.eclipse.bpmn2.modeler.core.features.label.AddShapeLabelFeature;
 import org.eclipse.bpmn2.modeler.core.features.label.UpdateLabelFeature;
 import org.eclipse.bpmn2.modeler.core.model.Bpmn2ModelerFactory;
 import org.eclipse.bpmn2.modeler.core.model.ModelHandler;
-import org.eclipse.bpmn2.modeler.core.utils.AnchorUtil;
 import org.eclipse.bpmn2.modeler.core.utils.ModelUtil;
 import org.eclipse.bpmn2.modeler.core.utils.StyleUtil;
 import org.eclipse.bpmn2.modeler.ui.ImageProvider;
@@ -55,9 +54,6 @@ import org.eclipse.graphiti.mm.algorithms.Polyline;
 import org.eclipse.graphiti.mm.algorithms.Rectangle;
 import org.eclipse.graphiti.mm.pictograms.ContainerShape;
 import org.eclipse.graphiti.mm.pictograms.PictogramElement;
-import org.eclipse.graphiti.services.Graphiti;
-import org.eclipse.graphiti.services.IGaService;
-import org.eclipse.graphiti.services.IPeService;
 import org.eclipse.graphiti.ui.internal.util.ui.PopupMenu;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -237,66 +233,66 @@ public class DataStoreReferenceFeatureContainer extends BaseElementFeatureContai
 
 		@Override
 		public DataStoreReference createBusinessObject(ICreateContext context) {
-			// NOTE: this is slightly different from DataObject/DataObjectReference:
-			// Both DataObject and DataObjectReference instances are contained in some FlowElementContainer
-			// (e.g. a Process) whereas DataStore instances are contained in the root element "Definitions".
-			// This means that whenever the user creates a "Data Store" (using DND from the tool palette),
-			// it necessarily means that a DataStoreReference is created and added to the FlowElementContainer
-			// which is the target of the ICreateContext. In addition, if the new DataStoreReference refers
+			// NOTE: this is slightly different from
+			// DataObject/DataObjectReference:
+			// Both DataObject and DataObjectReference instances are contained
+			// in some FlowElementContainer
+			// (e.g. a Process) whereas DataStore instances are contained in the
+			// root element "Definitions".
+			// This means that whenever the user creates a "Data Store" (using
+			// DND from the tool palette),
+			// it necessarily means that a DataStoreReference is created and
+			// added to the FlowElementContainer
+			// which is the target of the ICreateContext. In addition, if the
+			// new DataStoreReference refers
 			// to a new DataStore, one is created and added to Definitions.
 			changesDone = true;
-				ModelHandler mh = ModelHandler.getInstance(getDiagram());
+			ModelHandler mh = ModelHandler.getInstance(getDiagram());
 
-			DataStoreReference dataStoreRef = Bpmn2ModelerFactory.create(mh.getResource(), DataStoreReference.class);
-				DataStore dataStore = Bpmn2ModelerFactory.create(mh.getResource(), DataStore.class);
-				String oldName = dataStore.getName();
-				dataStore.setName(Messages.DataStoreReferenceFeatureContainer_New);
-				dataStore.setId(null);
+			DataStoreReference dataStoreRef = Bpmn2ModelerFactory.createObject(mh.getResource(),
+					DataStoreReference.class);
+			DataStore dataStore = Bpmn2ModelerFactory.createObject(mh.getResource(), DataStore.class);
+			String oldName = dataStore.getName();
+			dataStore.setName(Messages.DataStoreReferenceFeatureContainer_New);
+			dataStore.setId(null);
 
-				List<DataStore> dataStoreList = new ArrayList<DataStore>();
-				dataStoreList.add(dataStore);
-				TreeIterator<EObject> iter = mh.getDefinitions().eAllContents();
-				while (iter.hasNext()) {
-					EObject obj = iter.next();
-					if (obj instanceof DataStore)
-						dataStoreList.add((DataStore) obj);
-				}
+			List<DataStore> dataStoreList = new ArrayList<DataStore>();
+			dataStoreList.add(dataStore);
+			TreeIterator<EObject> iter = mh.getDefinitions().eAllContents();
+			while (iter.hasNext()) {
+				EObject obj = iter.next();
+				if (obj instanceof DataStore)
+					dataStoreList.add((DataStore) obj);
+			}
 
-				DataStore result = dataStore;
-				if (dataStoreList.size() > 1) {
-					PopupMenu popupMenu = new PopupMenu(dataStoreList, labelProvider);
-					changesDone = popupMenu.show(Display.getCurrent().getActiveShell());
-					if (changesDone) {
-						result = (DataStore) popupMenu.getResult();
-					}
-					else {
-						EcoreUtil.delete(dataStore);
+			DataStore result = dataStore;
+			if (dataStoreList.size() > 1) {
+				PopupMenu popupMenu = new PopupMenu(dataStoreList, labelProvider);
+				changesDone = popupMenu.show(Display.getCurrent().getActiveShell());
+				if (changesDone) {
+					result = (DataStore) popupMenu.getResult();
+				} else {
+					EcoreUtil.delete(dataStore);
 					EcoreUtil.delete(dataStoreRef);
 					dataStoreRef = null;
-					}
 				}
-			else
+			} else
 				changesDone = true;
 
-				if (changesDone) {
-					if (result == dataStore) { // the new one
-						mh.addRootElement(dataStore);
-						ModelUtil.setID(dataStore);
-						dataStore.setName(oldName);
+			if (changesDone) {
+				if (result == dataStore) { // the new one
+					mh.addRootElement(dataStore);
+					ModelUtil.setID(dataStore);
+					dataStore.setName(oldName);
 					dataStoreRef.setName(dataStore.getName());
-					} else
+				} else
 					dataStoreRef.setName(
-							NLS.bind(
-								Messages.DataStoreReferenceFeatureContainer_Default_Name,
-								result.getName()
-							)
-						);
-	
+							NLS.bind(Messages.DataStoreReferenceFeatureContainer_Default_Name, result.getName()));
+
 				dataStoreRef.setDataStoreRef(result);
-				ModelUtil.setID(dataStoreRef, mh.getResource());
 				putBusinessObject(context, dataStoreRef);
-				}
-				
+			}
+
 			return dataStoreRef;
 		}
 	}

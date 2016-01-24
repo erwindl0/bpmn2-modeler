@@ -114,7 +114,7 @@ public class ItemDefinitionRefFeatureDescriptor<T extends BaseElement> extends F
 		}
 	}
 	
-	private void changeReferences(RootElement object, ItemDefinition itemDefinition) {
+	protected void changeReferences(RootElement object, ItemDefinition itemDefinition) {
 		for (EObject ed : ModelUtil.getAllReachableObjects(object, Bpmn2Package.eINSTANCE.getEventDefinition())) {
 			if (EventDefinitionsUtil.getEventDefinitionTarget((EventDefinition)ed) == object) {
 				Tuple<ItemAwareElement, DataAssociation> param =
@@ -124,7 +124,7 @@ public class ItemDefinitionRefFeatureDescriptor<T extends BaseElement> extends F
 		}
 	}
 	
-	private void changeReferences(ItemAwareElement object, ItemDefinition itemDefinition) {
+	protected void changeReferences(ItemAwareElement object, ItemDefinition itemDefinition) {
 		Definitions definitions = ModelUtil.getDefinitions(object);
 		Stack<ItemAwareElement> changedObjects = new Stack<ItemAwareElement>();
 		changedObjects.push((ItemAwareElement)object);

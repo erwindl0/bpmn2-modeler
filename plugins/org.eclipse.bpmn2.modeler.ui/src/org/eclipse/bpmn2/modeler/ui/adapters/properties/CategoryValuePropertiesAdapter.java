@@ -16,7 +16,6 @@ package org.eclipse.bpmn2.modeler.ui.adapters.properties;
 import org.eclipse.bpmn2.Bpmn2Package;
 import org.eclipse.bpmn2.Category;
 import org.eclipse.bpmn2.CategoryValue;
-import org.eclipse.bpmn2.MessageFlow;
 import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesAdapter;
 import org.eclipse.bpmn2.modeler.core.adapters.FeatureDescriptor;
 import org.eclipse.bpmn2.modeler.core.adapters.ObjectDescriptor;

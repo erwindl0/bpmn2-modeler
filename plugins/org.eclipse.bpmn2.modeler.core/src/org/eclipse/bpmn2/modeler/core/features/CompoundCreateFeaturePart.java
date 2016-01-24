@@ -18,15 +18,16 @@ import java.util.Map.Entry;
 import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesAdapter;
+import org.eclipse.bpmn2.modeler.core.model.Bpmn2ModelerFactory;
 import org.eclipse.bpmn2.modeler.core.runtime.ModelDescriptor;
 import org.eclipse.bpmn2.modeler.core.runtime.TargetRuntime;
 import org.eclipse.bpmn2.modeler.core.runtime.ToolPaletteDescriptor;
 import org.eclipse.bpmn2.modeler.core.utils.AnchorUtil;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.bpmn2.modeler.core.utils.GraphicsUtil;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
-import org.eclipse.emf.ecore.EFactory;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.graphiti.features.ICreateConnectionFeature;
@@ -48,8 +49,6 @@ import org.eclipse.graphiti.mm.pictograms.FixPointAnchor;
 import org.eclipse.graphiti.mm.pictograms.PictogramElement;
 import org.eclipse.graphiti.mm.pictograms.PictogramLink;
 import org.eclipse.graphiti.mm.pictograms.PictogramsFactory;
-import org.eclipse.graphiti.mm.pictograms.Shape;
-import org.eclipse.graphiti.services.Graphiti;
 
 /**
  * This is a Graphiti CreateFeature child component of {@link CompoundCreateFeature}.
@@ -255,7 +254,7 @@ public class CompoundCreateFeaturePart<CONTEXT> {
 			value = this.getProperty("source"); //$NON-NLS-1$
 			if (value!=null) {
 				for (PictogramElement pe : pictogramElements) {
-					String id = Graphiti.getPeService().getPropertyValue(pe, ToolPaletteDescriptor.TOOLPART_ID);
+					String id = FeatureSupport.getPropertyValue(pe, ToolPaletteDescriptor.TOOLPART_ID);
 					if (value.equals(id)) {
 						source = pe;
 						break;
@@ -271,7 +270,7 @@ public class CompoundCreateFeaturePart<CONTEXT> {
 			value = this.getProperty("target"); //$NON-NLS-1$
 			if (value!=null) {
 				for (PictogramElement pe : pictogramElements) {
-					String id = Graphiti.getPeService().getPropertyValue(pe, ToolPaletteDescriptor.TOOLPART_ID);
+					String id = FeatureSupport.getPropertyValue(pe, ToolPaletteDescriptor.TOOLPART_ID);
 					if (value.equals(id)) {
 						target = pe;
 						break;
@@ -319,7 +318,7 @@ public class CompoundCreateFeaturePart<CONTEXT> {
 			pictogramElements.add(pe);
 			value = this.getProperty(ToolPaletteDescriptor.TOOLPART_ID);
 			if (value!=null) {
-				Graphiti.getPeService().setPropertyValue(pe, ToolPaletteDescriptor.TOOLPART_ID, value);
+				FeatureSupport.setPropertyValue(pe, ToolPaletteDescriptor.TOOLPART_ID, value);
 			}
 			updatePE = pe;
 		}
@@ -327,7 +326,7 @@ public class CompoundCreateFeaturePart<CONTEXT> {
 			be = BusinessObjectUtil.getFirstBaseElement(cn);
 			value = this.getProperty(ToolPaletteDescriptor.TOOLPART_ID);
 			if (value!=null) {
-				Graphiti.getPeService().setPropertyValue(cn, ToolPaletteDescriptor.TOOLPART_ID, value);
+				FeatureSupport.setPropertyValue(cn, ToolPaletteDescriptor.TOOLPART_ID, value);
 			}
 			updatePE = cn;
 		}
@@ -347,7 +346,7 @@ public class CompoundCreateFeaturePart<CONTEXT> {
 				updateFeature.update(updateContext);
 		}
 		
-		businessObjects.add(result);
+		businessObjects.addAll(result);
 	}
 	
 	private void addPictogramElementToContext(IContext context, PictogramElement pe) {
@@ -369,8 +368,7 @@ public class CompoundCreateFeaturePart<CONTEXT> {
 					if (value.startsWith("$")) { //$NON-NLS-1$
 						String name = value.substring(1);
 						EClassifier eClass = md.getClassifier(name);
-						EFactory factory = eClass.getEPackage().getEFactoryInstance();
-						EObject object = factory.create((EClass)eClass);
+						EObject object = Bpmn2ModelerFactory.create(be.eResource(), (EClass)eClass);
 						adapter.getFeatureDescriptor(feature).setValue(object);
 					}
 					else {

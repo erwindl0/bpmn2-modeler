@@ -14,6 +14,7 @@
 package org.eclipse.bpmn2.modeler.ui.adapters.properties;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.bpmn2.Bpmn2Package;
 import org.eclipse.bpmn2.Collaboration;
@@ -75,8 +76,8 @@ public class RootElementPropertiesAdapter<T extends RootElement> extends Extende
 		}
 		
 		@Override
-		public T createObject(Resource resource, EClass eclass) {
-			T rootElement = super.createObject(resource, eclass);
+		public T createObject(Resource resource, EClass eclass, Map<String, Object> args) {
+			T rootElement = super.createObject(resource, eclass, args);
 			
 			Definitions definitions = null;
 			if (resource!=null)
@@ -96,12 +97,14 @@ public class RootElementPropertiesAdapter<T extends RootElement> extends Extende
 			        	// This will be a Process that has a BPMNDiagram
 			        	List<Process> processes = ModelUtil.getAllRootElements(definitions, Process.class);
 			        	for (Process process : processes) {
-			        		if (DIUtils.findBPMNDiagram(process)!=null) {
+			        		BPMNDiagram bpmnDiagram = DIUtils.findBPMNDiagram(process);
+			        		if (bpmnDiagram!=null) {
 				        		// create a Participant for the Default Process so we can add it to the Collaboration
 								Participant defaultParticipant = Bpmn2ModelerFactory.create(resource, Participant.class);
 								defaultParticipant.setProcessRef(process);
 								defaultParticipant.setName(process.getName() +  " Pool"); //$NON-NLS-1$
 					        	collaboration.getParticipants().add(defaultParticipant);
+								bpmnDiagram.getPlane().setBpmnElement(collaboration);
 			        			break;
 			        		}
 			        	}

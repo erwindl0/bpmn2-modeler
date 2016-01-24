@@ -16,7 +16,6 @@ import java.util.List;
 import org.eclipse.bpmn2.Activity;
 import org.eclipse.bpmn2.BoundaryEvent;
 import org.eclipse.bpmn2.CallActivity;
-import org.eclipse.bpmn2.CallableElement;
 import org.eclipse.bpmn2.CatchEvent;
 import org.eclipse.bpmn2.Choreography;
 import org.eclipse.bpmn2.ChoreographyActivity;
@@ -72,10 +71,12 @@ public class FlowElementTreeEditPart extends AbstractGraphicsTreeEditPart {
 		else if (elem instanceof CallActivity) {
 			// render a Call Activity with its called element target
 			// (a Process or Global Task) as the child node.
-			CallableElement target = ((CallActivity)elem).getCalledElementRef();
-			if (target!=null) {
-				retList.add(target);
-			}
+			// DON'T DO IT! This causes an infinite loop.
+			// TODO: figure out how to stop recursion at referenced process level.
+//			CallableElement target = ((CallActivity)elem).getCalledElementRef();
+//			if (target!=null) {
+//				retList.add(target);
+//			}
 		}
 		else if (elem instanceof CatchEvent) {
 			retList.addAll(((CatchEvent)elem).getEventDefinitions());
@@ -174,12 +175,13 @@ public class FlowElementTreeEditPart extends AbstractGraphicsTreeEditPart {
 			// Add Pools as children if the Pool has a Process associated with it,
 			// or if the Participant is NOT referenced by a Choreography Activity.
 			for (Participant p : ((Choreography)container).getParticipants()) {
-				if (p.getProcessRef()!=null)
+//				if (p.getProcessRef()!=null)
 					retList.add(p);
-				else {
+//				else 
+				{
 					for (FlowElement fe : flowElements) {
 						if (fe instanceof ChoreographyActivity) {
-							if (!((ChoreographyActivity)fe).getParticipantRefs().contains(p)) {
+							if (!((ChoreographyActivity)fe).getParticipantRefs().contains(p) && !retList.contains(p)) {
 								retList.add(p);
 							}
 						}

@@ -71,14 +71,7 @@ public class SubProcessFeatureContainer extends AbstractExpandableActivityFeatur
 
 	@Override
 	public IAddFeature getAddFeature(IFeatureProvider fp) {
-		return new AddExpandableActivityFeature<SubProcess>(fp) {
-
-			@Override
-			public Class getBusinessObjectType() {
-				return SubProcess.class;
-			}
-			
-		};
+		return new AddSubProcessFeature(fp);
 	}
 
 	@Override
@@ -86,6 +79,19 @@ public class SubProcessFeatureContainer extends AbstractExpandableActivityFeatur
 		MultiUpdateFeature multiUpdate = (MultiUpdateFeature) super.getUpdateFeature(fp);
 		multiUpdate.addFeature(new UpdateSubProcessDecoratorFeature(fp));
 		return multiUpdate;
+	}
+
+	public static class AddSubProcessFeature extends AddExpandableActivityFeature<SubProcess> {
+
+		public AddSubProcessFeature(IFeatureProvider fp) {
+			super(fp);
+		}
+
+		@Override
+		public Class getBusinessObjectType() {
+			return SubProcess.class;
+		}
+		
 	}
 
 	public static class CreateSubProcessFeature extends AbstractCreateExpandableFlowNodeFeature<SubProcess> {

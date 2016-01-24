@@ -16,13 +16,13 @@ import static org.eclipse.bpmn2.modeler.ui.features.event.BoundaryEventFeatureCo
 
 import org.eclipse.bpmn2.BoundaryEvent;
 import org.eclipse.bpmn2.modeler.core.features.event.AbstractUpdateEventFeature;
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.graphiti.features.IFeatureProvider;
 import org.eclipse.graphiti.features.IReason;
 import org.eclipse.graphiti.features.context.IUpdateContext;
 import org.eclipse.graphiti.features.impl.Reason;
 import org.eclipse.graphiti.mm.algorithms.Ellipse;
 import org.eclipse.graphiti.mm.algorithms.styles.LineStyle;
-import org.eclipse.graphiti.services.Graphiti;
 
 public class UpdateBoundaryEventFeature extends AbstractUpdateEventFeature<BoundaryEvent> {
 
@@ -36,7 +36,7 @@ public class UpdateBoundaryEventFeature extends AbstractUpdateEventFeature<Bound
 	public IReason updateNeeded(IUpdateContext context) {
 		IReason reason = super.updateNeeded(context);
 		if (!reason.toBoolean()) {
-			String cancelProperty = Graphiti.getPeService().getPropertyValue(context.getPictogramElement(),
+			String cancelProperty = FeatureSupport.getPropertyValue(context.getPictogramElement(),
 			        BOUNDARY_EVENT_CANCEL);
 			BoundaryEvent event = (BoundaryEvent) getBusinessObjectForPictogramElement(context.getPictogramElement());
 			boolean changed = Boolean.parseBoolean(cancelProperty) != event.isCancelActivity();
@@ -51,7 +51,7 @@ public class UpdateBoundaryEventFeature extends AbstractUpdateEventFeature<Bound
 		
 		BoundaryEvent event = (BoundaryEvent) getBusinessObjectForPictogramElement(context.getPictogramElement());
 
-		Graphiti.getPeService().setPropertyValue(context.getPictogramElement(), BOUNDARY_EVENT_CANCEL,
+		FeatureSupport.setPropertyValue(context.getPictogramElement(), BOUNDARY_EVENT_CANCEL,
 		        Boolean.toString(event.isCancelActivity()));
 
 		Ellipse ellipse = (Ellipse) context.getPictogramElement().getGraphicsAlgorithm();

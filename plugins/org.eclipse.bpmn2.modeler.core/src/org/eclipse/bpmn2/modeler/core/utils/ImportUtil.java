@@ -14,10 +14,8 @@
 package org.eclipse.bpmn2.modeler.core.utils;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.Bpmn2Package;
 import org.eclipse.bpmn2.CallActivity;
 import org.eclipse.bpmn2.CallableElement;
@@ -28,6 +26,7 @@ import org.eclipse.bpmn2.ItemDefinition;
 import org.eclipse.bpmn2.ItemKind;
 import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.modeler.core.Activator;
+import org.eclipse.bpmn2.modeler.core.model.Bpmn2ModelerFactory;
 import org.eclipse.bpmn2.modeler.core.model.Bpmn2ModelerResourceSetImpl;
 import org.eclipse.bpmn2.util.Bpmn2Resource;
 import org.eclipse.core.resources.IContainer;
@@ -1382,8 +1381,8 @@ public class ImportUtil {
 	private static <T extends EObject> T createBpmn2Object(Definitions definitions, Class<T> clazz) {
 		EClassifier eClassifier = Bpmn2Package.eINSTANCE.getEClassifier(clazz.getSimpleName());
 		if (eClassifier instanceof EClass) {
-			T newObject = (T) Bpmn2Factory.eINSTANCE.create((EClass)eClassifier);
-			ModelUtil.setID(newObject, definitions.eResource());
+			Resource resource = definitions.eResource();
+			T newObject = (T) Bpmn2ModelerFactory.create(resource, (EClass)eClassifier);
 			return newObject;
 		}
 		return null;

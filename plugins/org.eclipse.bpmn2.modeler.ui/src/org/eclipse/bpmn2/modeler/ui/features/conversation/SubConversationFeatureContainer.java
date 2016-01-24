@@ -14,7 +14,6 @@ package org.eclipse.bpmn2.modeler.ui.features.conversation;
 
 import org.eclipse.bpmn2.Bpmn2Package;
 import org.eclipse.bpmn2.SubConversation;
-import org.eclipse.bpmn2.modeler.core.features.DefaultLayoutBPMNConnectionFeature;
 import org.eclipse.bpmn2.modeler.core.features.DefaultMoveBPMNShapeFeature;
 import org.eclipse.bpmn2.modeler.core.features.GraphitiConstants;
 import org.eclipse.bpmn2.modeler.core.features.MultiUpdateFeature;

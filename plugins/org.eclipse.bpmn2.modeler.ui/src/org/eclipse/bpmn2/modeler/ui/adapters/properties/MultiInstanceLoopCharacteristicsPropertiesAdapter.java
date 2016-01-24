@@ -105,7 +105,7 @@ public class MultiInstanceLoopCharacteristicsPropertiesAdapter extends ExtendedP
 				if (f!=null) {
 					InputOutputSpecification ioSpecification = (InputOutputSpecification)container.eGet(f);
 					if (ioSpecification==null) {
-						ioSpecification = Bpmn2ModelerFactory.createFeature(container, f, InputOutputSpecification.class);
+						ioSpecification = Bpmn2ModelerFactory.createFeature(object.eResource(), container, f, InputOutputSpecification.class);
 					}
 					if (value instanceof DataInput)
 						ioSpecification.getDataInputs().add((DataInput)value);

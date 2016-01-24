@@ -59,7 +59,7 @@ import org.eclipse.bpmn2.di.BPMNDiagram;
 import org.eclipse.bpmn2.di.BPMNEdge;
 import org.eclipse.bpmn2.di.BPMNShape;
 import org.eclipse.bpmn2.di.ParticipantBandKind;
-import org.eclipse.bpmn2.modeler.core.adapters.ObjectPropertyProvider;
+import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesAdapter;
 import org.eclipse.bpmn2.modeler.core.di.DIUtils;
 import org.eclipse.bpmn2.modeler.core.features.AbstractConnectionRouter;
 import org.eclipse.bpmn2.modeler.core.features.GraphitiConstants;
@@ -77,6 +77,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.graphiti.datatypes.IDimension;
+import org.eclipse.graphiti.datatypes.ILocation;
 import org.eclipse.graphiti.features.IFeatureProvider;
 import org.eclipse.graphiti.features.ILayoutFeature;
 import org.eclipse.graphiti.features.IUpdateFeature;
@@ -85,9 +86,11 @@ import org.eclipse.graphiti.features.context.ICustomContext;
 import org.eclipse.graphiti.features.context.IPictogramElementContext;
 import org.eclipse.graphiti.features.context.ITargetContext;
 import org.eclipse.graphiti.features.context.impl.LayoutContext;
+import org.eclipse.graphiti.features.context.impl.ResizeShapeContext;
 import org.eclipse.graphiti.features.context.impl.UpdateContext;
 import org.eclipse.graphiti.mm.MmFactory;
 import org.eclipse.graphiti.mm.Property;
+import org.eclipse.graphiti.mm.PropertyContainer;
 import org.eclipse.graphiti.mm.algorithms.GraphicsAlgorithm;
 import org.eclipse.graphiti.mm.algorithms.styles.Point;
 import org.eclipse.graphiti.mm.pictograms.Anchor;
@@ -106,6 +109,7 @@ import org.eclipse.graphiti.services.IPeService;
  * This is a hodgepodge of static methods used by various Graphiti Features.
  */
 public class FeatureSupport {
+
 	public static boolean isValidFlowElementTarget(ITargetContext context) {
 		boolean intoDiagram = context.getTargetContainer() instanceof Diagram;
 		boolean intoLane = isTargetLane(context) && isTargetLaneOnTop(context);
@@ -116,9 +120,22 @@ public class FeatureSupport {
 	}
 	
 	public static boolean isValidArtifactTarget(ITargetContext context) {
-		boolean intoDiagram = context.getTargetContainer() instanceof Diagram;
-		boolean intoLane = isTargetLane(context) && isTargetLaneOnTop(context);
 		boolean intoParticipant = isTargetParticipant(context);
+		Participant participant = null;
+		if (intoParticipant) {
+			participant = FeatureSupport.getTargetParticipant(context);
+			if (FeatureSupport.hasBpmnDiagram(participant)) {
+				return false;
+			}
+		}
+		boolean intoDiagram = context.getTargetContainer() instanceof Diagram;
+		if (intoDiagram) {
+			Diagram diagram = Graphiti.getPeService().getDiagramForShape(context.getTargetContainer());
+			if (FeatureSupport.isParticipantReference(diagram, participant)) {
+				return false;
+			}
+		}
+		boolean intoLane = isTargetLane(context) && isTargetLaneOnTop(context);
 		boolean intoSubProcess = isTargetSubProcess(context);
 		boolean intoSubChoreography = isTargetSubChoreography(context);
 		boolean intoGroup = isTargetGroup(context);
@@ -140,14 +157,26 @@ public class FeatureSupport {
 	}
 
 	public static boolean isValidDataTarget(ITargetContext context) {
+		boolean intoParticipant = isTargetParticipant(context);
+		Participant participant = null;
+		if (intoParticipant) {
+			participant = FeatureSupport.getTargetParticipant(context);
+			if (FeatureSupport.hasBpmnDiagram(participant)) {
+				return false;
+			}
+		}
+		boolean intoDiagram = context.getTargetContainer() instanceof Diagram;
+		if (intoDiagram) {
+			Diagram diagram = Graphiti.getPeService().getDiagramForShape(context.getTargetContainer());
+			if (FeatureSupport.isParticipantReference(diagram, participant)) {
+				return false;
+			}
+		}
 		Object containerBO = BusinessObjectUtil.getBusinessObjectForPictogramElement( context.getTargetContainer() );
-		boolean intoDiagram = containerBO instanceof BPMNDiagram;
 		boolean intoSubProcess = containerBO instanceof FlowElementsContainer;
-		if (intoSubProcess || intoDiagram)
+		if (intoSubProcess || intoDiagram || intoParticipant)
 			return true;
 		if (isTargetLane(context) && isTargetLaneOnTop(context))
-			return true;
-		if (isTargetParticipant(context))
 			return true;
 		return false;
 	}
@@ -256,7 +285,7 @@ public class FeatureSupport {
 				return false;
 		}
 
-		String v = Graphiti.getPeService().getPropertyValue(container, GraphitiConstants.IS_HORIZONTAL_PROPERTY);
+		String v = getPropertyValue(container, GraphitiConstants.IS_HORIZONTAL_PROPERTY);
 		if (v==null) {
 			BPMNShape bpmnShape = DIUtils.findBPMNShape(BusinessObjectUtil.getFirstBaseElement(container));
 			if (bpmnShape!=null)
@@ -267,7 +296,7 @@ public class FeatureSupport {
 	}
 	
 	public static void setHorizontal(ContainerShape container, boolean isHorizontal) {
-		Graphiti.getPeService().setPropertyValue(container, GraphitiConstants.IS_HORIZONTAL_PROPERTY, Boolean.toString(isHorizontal));
+		setPropertyValue(container, GraphitiConstants.IS_HORIZONTAL_PROPERTY, Boolean.toString(isHorizontal));
 		BPMNShape bs = BusinessObjectUtil.getFirstElementOfType(container, BPMNShape.class);
 		if (bs!=null)
 			bs.setIsHorizontal(isHorizontal);
@@ -338,14 +367,14 @@ public class FeatureSupport {
 				pe.setVisible(visible);
 
 			if (visible)
-				FeatureSupport.updateLabel(fp, pe, null);
+				updateLabel(fp, pe, null);
 			if (pe instanceof AnchorContainer) {
 				AnchorContainer ac = (AnchorContainer)pe;
 				for (Anchor a : ac.getAnchors()) {
 					for (Connection c : a.getOutgoingConnections()) {
 						c.setVisible(visible);
 						if (visible)
-							FeatureSupport.updateLabel(fp, c, null);
+							updateLabel(fp, c, null);
 						for (ConnectionDecorator decorator : c.getConnectionDecorators()) {
 							decorator.setVisible(visible);
 						}
@@ -383,7 +412,7 @@ public class FeatureSupport {
 		Iterator<Shape> iterator = peService.getAllContainedShapes(container).iterator();
 		while (iterator.hasNext()) {
 			Shape shape = iterator.next();
-			String value = peService.getPropertyValue(shape, property);
+			String value = getPropertyValue(shape, property);
 			if (value != null && value.equals(expectedValue)) {
 				return shape;
 			}
@@ -474,7 +503,7 @@ public class FeatureSupport {
 	 */
 	public static List<PictogramElement> getPoolAndLaneDescendants(ContainerShape containerShape) {
 		List<PictogramElement> children = new ArrayList<PictogramElement>();
-		FeatureSupport.collectChildren(containerShape, children, false);
+		collectChildren(containerShape, children, false);
 		return children;
 	}
 
@@ -549,7 +578,23 @@ public class FeatureSupport {
 		}
 		
 		return false;
-		
+	}
+	
+	public static boolean isParticipantReference(Diagram diagram, Participant participant) {
+		if (participant!=null) {
+			// the shape is a Pool, find its containing Graphiti Diagram
+			// and from that, get the BPMNDiagram
+			BPMNDiagram bpmnDiagram = (BPMNDiagram) BusinessObjectUtil.getBusinessObjectForPictogramElement(diagram);
+			if (bpmnDiagram==null)
+				return false;
+			// if the BPMNDiagram that contains this Participant is NOT a
+			// Collaboration (the only type that can contain a Participant) then
+			// this must be a Participant reference
+			BaseElement be = bpmnDiagram.getPlane().getBpmnElement();
+			if (!(be instanceof Collaboration))
+				return true;
+		}
+		return false;
 	}
 
 	public static List<ContainerShape> findGroupedShapes(ContainerShape groupShape) {
@@ -757,7 +802,7 @@ public class FeatureSupport {
 		}
 
 		if (layoutChanged)
-			FeatureSupport.updateLabel(fp, connection, null);
+			updateLabel(fp, connection, null);
 		
 		// also update any Connections that are connected to this Connection
 		
@@ -769,15 +814,61 @@ public class FeatureSupport {
 	
 	public static List<Connection> getConnections(AnchorContainer ac) {
 		List<Connection> connections = new ArrayList<Connection>();
-		for (Anchor a : ac.getAnchors()) {
-			connections.addAll(a.getIncomingConnections());
-			connections.addAll(a.getOutgoingConnections());
+		if (ac instanceof Connection) {
+			Connection c = (Connection)ac;
+			for (ConnectionDecorator cd : c.getConnectionDecorators()) {
+				for (Anchor a : cd.getAnchors()) {
+					connections.addAll(a.getIncomingConnections());
+					connections.addAll(a.getOutgoingConnections());
+				}
+			}
+		}
+		else {
+			for (Anchor a : ac.getAnchors()) {
+				connections.addAll(a.getIncomingConnections());
+				connections.addAll(a.getOutgoingConnections());
+			}
+		}
+		return connections;
+	}
+	
+	public static List<Connection> getConnectionsRecursive(AnchorContainer ac) {
+		List<Connection> connections = new ArrayList<Connection>();
+		TreeIterator<EObject> iter = ac.eAllContents();
+		while (iter.hasNext()) {
+			EObject o = iter.next();
+			if (o instanceof AnchorContainer) {
+				for (Anchor a : ((AnchorContainer)o).getAnchors()) {
+					connections.addAll(a.getIncomingConnections());
+					connections.addAll(a.getOutgoingConnections());
+				}
+			}
 		}
 		return connections;
 	}
 
+	public static void updateConnections(IFeatureProvider fp, List<Connection> connections, boolean force) {
+		if (force) {
+			for (Connection c : connections) {
+				if (c instanceof FreeFormConnection) {
+					FreeFormConnection ffc = (FreeFormConnection)c;
+					ffc.getBendpoints().clear();
+				}
+			}
+		}
+		for (Connection c : connections) {
+			updateConnection(fp,c,force);
+		}
+	}
+
 	public static boolean updateConnection(IFeatureProvider fp, Connection connection, boolean force) {
 		AbstractConnectionRouter.setForceRouting(connection, force);
+		if (force) {
+			if (connection instanceof FreeFormConnection) {
+				FreeFormConnection ffc = (FreeFormConnection)connection;
+				ffc.getBendpoints().clear();
+			}
+		}
 		return updateConnection(fp,connection);
 	}
 
@@ -844,7 +935,7 @@ public class FeatureSupport {
 	
 	public static void updateCategoryValues(IFeatureProvider fp, PictogramElement pe) {
 		
-		Resource resource = ObjectPropertyProvider.getResource(pe);
+		Resource resource = ExtendedPropertiesAdapter.getResource(pe);
 		if (Bpmn2Preferences.getInstance(resource).getPropagateGroupCategories()) {
 			// only do this if User Preference is enabled: assign the Group's CategoryValue
 			// to the FlowElement represented by the given PictogramElement
@@ -864,7 +955,7 @@ public class FeatureSupport {
 					
 					for (PictogramElement groupShape : Graphiti.getLinkService().getPictogramElements(diagram, group)) {
 						if (groupShape instanceof ContainerShape) {
-							for (ContainerShape flowElementShape : FeatureSupport.findGroupedShapes((ContainerShape) groupShape)) {
+							for (ContainerShape flowElementShape : findGroupedShapes((ContainerShape) groupShape)) {
 								FlowElement fe = BusinessObjectUtil.getFirstElementOfType(flowElementShape, FlowElement.class);
 								if (fe==flowElement) {
 									fe.getCategoryValueRef().add(cv);
@@ -943,11 +1034,11 @@ public class FeatureSupport {
 	public static boolean isLabelShape(PictogramElement shape) {
 		if (shape==null)
 			return false;
-		return Graphiti.getPeService().getPropertyValue(shape, GraphitiConstants.LABEL_SHAPE) != null;
+		return getPropertyValue(shape, GraphitiConstants.LABEL_SHAPE) != null;
 	}
 
 	public static boolean isHidden(PictogramElement pe) {
-		if (Graphiti.getPeService().getPropertyValue(pe, GraphitiConstants.IS_HIDDEN)!=null)
+		if (getPropertyValue(pe, GraphitiConstants.IS_HIDDEN)!=null)
 			return true;
 		return false;
 	}
@@ -955,7 +1046,7 @@ public class FeatureSupport {
 	public static boolean setHidden(PictogramElement pe, boolean hidden) {
 		if (hidden) {
 			pe.eSetDeliver(false);
-			Graphiti.getPeService().setPropertyValue(pe, GraphitiConstants.IS_HIDDEN, Boolean.TRUE.toString());
+			setPropertyValue(pe, GraphitiConstants.IS_HIDDEN, Boolean.TRUE.toString());
 			pe.setVisible(false);
 			pe.eSetDeliver(true);
 		}
@@ -993,7 +1084,7 @@ public class FeatureSupport {
 		if (pe!=null)
 			return pe;
 		if (context instanceof IPictogramElementContext)
-			return FeatureSupport.getLabelOwner(((IPictogramElementContext)context).getPictogramElement());
+			return getLabelOwner(((IPictogramElementContext)context).getPictogramElement());
 		return null;
 	}
 
@@ -1024,7 +1115,7 @@ public class FeatureSupport {
 		// If this is the ContainerShape of the MessageFlow Message, then it is the label owner.
 		if (pe instanceof ContainerShape) {
 			Shape labelShape = BusinessObjectUtil.getFirstElementOfType(pe, Shape.class);
-			if (FeatureSupport.isLabelShape(labelShape))
+			if (isLabelShape(labelShape))
 				return pe;
 		}
 
@@ -1164,7 +1255,7 @@ public class FeatureSupport {
 		List<ContainerShape> bandShapes = new ArrayList<ContainerShape>();
 		Collection<Shape> shapes = peService.getAllContainedShapes(containerShape);
 		for (Shape s : shapes) {
-			String property = peService.getPropertyValue(s, ChoreographyUtil.PARTICIPANT_BAND);
+			String property = getPropertyValue(s, ChoreographyUtil.PARTICIPANT_BAND);
 			if (new Boolean(property)) {
 				bandShapes.add((ContainerShape) s);
 			}
@@ -1173,17 +1264,29 @@ public class FeatureSupport {
 	}
 	
 	public static boolean isElementExpanded(PictogramElement pe) {
-		String property = Graphiti.getPeService().getPropertyValue(pe,GraphitiConstants.IS_EXPANDED);
+		String property = getPropertyValue(pe,GraphitiConstants.IS_EXPANDED);
 		return Boolean.parseBoolean(property);
 	}
 
 	public static void setElementExpanded(PictogramElement pe, boolean isExpanded) {
 		if (isExpanded)
-			Graphiti.getPeService().setPropertyValue(pe, GraphitiConstants.IS_EXPANDED, Boolean.TRUE.toString());
-		else
-			Graphiti.getPeService().removeProperty(pe, GraphitiConstants.IS_EXPANDED);
+			setPropertyValue(pe, GraphitiConstants.IS_EXPANDED, Boolean.TRUE.toString());
+		else {
+			setPropertyValue(pe, GraphitiConstants.IS_EXPANDED, null);
+		}
 	}
 
+	public static void setElementExpanded(BaseElement be, boolean isExpanded) {
+		if (isExpandableElement(be)) {
+			BPMNDiagram bpmnDiagram = DIUtils.findBPMNDiagram(be);
+			// otherwise check the "isExpanded" state of the BPMNShape element.
+			BPMNShape bpmnShape = DIUtils.findBPMNShape(be);
+			if (bpmnShape!=null && bpmnDiagram==null) {
+				bpmnShape.setIsExpanded(isExpanded);
+			}
+		}
+	}
+	
 	public static boolean isElementExpanded(BaseElement be) {
 		if (isExpandableElement(be)) {
 			// if the BaseElement has its own BPMNDiagram page it should be considered
@@ -1198,7 +1301,12 @@ public class FeatureSupport {
 		}
 		return false;
 	}
-
+	
+	public static boolean isExpandableElement(PictogramElement pe) {
+		BaseElement be = BusinessObjectUtil.getFirstBaseElement(pe);
+		return isExpandableElement(be);
+	}
+	
 	public static boolean isExpandableElement(BaseElement be) {
 		return be instanceof SubProcess
 				|| be instanceof AdHocSubProcess
@@ -1207,23 +1315,29 @@ public class FeatureSupport {
 				|| be instanceof CallChoreography;
 	}
 	
-	public static void updateExpandedSize(PictogramElement pe) {
-		IDimension size = GraphicsUtil.calculateSize(pe);
-		FeatureSupport.setExpandedSize(pe, size);
+	public static void updateExpandedSize(ContainerShape shape) {
+		IDimension size = GraphicsUtil.calculateSize(shape);
+		setExpandedSize(shape, size);
 	}
 	
-	public static void setExpandedSize(PictogramElement pe, IDimension size) {
-		setExpandedSize(pe, size.getWidth(), size.getHeight());
+	public static void setExpandedSize(ContainerShape shape, IDimension size) {
+		setExpandedSize(shape, size.getWidth(), size.getHeight());
 	}
 	
-	public static void setExpandedSize(PictogramElement pe, int width, int height) {
-		Graphiti.getPeService().setPropertyValue(pe, GraphitiConstants.EXPANDED_SIZE, width+","+height); //$NON-NLS-1$
+	public static void setExpandedSize(ContainerShape shape, int width, int height) {
+		setPropertyValue(shape, GraphitiConstants.EXPANDED_SIZE, width+","+height); //$NON-NLS-1$
 	}
 	
-	public static IDimension getExpandedSize(PictogramElement pe) {
-		IDimension size = GraphicsUtil.calculateSize(pe);
-		String property = Graphiti.getPeService().getPropertyValue(pe, GraphitiConstants.EXPANDED_SIZE);
-		if (property!=null) {
+	public static IDimension getExpandedSize(ContainerShape shape) {
+		IDimension size = GraphicsUtil.calculateSize(shape);
+		String property = getPropertyValue(shape, GraphitiConstants.EXPANDED_SIZE);
+		if (property==null) {
+			ResizeShapeContext resizeContext = new ResizeShapeContext(shape);
+			ExpandableActivitySizeCalculator calculator = new ExpandableActivitySizeCalculator(resizeContext);
+			size.setWidth(calculator.getWidth());
+			size.setHeight(calculator.getHeight());
+		}
+		else {
 			int index = property.indexOf(',');
 			int w = Integer.parseInt(property.substring(0,index));
 			int h = Integer.parseInt(property.substring(index+1));
@@ -1233,23 +1347,29 @@ public class FeatureSupport {
 		return size;
 	}
 	
-	public static void updateCollapsedSize(PictogramElement pe) {
-		IDimension size = GraphicsUtil.calculateSize(pe);
-		FeatureSupport.setCollapsedSize(pe, size);
+	public static void updateCollapsedSize(ContainerShape shape) {
+		IDimension size = GraphicsUtil.calculateSize(shape);
+		setCollapsedSize(shape, size);
 	}
 	
-	public static void setCollapsedSize(PictogramElement pe, IDimension size) {
-		setCollapsedSize(pe, size.getWidth(), size.getHeight());
+	public static void setCollapsedSize(ContainerShape shape, IDimension size) {
+		setCollapsedSize(shape, size.getWidth(), size.getHeight());
 	}
 	
-	public static void setCollapsedSize(PictogramElement pe, int width, int height) {
-		Graphiti.getPeService().setPropertyValue(pe, GraphitiConstants.COLLAPSED_SIZE, width+","+height); //$NON-NLS-1$
+	public static void setCollapsedSize(ContainerShape shape, int width, int height) {
+		setPropertyValue(shape, GraphitiConstants.COLLAPSED_SIZE, width+","+height); //$NON-NLS-1$
 	}
 	
-	public static IDimension getCollapsedSize(PictogramElement pe) {
-		IDimension size = GraphicsUtil.calculateSize(pe);
-		String property = Graphiti.getPeService().getPropertyValue(pe, GraphitiConstants.COLLAPSED_SIZE);
-		if (property!=null) {
+	public static IDimension getCollapsedSize(ContainerShape shape) {
+		IDimension size = GraphicsUtil.calculateSize(shape);
+		String property = getPropertyValue(shape, GraphitiConstants.COLLAPSED_SIZE);
+		if (property==null) {
+			Bpmn2Preferences preferences = Bpmn2Preferences.getInstance(shape);
+			ShapeStyle ss = preferences.getShapeStyle("TASK");
+			size.setWidth(ss.getDefaultWidth());
+			size.setHeight(ss.getDefaultHeight());
+		}
+		else {
 			int index = property.indexOf(',');
 			int w = Integer.parseInt(property.substring(0,index));
 			int h = Integer.parseInt(property.substring(index+1));
@@ -1257,5 +1377,136 @@ public class FeatureSupport {
 			size.setHeight(h);
 		}
 		return size;
+	}
+	
+	public static String getPropertyValue(PropertyContainer propertyContainer, String key) {
+		return Graphiti.getPeService().getPropertyValue(propertyContainer, key);
+	}
+	
+	public static void setPropertyValue(PropertyContainer propertyContainer, String key, String value) {
+		while (Graphiti.getPeService().getPropertyValue(propertyContainer, key)!=null)
+			Graphiti.getPeService().removeProperty(propertyContainer, key);
+		if (value!=null)
+			Graphiti.getPeService().setPropertyValue(propertyContainer, key, value);
+	}
+	
+	public static class ExpandableActivitySizeCalculator {
+		
+		public static int MARGIN = 20;
+		public int deltaX;
+		public int deltaY;
+		int deltaWidth;
+		int deltaHeight;
+		int minWidth;
+		int minHeight;
+		ContainerShape containerShape;
+		ResizeShapeContext context;
+		ShapeStyle ss;
+		
+		public ExpandableActivitySizeCalculator(ResizeShapeContext context) {
+			this.context = context;
+			setShape((ContainerShape) context.getPictogramElement());
+		}
+		
+		private void setShape(ContainerShape containerShape) {
+			this.containerShape = containerShape;
+			Bpmn2Preferences preferences = Bpmn2Preferences.getInstance(containerShape.eResource());
+			ss = preferences.getShapeStyle(BusinessObjectUtil.getFirstBaseElement(containerShape));
+			calculate();
+		}
+		
+		private ILocation getLocationRelativeToContainer(ContainerShape parent, ContainerShape child) {
+			ILocation loc = Graphiti.getPeService().getLocationRelativeToDiagram(child);
+			ContainerShape container = parent.getContainer();
+			if (container instanceof ContainerShape && !(container instanceof Diagram)) {
+				ILocation containerLoc = Graphiti.getPeService().getLocationRelativeToDiagram(container);
+				loc.setX(loc.getX() - containerLoc.getX());
+				loc.setY(loc.getY() - containerLoc.getY());
+			}
+			return loc;
+		}
+		
+		private void calculate() {
+			int minX = Integer.MAX_VALUE;
+			int minY = Integer.MAX_VALUE;
+			int minChildX = Integer.MAX_VALUE;
+			int minChildY = Integer.MAX_VALUE;
+			minWidth = 0;
+			minHeight = 0;
+			List<PictogramElement> containerChildren = getContainerChildren(containerShape);
+			GraphicsAlgorithm ga;
+	
+			for (PictogramElement pe : containerChildren) {
+				ga = pe.getGraphicsAlgorithm();
+				if (ga!=null) {
+					if (ga.getX() < minChildX)
+						minChildX = ga.getX();
+					if (ga.getY() < minChildY)
+						minChildY = ga.getY();
+					ILocation loc = getLocationRelativeToContainer(containerShape, (ContainerShape)pe);
+					int x = loc.getX();
+					int y = loc.getY();
+					if (x < minX)
+						minX = x;
+					if (y < minY)
+						minY = y;
+				}
+			}
+			
+			for (PictogramElement pe : containerChildren) {
+				ga = pe.getGraphicsAlgorithm();
+				if (ga!=null) {
+					ILocation loc = getLocationRelativeToContainer(containerShape, (ContainerShape)pe);
+					int w = loc.getX() - minX + ga.getWidth();
+					int h = loc.getY() - minY + ga.getHeight();
+					if (w > minWidth)
+						minWidth = w;
+					if (h > minHeight)
+						minHeight = h;
+				}
+			}
+			
+			if (minWidth<=0)
+				minWidth = ss.getDefaultWidth();
+			if (minHeight<=0)
+				minHeight = ss.getDefaultHeight();
+			
+			minX -= MARGIN;
+			minY -= MARGIN;
+			minWidth += 2*MARGIN;
+			minHeight += 2*MARGIN;
+			
+			ga = containerShape.getGraphicsAlgorithm();
+	
+			if (context.getX()>minX) {
+				int dx0 = context.getX() - ga.getX();
+				context.setX(minX);
+				int dx1 = context.getX() - ga.getX();
+				context.setWidth(context.getWidth() - (dx1 - dx0));
+			}
+			if (context.getY()>minY) {
+				int dy0 = context.getY() - ga.getY();
+				context.setY(minY);
+				int dy1 = context.getY() - ga.getY();
+				context.setHeight(context.getHeight() - (dy1 - dy0));
+			}
+			
+			if (context.getX() != ga.getX())
+				deltaX = context.getX() - ga.getX();
+			else if (context.getWidth()<minWidth + minChildX - MARGIN)
+				context.setWidth(minWidth + minChildX - MARGIN);
+			if (context.getY() != ga.getY())
+				deltaY = context.getY() - ga.getY();
+			else if (context.getHeight()<minHeight + minChildY - MARGIN)
+				context.setHeight(minHeight + minChildY - MARGIN);
+		}
+		
+		public int getWidth() {
+			return minWidth;
+		}
+		
+		public int getHeight() {
+			return minHeight;
+		}
 	}
 }

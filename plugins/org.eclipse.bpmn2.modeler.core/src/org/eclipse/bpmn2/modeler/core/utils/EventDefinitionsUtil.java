@@ -86,11 +86,11 @@ public class EventDefinitionsUtil {
 				if (parameters.size()<=index) {
 					String name = ed.getId().replace("EventDefinition", ""); //$NON-NLS-1$ //$NON-NLS-2$
 					if (isInput) {
-						element = Bpmn2ModelerFactory.create(resource, DataInput.class);
+						element = Bpmn2ModelerFactory.createObject(resource, DataInput.class);
 						((DataInput)element).setName(name+"_Input"); //$NON-NLS-1$
 					}
 					else {
-						element = Bpmn2ModelerFactory.create(resource, DataOutput.class);
+						element = Bpmn2ModelerFactory.createObject(resource, DataOutput.class);
 						((DataOutput)element).setName(name+"_Output"); //$NON-NLS-1$
 					}
 					if (itemDefinition!=null) {
@@ -109,7 +109,7 @@ public class EventDefinitionsUtil {
 						}
 					}
 					if (association==null) {
-						association = Bpmn2ModelerFactory.create(resource, DataInputAssociation.class);
+						association = Bpmn2ModelerFactory.createObject(resource, DataInputAssociation.class);
 						association.setTargetRef(element);
 						associations.add(association);
 					}
@@ -122,7 +122,7 @@ public class EventDefinitionsUtil {
 						}
 					}
 					if (association==null) {
-						association = Bpmn2ModelerFactory.create(resource, DataOutputAssociation.class);
+						association = Bpmn2ModelerFactory.createObject(resource, DataOutputAssociation.class);
 						if (element!=null)
 							association.getSourceRef().add(element);
 						associations.add(association);
@@ -130,11 +130,11 @@ public class EventDefinitionsUtil {
 				}
 				if (ioSet==null) {
 					if (isInput) {
-						ioSet = (BaseElement) Bpmn2ModelerFactory.create(resource, InputSet.class);
+						ioSet = (BaseElement) Bpmn2ModelerFactory.createObject(resource, InputSet.class);
 						throwEvent.setInputSet((InputSet)ioSet);
 					}
 					else {
-						ioSet = (BaseElement) Bpmn2ModelerFactory.create(resource, OutputSet.class);
+						ioSet = (BaseElement) Bpmn2ModelerFactory.createObject(resource, OutputSet.class);
 						catchEvent.setOutputSet((OutputSet)ioSet);
 					}
 				}

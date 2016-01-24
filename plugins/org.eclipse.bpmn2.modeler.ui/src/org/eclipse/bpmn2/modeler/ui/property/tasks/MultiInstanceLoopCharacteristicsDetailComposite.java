@@ -18,7 +18,6 @@ import org.eclipse.bpmn2.Expression;
 import org.eclipse.bpmn2.FormalExpression;
 import org.eclipse.bpmn2.MultiInstanceBehavior;
 import org.eclipse.bpmn2.MultiInstanceLoopCharacteristics;
-import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesAdapter;
 import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesProvider;
 import org.eclipse.bpmn2.modeler.core.adapters.InsertionAdapter;
 import org.eclipse.bpmn2.modeler.core.merrimac.clad.AbstractBpmn2PropertySection;
@@ -32,8 +31,6 @@ import org.eclipse.bpmn2.modeler.core.merrimac.dialogs.ComboObjectEditor;
 import org.eclipse.bpmn2.modeler.core.merrimac.dialogs.FeatureEditingDialog;
 import org.eclipse.bpmn2.modeler.core.merrimac.dialogs.ObjectEditor;
 import org.eclipse.bpmn2.modeler.core.merrimac.dialogs.TextAndButtonObjectEditor;
-import org.eclipse.bpmn2.modeler.core.merrimac.dialogs.TextObjectEditor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.bpmn2.modeler.core.runtime.TargetRuntime;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -398,7 +395,8 @@ public class MultiInstanceLoopCharacteristicsDetailComposite extends DefaultDeta
 					editingDomain.getCommandStack().execute(new RecordingCommand(editingDomain) {
 						@Override
 						protected void doExecute() {
-							getBO().setCompletionCondition(null);
+							getBusinessObjectDelegate().setValue(getBO(),
+									Bpmn2Package.eINSTANCE.getMultiInstanceLoopCharacteristics_CompletionCondition(), null);
 						}
 					});
 				}
@@ -433,8 +431,10 @@ public class MultiInstanceLoopCharacteristicsDetailComposite extends DefaultDeta
 					editingDomain.getCommandStack().execute(new RecordingCommand(editingDomain) {
 						@Override
 						protected void doExecute() {
-							getBO().setLoopDataInputRef(null);
-							getBO().setInputDataItem(null);
+							getBusinessObjectDelegate().setValue(getBO(),
+									Bpmn2Package.eINSTANCE.getMultiInstanceLoopCharacteristics_InputDataItem(), null);
+							getBusinessObjectDelegate().setValue(getBO(),
+									Bpmn2Package.eINSTANCE.getMultiInstanceLoopCharacteristics_LoopDataInputRef(), null);
 						}
 					});
 				}
@@ -469,7 +469,8 @@ public class MultiInstanceLoopCharacteristicsDetailComposite extends DefaultDeta
 					editingDomain.getCommandStack().execute(new RecordingCommand(editingDomain) {
 						@Override
 						protected void doExecute() {
-							getBO().setLoopCardinality(null);
+							getBusinessObjectDelegate().setValue(getBO(),
+									Bpmn2Package.eINSTANCE.getMultiInstanceLoopCharacteristics_LoopCardinality(), null);
 						}
 					});
 				}
@@ -498,8 +499,10 @@ public class MultiInstanceLoopCharacteristicsDetailComposite extends DefaultDeta
 					editingDomain.getCommandStack().execute(new RecordingCommand(editingDomain) {
 						@Override
 						protected void doExecute() {
-							getBO().setLoopDataOutputRef(null);
-							getBO().setOutputDataItem(null);
+							getBusinessObjectDelegate().setValue(getBO(),
+									Bpmn2Package.eINSTANCE.getMultiInstanceLoopCharacteristics_OutputDataItem(), null);
+							getBusinessObjectDelegate().setValue(getBO(),
+								Bpmn2Package.eINSTANCE.getMultiInstanceLoopCharacteristics_LoopDataOutputRef(), null);
 						}
 					});
 				}
@@ -652,7 +655,8 @@ public class MultiInstanceLoopCharacteristicsDetailComposite extends DefaultDeta
 
 							DataInput input = lc.getInputDataItem();
 							if (input==null) {
-								input = (DataInput) getBusinessObjectDelegate().createObject(PACKAGE.getDataInput());
+								input = createModelObject(DataInput.class);
+								input.setName("");
 								InsertionAdapter.add(lc, PACKAGE.getMultiInstanceLoopCharacteristics_InputDataItem(), input);
 							}
 							editor = new DataInputOutputObjectEditor(this, input, PACKAGE.getDataInput_Name());
@@ -682,7 +686,8 @@ public class MultiInstanceLoopCharacteristicsDetailComposite extends DefaultDeta
 							
 							DataOutput output = lc.getOutputDataItem();
 							if (output==null) {
-								output = (DataOutput) getBusinessObjectDelegate().createObject(PACKAGE.getDataOutput());
+								output = createModelObject(DataOutput.class);
+								output.setName("");
 								InsertionAdapter.add(lc, PACKAGE.getMultiInstanceLoopCharacteristics_OutputDataItem(), output);
 							}
 							editor = new DataInputOutputObjectEditor(this, output, PACKAGE.getDataOutput_Name());

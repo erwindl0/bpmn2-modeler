@@ -12,14 +12,13 @@
  ******************************************************************************/
 package org.eclipse.bpmn2.modeler.core.features;
 
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.graphiti.features.IFeatureProvider;
 import org.eclipse.graphiti.features.IRemoveFeature;
 import org.eclipse.graphiti.features.context.IContext;
 import org.eclipse.graphiti.features.context.IPictogramElementContext;
 import org.eclipse.graphiti.features.custom.ICustomFeature;
 import org.eclipse.graphiti.mm.PropertyContainer;
-import org.eclipse.graphiti.mm.pictograms.Connection;
-import org.eclipse.graphiti.services.Graphiti;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -46,7 +45,7 @@ public abstract class PropertyBasedFeatureContainer implements IShapeFeatureCont
 		if (!(o instanceof PropertyContainer)) {
 			return false;
 		}
-		String property = Graphiti.getPeService().getPropertyValue((PropertyContainer) o, getPropertyKey());
+		String property = FeatureSupport.getPropertyValue((PropertyContainer) o, getPropertyKey());
 		if (property == null) {
 			return false;
 		}

@@ -13,7 +13,6 @@
 package org.eclipse.bpmn2.modeler.core.features.gateway;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import org.eclipse.bpmn2.Activity;
 import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;

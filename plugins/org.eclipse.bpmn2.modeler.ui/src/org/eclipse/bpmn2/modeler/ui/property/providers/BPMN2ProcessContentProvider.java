@@ -13,7 +13,6 @@ package org.eclipse.bpmn2.modeler.ui.property.providers;
 import java.util.List;
 
 import org.eclipse.bpmn2.Definitions;
-import org.eclipse.bpmn2.Interface;
 import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.RootElement;
 

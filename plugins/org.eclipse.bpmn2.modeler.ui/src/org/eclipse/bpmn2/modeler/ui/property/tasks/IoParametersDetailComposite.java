@@ -16,9 +16,6 @@ package org.eclipse.bpmn2.modeler.ui.property.tasks;
 
 
 import org.eclipse.bpmn2.InputOutputSpecification;
-import org.eclipse.bpmn2.ReceiveTask;
-import org.eclipse.bpmn2.SendTask;
-import org.eclipse.bpmn2.ServiceTask;
 import org.eclipse.bpmn2.modeler.core.adapters.InsertionAdapter;
 import org.eclipse.bpmn2.modeler.core.merrimac.clad.AbstractBpmn2PropertySection;
 import org.eclipse.bpmn2.modeler.core.merrimac.clad.AbstractDetailComposite;

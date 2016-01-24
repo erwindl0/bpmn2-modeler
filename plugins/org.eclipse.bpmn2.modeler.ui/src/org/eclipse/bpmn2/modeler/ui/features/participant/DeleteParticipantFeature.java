@@ -19,10 +19,7 @@ import org.eclipse.bpmn2.Collaboration;
 import org.eclipse.bpmn2.Definitions;
 import org.eclipse.bpmn2.FlowElementsContainer;
 import org.eclipse.bpmn2.Participant;
-import org.eclipse.bpmn2.SubProcess;
 import org.eclipse.bpmn2.di.BPMNDiagram;
-import org.eclipse.bpmn2.di.BPMNPlane;
-import org.eclipse.bpmn2.di.BPMNShape;
 import org.eclipse.bpmn2.modeler.core.di.DIUtils;
 import org.eclipse.bpmn2.modeler.core.features.choreography.ChoreographyUtil;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
@@ -95,20 +92,16 @@ public class DeleteParticipantFeature extends AbstractDefaultDeleteFeature {
 			ContainerShape poolShape = (ContainerShape) pe;
 			Object bo = getBusinessObjectForPictogramElement(pe);
 			if (bo instanceof Participant) {
-				Participant pool = (Participant) bo;
-				BPMNShape bpmnShape = BusinessObjectUtil.getFirstElementOfType(poolShape, BPMNShape.class);
-				BPMNPlane plane = (BPMNPlane) bpmnShape.eContainer();
-				if (plane.getBpmnElement() instanceof SubProcess) {
-					// can't delete this Participant - it is only a
-					// reference to the original on the main diagram.
-					isReference = true;
+				Participant participant = (Participant) bo;
+				if (FeatureSupport.isParticipantReference(getDiagram(), participant)) {
+					isReference = true;;
 				}
 
 				if (!isReference) {
-					Definitions definitions = ModelUtil.getDefinitions(pool);
+					Definitions definitions = ModelUtil.getDefinitions(participant);
 					List<Collaboration> collaborations = ModelUtil.getAllRootElements(definitions, Collaboration.class);
 					for (Collaboration c : collaborations) {
-						if (c.getParticipants().contains(pool)) {
+						if (c.getParticipants().contains(participant)) {
 							collaboration = c;
 							break;
 						}
@@ -129,7 +122,7 @@ public class DeleteParticipantFeature extends AbstractDefaultDeleteFeature {
 							df.delete(dc);
 						}
 					}
-					bo = pool.getProcessRef();
+					bo = participant.getProcessRef();
 					if (bo instanceof FlowElementsContainer) {
 						BPMNDiagram bpmnDiagram = DIUtils.findBPMNDiagram((FlowElementsContainer)bo);
 						if (bpmnDiagram != null) {
@@ -145,12 +138,16 @@ public class DeleteParticipantFeature extends AbstractDefaultDeleteFeature {
 		if (collaboration!=null && collaboration.getParticipants().size()==1) {
 			Participant lastParticipant = collaboration.getParticipants().get(0);
 			if (lastParticipant.getProcessRef()!=null && DIUtils.findBPMNShape(lastParticipant)==null) {
-				// can delete the final Participant and Collaboration
+				// We can delete the final Participant and Collaboration
 				// as long as the Participant has a Process and does
 				// not have a Pool shape. The Participant's Process
 				// will become the Default Process - the entire diagram
+				BPMNDiagram bpmnDiagram = DIUtils.findBPMNDiagram(collaboration);
 				EcoreUtil.delete(lastParticipant);
 				EcoreUtil.delete(collaboration);
+				if (bpmnDiagram!=null) {
+					bpmnDiagram.getPlane().setBpmnElement(lastParticipant.getProcessRef());
+				}
 			}
 		}
 	}

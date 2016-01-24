@@ -13,6 +13,7 @@
 
 package org.eclipse.bpmn2.modeler.core.validation.validators;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.bpmn2.Definitions;
@@ -40,17 +41,28 @@ public class ProcessValidator extends AbstractBpmn2ElementValidator<Process> {
 		super(ctx);
 	}
 
+	/**
+	 * @param other
+	 */
+	@SuppressWarnings("rawtypes")
+	public ProcessValidator(AbstractBpmn2ElementValidator other) {
+		super(other);
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.bpmn2.modeler.core.validation.validators.AbstractBpmn2ElementValidator#validate(org.eclipse.bpmn2.BaseElement)
 	 */
 	@Override
 	public IStatus validate(Process process) {
 		boolean foundStartEvent = false;
+		List<StartEvent> untriggeredStartEvents = new ArrayList<StartEvent>();
 		boolean foundEndEvent = false;
 		List<FlowElement> flowElements = process.getFlowElements();
 		for (FlowElement fe : flowElements) {
 			if (fe instanceof StartEvent) {
 				foundStartEvent = true;
+				if (((StartEvent)fe).getEventDefinitions().size() == 0)
+					untriggeredStartEvents.add((StartEvent)fe);
 			}
 			if (fe instanceof EndEvent) {
 				foundEndEvent = true;
@@ -58,6 +70,11 @@ public class ProcessValidator extends AbstractBpmn2ElementValidator<Process> {
 		}
 		if (!foundStartEvent) {
 			addStatus(process, Status.WARNING, Messages.ProcessValidator_No_StartEvent);
+		}
+		if (untriggeredStartEvents.size()>1) {
+			addStatus(process,
+					untriggeredStartEvents.toArray(new StartEvent[untriggeredStartEvents.size()]),
+					Status.ERROR, Messages.ProcessValidator_Multiple_UntriggeredStartEvents);
 		}
 		if (!foundEndEvent) {
 			addStatus(process, Status.WARNING, Messages.ProcessValidator_No_EndEvent);

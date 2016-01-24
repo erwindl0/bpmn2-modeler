@@ -181,7 +181,7 @@ public class WhiteboxFeature extends AbstractCustomFeature {
 		BPMNPlane plane = BpmnDiFactory.eINSTANCE.createBPMNPlane();
 		ModelUtil.setID(plane, resource);
 		
-		Process process = Bpmn2ModelerFactory.create(resource, Process.class);
+		Process process = Bpmn2ModelerFactory.createObject(resource, Process.class);
 		plane.setBpmnElement(process);
 		newDiagram.setPlane(plane);
 

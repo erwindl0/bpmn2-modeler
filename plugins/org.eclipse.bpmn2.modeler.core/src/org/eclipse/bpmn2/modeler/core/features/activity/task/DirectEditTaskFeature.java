@@ -13,7 +13,6 @@
 package org.eclipse.bpmn2.modeler.core.features.activity.task;
 
 import org.eclipse.bpmn2.modeler.core.features.AbstractBpmn2DirectEditingFeature;
-import org.eclipse.bpmn2.modeler.core.features.DirectEditBaseElementFeature;
 import org.eclipse.graphiti.features.IFeatureProvider;
 import org.eclipse.graphiti.features.context.IDirectEditingContext;
 

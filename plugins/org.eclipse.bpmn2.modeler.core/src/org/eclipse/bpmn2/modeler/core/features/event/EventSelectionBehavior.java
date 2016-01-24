@@ -13,7 +13,6 @@
 package org.eclipse.bpmn2.modeler.core.features.event;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import org.eclipse.bpmn2.BoundaryEvent;
 import org.eclipse.bpmn2.Event;

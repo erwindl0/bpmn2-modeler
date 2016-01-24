@@ -23,6 +23,7 @@ import org.eclipse.bpmn2.Lane;
 import org.eclipse.bpmn2.MessageFlow;
 import org.eclipse.bpmn2.Participant;
 import org.eclipse.bpmn2.SequenceFlow;
+import org.eclipse.bpmn2.SubProcess;
 import org.eclipse.bpmn2.modeler.core.Activator;
 import org.eclipse.bpmn2.modeler.core.model.ModelHandler;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
@@ -31,11 +32,15 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.graphiti.features.IDeleteFeature;
 import org.eclipse.graphiti.features.IFeatureProvider;
+import org.eclipse.graphiti.features.IResizeShapeFeature;
 import org.eclipse.graphiti.features.context.IMoveShapeContext;
 import org.eclipse.graphiti.features.context.impl.DeleteContext;
+import org.eclipse.graphiti.features.context.impl.ResizeShapeContext;
+import org.eclipse.graphiti.mm.algorithms.GraphicsAlgorithm;
 import org.eclipse.graphiti.mm.pictograms.Anchor;
 import org.eclipse.graphiti.mm.pictograms.AnchorContainer;
 import org.eclipse.graphiti.mm.pictograms.Connection;
+import org.eclipse.graphiti.mm.pictograms.ContainerShape;
 import org.eclipse.graphiti.mm.pictograms.PictogramElement;
 import org.eclipse.graphiti.mm.pictograms.Shape;
 
@@ -122,7 +127,21 @@ public class MoveFlowNodeFeature extends DefaultMoveBPMNShapeFeature {
 			} catch (Exception e) {
 				Activator.logError(e);
 			}
+			
+			ContainerShape parentContainer = shape.getContainer();
+			if (BusinessObjectUtil.containsElementOfType(parentContainer, SubProcess.class)) {
+				GraphicsAlgorithm ga = parentContainer.getGraphicsAlgorithm();
+				ResizeShapeContext resizeContext = new ResizeShapeContext(parentContainer);
+				resizeContext.setWidth(ga.getWidth());
+				resizeContext.setHeight(ga.getHeight());
+				resizeContext.setX(ga.getX());
+				resizeContext.setY(ga.getY());
+
+				IResizeShapeFeature resizeFeature = getFeatureProvider().getResizeShapeFeature(resizeContext);
+				resizeFeature.resizeShape(resizeContext);
+			}
 		}
+		
 		super.postMoveShape(context);
 	}
 

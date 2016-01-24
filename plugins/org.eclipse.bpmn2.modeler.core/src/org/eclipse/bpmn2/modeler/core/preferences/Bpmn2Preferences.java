@@ -45,7 +45,7 @@ import org.eclipse.bpmn2.TerminateEventDefinition;
 import org.eclipse.bpmn2.Transaction;
 import org.eclipse.bpmn2.di.BPMNShape;
 import org.eclipse.bpmn2.modeler.core.Activator;
-import org.eclipse.bpmn2.modeler.core.adapters.ObjectPropertyProvider;
+import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesAdapter;
 import org.eclipse.bpmn2.modeler.core.runtime.ModelEnablementDescriptor;
 import org.eclipse.bpmn2.modeler.core.runtime.TargetRuntime;
 import org.eclipse.core.resources.IProject;
@@ -253,7 +253,7 @@ public class Bpmn2Preferences implements IResourceChangeListener, IPropertyChang
 	 * @return project preferences
 	 */
 	public static Bpmn2Preferences getInstance(EObject object) {
-		return getInstance(ObjectPropertyProvider.getResource(object));
+		return getInstance(ExtendedPropertiesAdapter.getResource(object));
 	}
 	
 	public static Bpmn2Preferences getInstance(Resource resource) {
@@ -628,8 +628,8 @@ public class Bpmn2Preferences implements IResourceChangeListener, IPropertyChang
 	private static String getShapeStylePreferenceName(String name) {
 		// stupid hack to map both DataInputAssociation and DataOutputAssociation
 		// to DataAssociation
-		if ("DataInputAssociation".equals(name) || "DataOutputAssociation".equals(name)) //$NON-NLS-1$ //$NON-NLS-2$
-			return "DataAssociation"; //$NON-NLS-1$
+		if ("DataInputAssociation".equals(name) || "DataOutputAssociation".equals(name))
+			return "DataAssociation";
 		return name;
 	}
 	

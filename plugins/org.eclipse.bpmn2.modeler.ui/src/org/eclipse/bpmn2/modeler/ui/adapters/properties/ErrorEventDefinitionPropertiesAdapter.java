@@ -37,6 +37,7 @@ public class ErrorEventDefinitionPropertiesAdapter extends EventDefinitionProper
 		
     	setProperty(Bpmn2Package.eINSTANCE.getErrorEventDefinition_ErrorRef(), UI_CAN_CREATE_NEW, Boolean.TRUE);
     	setProperty(Bpmn2Package.eINSTANCE.getErrorEventDefinition_ErrorRef(), UI_CAN_EDIT, Boolean.TRUE);
+    	setProperty(Bpmn2Package.eINSTANCE.getErrorEventDefinition_ErrorRef(), UI_IS_MULTI_CHOICE, Boolean.TRUE);
     	
 		EStructuralFeature ref = Bpmn2Package.eINSTANCE.getErrorEventDefinition_ErrorRef();
 		setFeatureDescriptor(ref, new FeatureDescriptor<ErrorEventDefinition>(this,object,ref) {

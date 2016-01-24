@@ -22,6 +22,7 @@ import org.eclipse.bpmn2.Lane;
 import org.eclipse.bpmn2.Participant;
 import org.eclipse.bpmn2.modeler.core.di.DIUtils;
 import org.eclipse.bpmn2.modeler.core.features.AbstractLayoutBpmn2ShapeFeature;
+import org.eclipse.bpmn2.modeler.core.features.containers.participant.AddParticipantFeature;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
 import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.emf.common.util.ECollections;
@@ -87,13 +88,8 @@ public class LayoutContainerFeature extends AbstractLayoutBpmn2ShapeFeature {
 		DIUtils.updateDIShape(rootContainer);
 		
 		for (PictogramElement pe : FeatureSupport.getPoolAndLaneDescendants(rootContainer)) {
-			if (pe instanceof FreeFormConnection) {
-				FreeFormConnection c = (FreeFormConnection) pe;
-				// only reroute connections between shapes in different containers
-				AnchorContainer start = c.getStart().getParent();
-				AnchorContainer end = c.getEnd().getParent();
-				if (start.eContainer()!=end.eContainer())
-					FeatureSupport.updateConnection(getFeatureProvider(), (Connection)pe, true);
+			if (pe instanceof Connection) {
+				FeatureSupport.updateConnection(getFeatureProvider(), (Connection)pe, true);
 			}
 		}
 
@@ -118,8 +114,8 @@ public class LayoutContainerFeature extends AbstractLayoutBpmn2ShapeFeature {
 		
 		BaseElement elem = BusinessObjectUtil.getFirstElementOfType(root, BaseElement.class);
 		GraphicsAlgorithm ga = root.getGraphicsAlgorithm();
-		int width = ga.getWidth() - 30;
-		int height = ga.getHeight() - 30;
+		int width = ga.getWidth() - AddParticipantFeature.TITLE_HEIGHT;
+		int height = ga.getHeight() - AddParticipantFeature.TITLE_HEIGHT;
 		boolean horz = FeatureSupport.isHorizontal(root);
 
 		for (Shape s : root.getChildren()) {
@@ -140,14 +136,14 @@ public class LayoutContainerFeature extends AbstractLayoutBpmn2ShapeFeature {
 	private Dimension resizeContainer(ContainerShape container) {
 		BaseElement elem = BusinessObjectUtil.getFirstElementOfType(container, BaseElement.class);
 		int height = 0;
-		int width = container.getGraphicsAlgorithm().getWidth() - 30;
+		int width = container.getGraphicsAlgorithm().getWidth() - AddParticipantFeature.TITLE_HEIGHT;
 		boolean horz = FeatureSupport.isHorizontal(container);
 		if (horz) {
 			height = 0;
-			width = container.getGraphicsAlgorithm().getWidth() - 30;
+			width = container.getGraphicsAlgorithm().getWidth() - AddParticipantFeature.TITLE_HEIGHT;
 		} else {
 			width = 0;
-			height = container.getGraphicsAlgorithm().getHeight() - 30;
+			height = container.getGraphicsAlgorithm().getHeight() - AddParticipantFeature.TITLE_HEIGHT;
 		}
 
 		EList<Shape> children = container.getChildren();
@@ -157,7 +153,7 @@ public class LayoutContainerFeature extends AbstractLayoutBpmn2ShapeFeature {
 			if (canResize(elem, s, bo)) {
 				GraphicsAlgorithm ga = s.getGraphicsAlgorithm();
 				if (horz) {
-					gaService.setLocation(ga, 30, height);
+					gaService.setLocation(ga, AddParticipantFeature.TITLE_HEIGHT, height);
 					height += ga.getHeight() - 1;
 					if (ga.getWidth() >= width) {
 						width = ga.getWidth();
@@ -165,7 +161,7 @@ public class LayoutContainerFeature extends AbstractLayoutBpmn2ShapeFeature {
 						gaService.setSize(ga, width, ga.getHeight());
 					}
 				} else {
-					gaService.setLocation(ga, width, 30);
+					gaService.setLocation(ga, width, AddParticipantFeature.TITLE_HEIGHT);
 					width += ga.getWidth() - 1;
 					if (ga.getHeight() >= height) {
 						height = ga.getHeight();
@@ -182,7 +178,7 @@ public class LayoutContainerFeature extends AbstractLayoutBpmn2ShapeFeature {
 			if (height == 0) {
 				return new Dimension(ga.getWidth(), ga.getHeight());
 			} else {
-				int newWidth = width + 30;
+				int newWidth = width + AddParticipantFeature.TITLE_HEIGHT;
 				int newHeight = height + 1;
 				gaService.setSize(ga, newWidth, newHeight);
 
@@ -195,9 +191,9 @@ public class LayoutContainerFeature extends AbstractLayoutBpmn2ShapeFeature {
 						Polyline line = (Polyline) childGa;
 						Point p0 = line.getPoints().get(0);
 						Point p1 = line.getPoints().get(1);
-						p0.setX(30);
+						p0.setX(AddParticipantFeature.TITLE_HEIGHT);
 						p0.setY(0);
-						p1.setX(30);
+						p1.setX(AddParticipantFeature.TITLE_HEIGHT);
 						p1.setY(newHeight);
 					}
 				}
@@ -209,7 +205,7 @@ public class LayoutContainerFeature extends AbstractLayoutBpmn2ShapeFeature {
 				return new Dimension(ga.getWidth(), ga.getHeight());
 			} else {
 				int newWidth = width + 1;
-				int newHeight = height + 30;
+				int newHeight = height + AddParticipantFeature.TITLE_HEIGHT;
 				gaService.setSize(ga, newWidth, newHeight);
 
 				for (Shape s : children) {
@@ -222,9 +218,9 @@ public class LayoutContainerFeature extends AbstractLayoutBpmn2ShapeFeature {
 						Point p0 = line.getPoints().get(0);
 						Point p1 = line.getPoints().get(1);
 						p0.setX(0);
-						p0.setY(30);
+						p0.setY(AddParticipantFeature.TITLE_HEIGHT);
 						p1.setX(newWidth);
-						p1.setY(30);
+						p1.setY(AddParticipantFeature.TITLE_HEIGHT);
 					}
 				}
 
@@ -265,15 +261,15 @@ public class LayoutContainerFeature extends AbstractLayoutBpmn2ShapeFeature {
 					Point p0 = line.getPoints().get(0);
 					Point p1 = line.getPoints().get(1);
 					if (horz) {
-						p0.setX(30);
+						p0.setX(AddParticipantFeature.TITLE_HEIGHT);
 						p0.setY(0);
-						p1.setX(30);
+						p1.setX(AddParticipantFeature.TITLE_HEIGHT);
 						p1.setY(ga.getHeight());
 					} else {
 						p0.setX(0);
-						p0.setY(30);
+						p0.setY(AddParticipantFeature.TITLE_HEIGHT);
 						p1.setX(ga.getWidth());
-						p1.setY(30);
+						p1.setY(AddParticipantFeature.TITLE_HEIGHT);
 					}
 				}
 			}

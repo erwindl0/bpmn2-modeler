@@ -23,8 +23,8 @@ import org.eclipse.bpmn2.modeler.core.features.AbstractBpmn2UpdateFeature;
 import org.eclipse.bpmn2.modeler.core.features.GraphitiConstants;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
 import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
-import org.eclipse.bpmn2.modeler.core.utils.ShapeDecoratorUtil;
 import org.eclipse.bpmn2.modeler.core.utils.ModelUtil;
+import org.eclipse.bpmn2.modeler.core.utils.ShapeDecoratorUtil;
 import org.eclipse.bpmn2.modeler.core.utils.StyleUtil;
 import org.eclipse.bpmn2.modeler.core.utils.StyleUtil.FillStyle;
 import org.eclipse.graphiti.features.IFeatureProvider;
@@ -53,7 +53,7 @@ public abstract class AbstractUpdateEventDefinitionFeature extends AbstractBpmn2
 		if (size==1) {
 			Shape addedShape = getDecorationAlgorithm(event).draw(container);
 			link(addedShape, eventDefinitions.get(0));
-			Graphiti.getPeService().setPropertyValue(addedShape,
+			FeatureSupport.setPropertyValue(addedShape,
 					GraphitiConstants.EVENT_DEFINITION_SHAPE,
 					Boolean.toString(true));
 		}
@@ -61,7 +61,7 @@ public abstract class AbstractUpdateEventDefinitionFeature extends AbstractBpmn2
 			Shape multipleShape = Graphiti.getPeService().createShape(container, false);
 			drawForEvent(event, multipleShape);
 			link(multipleShape, eventDefinitions.toArray(new EventDefinition[size]));
-			Graphiti.getPeService().setPropertyValue(multipleShape,
+			FeatureSupport.setPropertyValue(multipleShape,
 					GraphitiConstants.EVENT_DEFINITION_SHAPE,
 					Boolean.toString(true));
 		}

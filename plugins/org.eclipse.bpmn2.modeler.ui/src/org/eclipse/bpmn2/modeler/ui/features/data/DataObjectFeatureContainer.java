@@ -178,8 +178,8 @@ public class DataObjectFeatureContainer extends AbstractDataFeatureContainer {
 			ModelHandler mh = ModelHandler.getInstance(getDiagram());
 
 			FlowElement flowElement = null;
-			DataObjectReference dataObjectReference = Bpmn2ModelerFactory.create(mh.getResource(), DataObjectReference.class);
-			DataObject dataObject = Bpmn2ModelerFactory.create(mh.getResource(), DataObject.class);
+			DataObjectReference dataObjectReference = Bpmn2ModelerFactory.createObject(mh.getResource(), DataObjectReference.class);
+			DataObject dataObject = Bpmn2ModelerFactory.createObject(mh.getResource(), DataObject.class);
 			String oldName = dataObject.getName();
 			dataObject.setName(Messages.DataObjectFeatureContainer_New);
 			dataObject.setId(null);

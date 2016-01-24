@@ -16,6 +16,7 @@ import org.eclipse.bpmn2.SubProcess;
 import org.eclipse.bpmn2.di.BPMNEdge;
 import org.eclipse.bpmn2.di.BPMNShape;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.bpmn2.modeler.ui.features.flow.MessageFlowFeatureContainer;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IClippingStrategy;
@@ -98,8 +99,16 @@ public class ConnectionLayerClippingStrategy implements IClippingStrategy {
 											// don't clip connection if the source or target is this SubProcess
 											EObject sourceBo = BusinessObjectUtil.getFirstBaseElement(source);
 											EObject targetBo = BusinessObjectUtil.getFirstBaseElement(target);
-											if (sourceBo!=container && targetBo!=container)
+											if (sourceBo!=container && targetBo!=container) {
+												ContainerShape parent = ((ContainerShape) pe).getContainer();
+												while (!(parent instanceof Diagram)) {
+													if (BusinessObjectUtil.getFirstBaseElement(parent) instanceof SubProcess) {
+														pe = parent;
+													}
+													parent = parent.getContainer();
+												}
 												return getClip((ContainerShape)pe);
+											}
 										}
 									}
 								}								
@@ -146,6 +155,10 @@ public class ConnectionLayerClippingStrategy implements IClippingStrategy {
 	private Rectangle[] getClip(ContainerShape pe) {
 		ILocation loc = Graphiti.getPeService().getLocationRelativeToDiagram(pe);
 		GraphicsAlgorithm ga = pe.getGraphicsAlgorithm();
+		// return a very small rectangle if the SubProcess is collapsed.
+		BaseElement be = BusinessObjectUtil.getFirstBaseElement(pe);
+		if (FeatureSupport.isExpandableElement(be) && !FeatureSupport.isElementExpanded(be))
+			return new Rectangle[] { new Rectangle(loc.getX(), loc.getY(), 1, 1) };
 		return new Rectangle[] { new Rectangle(loc.getX(), loc.getY(), ga.getWidth(), ga.getHeight()) };
 	}
 }

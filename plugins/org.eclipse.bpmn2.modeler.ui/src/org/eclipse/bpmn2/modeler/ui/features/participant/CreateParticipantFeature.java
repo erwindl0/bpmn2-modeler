@@ -14,12 +14,13 @@ package org.eclipse.bpmn2.modeler.ui.features.participant;
 
 import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.Bpmn2Package;
-import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.Collaboration;
 import org.eclipse.bpmn2.Participant;
+import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.di.BPMNDiagram;
 import org.eclipse.bpmn2.modeler.core.features.AbstractBpmn2CreateFeature;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.bpmn2.modeler.core.utils.ModelUtil;
 import org.eclipse.bpmn2.modeler.ui.ImageProvider;
 import org.eclipse.emf.ecore.EClass;
@@ -39,7 +40,15 @@ public class CreateParticipantFeature extends AbstractBpmn2CreateFeature<Partici
 		if (context.getTargetContainer() instanceof Diagram) {
 			BPMNDiagram bpmnDiagram = BusinessObjectUtil.getFirstElementOfType(context.getTargetContainer(), BPMNDiagram.class);
 			BaseElement bpmnElement = bpmnDiagram.getPlane().getBpmnElement();
-			if (bpmnElement instanceof Collaboration || bpmnElement instanceof Process || bpmnElement==null)
+			if (bpmnElement instanceof Process) {
+				for (Participant p : ModelUtil.getAllObjectsOfType(bpmnElement.eResource(), Participant.class)) {
+					if (p.getProcessRef() == bpmnElement && FeatureSupport.hasBpmnDiagram(bpmnElement)) {
+						return false;
+					}
+				}
+				return true;
+			}
+			if (bpmnElement instanceof Collaboration || bpmnElement==null)
 				return true;
 		}
 		return false;

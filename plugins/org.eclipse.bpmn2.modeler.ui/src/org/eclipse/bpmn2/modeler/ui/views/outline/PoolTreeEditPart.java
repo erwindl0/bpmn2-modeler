@@ -16,7 +16,6 @@ import java.util.List;
 import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.Participant;
 import org.eclipse.bpmn2.Process;
-import org.eclipse.gef.EditPart;
 
 public class PoolTreeEditPart extends AbstractGraphicsTreeEditPart {
 

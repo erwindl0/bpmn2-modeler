@@ -20,18 +20,14 @@ import org.eclipse.bpmn2.Bpmn2Package;
 import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesAdapter;
 import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesProvider;
 import org.eclipse.bpmn2.modeler.core.model.Bpmn2ModelerFactory;
-import org.eclipse.bpmn2.modeler.core.model.ModelDecorator;
-import org.eclipse.bpmn2.modeler.core.runtime.ModelExtensionDescriptor;
-import org.eclipse.bpmn2.modeler.core.runtime.TargetRuntime;
-import org.eclipse.bpmn2.modeler.core.utils.DiagramEditorAdapter;
+import org.eclipse.bpmn2.util.Bpmn2Resource;
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.transaction.TransactionalEditingDomain;
-import org.eclipse.graphiti.ui.editor.DiagramEditor;
 
 /**
  * Default implementation for accessing Business Objects in the merrimac UI package.
@@ -39,7 +35,7 @@ import org.eclipse.graphiti.ui.editor.DiagramEditor;
 public class DefaultBusinessObjectDelegate implements IBusinessObjectDelegate {
 
 	TransactionalEditingDomain editingDomain;
-	TargetRuntime targetRuntime;
+	Resource resource;
 	
 	public DefaultBusinessObjectDelegate(TransactionalEditingDomain editingDomain) {
 		Assert.isNotNull(editingDomain);
@@ -48,49 +44,24 @@ public class DefaultBusinessObjectDelegate implements IBusinessObjectDelegate {
 
 	@Override
 	public EObject createObject(EClass eClass) {
-		String type = eClass.getName();
-		for (ModelExtensionDescriptor d : getTargetRuntime().getModelExtensionDescriptors()) {
-			EClass ec = d.getModelDecorator().getEClass(type);
-			if (ec!=null) {
-				EObject object = d.createObject(eClass);
-				return object;
-			}
-		}
+		return Bpmn2ModelerFactory.createObject(getResource(), eClass);
+	}
+	
+	@Override
+	public EObject createFeature(EObject object, EStructuralFeature feature, EClass featureClass) {
+		return Bpmn2ModelerFactory.createFeature(getResource(), object, feature, featureClass);
+	}
+	
+	@Override
+	public EObject createFeature(EObject object, EStructuralFeature feature, Class featureClass) {
+		return Bpmn2ModelerFactory.createFeature(getResource(), object, feature, featureClass);
+	}
 
-		EClassifier eClassifier = ModelDecorator.findEClassifier(null, eClass.getName());
-		if (eClassifier instanceof EClass) {
-			// the EClass is in one of the standard BPMN2 packages or the EcorePackage.
-			return eClassifier.getEPackage().getEFactoryInstance().create((EClass)eClassifier);
-		}
-		return null;
-	}
-	
-	public EObject createFeature(EObject object, EStructuralFeature feature) {
-		EClass eClass = (EClass) feature.getEType();
-		String type = eClass.getName();
-		EObject value = null;
-		for (ModelExtensionDescriptor d : getTargetRuntime().getModelExtensionDescriptors()) {
-			EClass ec = d.getModelDecorator().getEClass(type);
-			if (ec!=null) {
-				value = d.createObject(eClass);
-				d.adaptObject(object);
-			}
-		}
-		if (value==null) {
-			EClassifier eClassifier = ModelDecorator.findEClassifier(null, eClass.getName());
-			if (eClassifier instanceof EClass) {
-				// the EClass is in one of the standard BPMN2 packages or the EcorePackage.
-				value = eClassifier.getEPackage().getEFactoryInstance().create((EClass)eClassifier);
-			}
-		}
-		return value;
-	}
-	
 	@Override
 	public <T extends EObject> T createObject(Class clazz) {
 		EClass eClass = (EClass) Bpmn2Package.eINSTANCE.getEClassifier(clazz.getSimpleName());
 		if (eClass!=null) {
-			return (T)Bpmn2ModelerFactory.eINSTANCE.create(eClass);
+			return (T) createObject(eClass);
 		}
 		return null;
 	}
@@ -107,6 +78,8 @@ public class DefaultBusinessObjectDelegate implements IBusinessObjectDelegate {
 
 	@Override
 	public String getLabel(EObject object) {
+		if (object instanceof EClass)
+			return ExtendedPropertiesProvider.getLabel(getResource(), (EClass)object);
 		return ExtendedPropertiesProvider.getLabel(object);
 	}
 
@@ -137,6 +110,8 @@ public class DefaultBusinessObjectDelegate implements IBusinessObjectDelegate {
 	
 	@Override
 	public List<Object> getValueList(EObject object, EStructuralFeature feature) {
+		if (object instanceof EClass)
+			return ExtendedPropertiesProvider.getValueList(getResource(), (EClass)object, feature);
 		return ExtendedPropertiesProvider.getValueList(object, feature);
 	}
 
@@ -182,26 +157,36 @@ public class DefaultBusinessObjectDelegate implements IBusinessObjectDelegate {
 
 	@Override
 	public boolean isMultiLineText(EObject object, EStructuralFeature feature) {
+		if (object instanceof EClass)
+			return ExtendedPropertiesProvider.isMultiLineText(getResource(), (EClass)object,feature);
 		return ExtendedPropertiesProvider.isMultiLineText(object,feature);
 	}
 
 	@Override
 	public boolean canEdit(EObject object, EStructuralFeature feature) {
+		if (object instanceof EClass)
+			return ExtendedPropertiesProvider.canEdit(getResource(), (EClass)object,feature);
 		return ExtendedPropertiesProvider.canEdit(object,feature);
 	}
 
 	@Override
 	public boolean canCreateNew(EObject object, EStructuralFeature feature) {
+		if (object instanceof EClass)
+			return ExtendedPropertiesProvider.canCreateNew(getResource(), (EClass)object,feature);
 		return ExtendedPropertiesProvider.canCreateNew(object,feature);
 	}
 
 	@Override
 	public boolean canEditInline(EObject object, EStructuralFeature feature) {
+		if (object instanceof EClass)
+			return ExtendedPropertiesProvider.canEditInline(getResource(), (EClass)object,feature);
 		return ExtendedPropertiesProvider.canEditInline(object,feature);
 	}
 
 	@Override
 	public boolean canSetNull(EObject object, EStructuralFeature feature) {
+		if (object instanceof EClass)
+			return ExtendedPropertiesProvider.canSetNull(getResource(), (EClass)object,feature);
 		return ExtendedPropertiesProvider.canSetNull(object,feature);
 	}
 
@@ -212,11 +197,15 @@ public class DefaultBusinessObjectDelegate implements IBusinessObjectDelegate {
 
 	@Override
 	public boolean isMultiChoice(EObject object, EStructuralFeature feature) {
+		if (object instanceof EClass)
+			return ExtendedPropertiesProvider.isMultiChoice(getResource(), (EClass)object, feature);
 		return ExtendedPropertiesProvider.isMultiChoice(object, feature);
 	}
 
 	@Override
 	public Hashtable<String, Object> getChoiceOfValues(EObject object, EStructuralFeature feature) {
+		if (object instanceof EClass)
+			return ExtendedPropertiesProvider.getChoiceOfValues(getResource(), (EClass)object, feature);
 		return ExtendedPropertiesProvider.getChoiceOfValues(object, feature);
 	}
 
@@ -225,21 +214,16 @@ public class DefaultBusinessObjectDelegate implements IBusinessObjectDelegate {
 		return ExtendedPropertiesProvider.getEType(object, feature);
 	}
 
-	private TargetRuntime getTargetRuntime() {
-		if (targetRuntime==null) {
-			targetRuntime = (TargetRuntime) getDiagramEditor().getAdapter(TargetRuntime.class);
-		}
-		return targetRuntime;
-	}
-	
-	private DiagramEditor getDiagramEditor() {
-		if (editingDomain != null) {
-			for (Adapter a : editingDomain.getResourceSet().eAdapters()) {
-				if (a instanceof DiagramEditorAdapter) {
-					return ((DiagramEditorAdapter)a).getDiagramEditor();
+	private Resource getResource() {
+		if (resource==null) {
+			for (Resource r : editingDomain.getResourceSet().getResources()) {
+				if (r instanceof Bpmn2Resource) {
+					resource = r;
+					break;
 				}
 			}
+			
 		}
-		return null;
+		return resource;
 	}
 }

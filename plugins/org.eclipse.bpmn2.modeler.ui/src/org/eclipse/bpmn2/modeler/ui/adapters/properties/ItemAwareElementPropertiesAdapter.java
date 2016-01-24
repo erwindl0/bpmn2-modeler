@@ -21,7 +21,6 @@ import org.eclipse.bpmn2.DataState;
 import org.eclipse.bpmn2.ItemAwareElement;
 import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesAdapter;
 import org.eclipse.bpmn2.modeler.core.adapters.FeatureDescriptor;
-import org.eclipse.bpmn2.modeler.core.adapters.ObjectPropertyProvider;
 import org.eclipse.bpmn2.modeler.core.model.Bpmn2ModelerFactory;
 import org.eclipse.bpmn2.modeler.core.model.ModelHandler;
 import org.eclipse.emf.common.notify.AdapterFactory;
@@ -59,7 +58,7 @@ public class ItemAwareElementPropertiesAdapter<T extends ItemAwareElement> exten
 				protected void internalSet(ItemAwareElement element, EStructuralFeature feature, Object value, int index) {
 					if (value instanceof String) {
 						// construct a DataState from the given name string
-						DataState ds = Bpmn2ModelerFactory.create(element.eResource(), DataState.class);
+						DataState ds = Bpmn2ModelerFactory.createObject(element.eResource(), DataState.class);
 						ds.setName((String)value);
 						value = ds;
 					}
@@ -81,7 +80,7 @@ public class ItemAwareElementPropertiesAdapter<T extends ItemAwareElement> exten
 				public Hashtable<String, Object> getChoiceOfValues() {
 					Hashtable<String,Object> choices = new Hashtable<String,Object>();
 					try {
-						Resource resource = ObjectPropertyProvider.getResource(object);
+						Resource resource = ExtendedPropertiesAdapter.getResource(object);
 						List<DataState> states = ModelHandler.getAll(resource, DataState.class);
 						for (DataState s : states) {
 							String label = s.getName();

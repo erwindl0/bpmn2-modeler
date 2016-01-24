@@ -22,7 +22,7 @@ import org.eclipse.bpmn2.di.BpmnDiPackage;
 import org.eclipse.bpmn2.modeler.core.Activator;
 import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesAdapter;
 import org.eclipse.bpmn2.modeler.core.adapters.FeatureDescriptor;
-import org.eclipse.bpmn2.modeler.core.adapters.ObjectPropertyProvider;
+import org.eclipse.bpmn2.modeler.core.model.Bpmn2ModelerFactory;
 import org.eclipse.bpmn2.modeler.core.model.ModelDecorator;
 import org.eclipse.bpmn2.modeler.core.preferences.Bpmn2Preferences;
 import org.eclipse.bpmn2.modeler.core.utils.ModelUtil;
@@ -31,8 +31,6 @@ import org.eclipse.bpmn2.modeler.core.utils.SimpleTreeIterator;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.emf.common.notify.Adapter;
-import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
@@ -242,32 +240,6 @@ public class ModelExtensionDescriptor extends BaseRuntimeExtensionDescriptor {
 			return initialize;
 		}
 	}
-	
-	/**
-	 * This adapter has been deprecated. Use BaseRuntimeExtensionDescriptor#getDescriptor(EObject,Class) instead
-	 * @deprecated
-	 */
-	public class ModelExtensionAdapter extends AdapterImpl {
-
-		ModelExtensionDescriptor descriptor;
-		
-		public ModelExtensionAdapter(ModelExtensionDescriptor descriptor) {
-			super();
-			this.descriptor = descriptor;
-		}
-		
-		public Property getProperty(String name) {
-			return descriptor.getProperty(name);
-		}
-		
-		public List<Property> getProperties(String path) {
-			return descriptor.getProperties(path);
-		}
-		
-		public ModelExtensionDescriptor getDescriptor() {
-			return descriptor;
-		}
-	}
 
 	protected String name;
 	protected String uri;
@@ -402,7 +374,7 @@ public class ModelExtensionDescriptor extends BaseRuntimeExtensionDescriptor {
      * @param eClass EClass of the object create.
      * @return the new object.
      */
-    public EObject basicCreateObject(EClass eClass) {
+    private EObject basicCreateObject(EClass eClass) {
         EPackage pkg = eClass.getEPackage();
         EObject object = pkg.getEFactoryInstance().create(eClass);
         TargetRuntimeAdapter.adapt(object, targetRuntime);
@@ -410,22 +382,24 @@ public class ModelExtensionDescriptor extends BaseRuntimeExtensionDescriptor {
     }
     
 	/**
-	 * Create and initialize an object of the given EClass. Initialization consists
-	 * of assigning an ID and setting a default name if the EClass has those features.
+	 * Create and initialize an object of the given EClass. Initialization
+	 * consists of assigning an ID and setting a default name if the EClass has
+	 * those features.
 	 * 
-	 * @param eClass - type of object to create
+	 * @param resource the EMF Resource which will eventually contain this EObject.
+	 * @param eClass type of object to create
 	 * @return an initialized EObject
+	 * @deprecated use Bpmn2ModelerFactory.createObject(Resource,EClass) instead
 	 */
-	public EObject createObject(EClass eClass) {
-		ExtendedPropertiesAdapter adapter = ExtendedPropertiesAdapter.adapt(eClass);
-		if (adapter!=null) {
-			adapter.setResource(containingResource);
-			return adapter.getObjectDescriptor().createObject(eClass);
-		}
-		EPackage pkg = eClass.getEPackage();
-		return pkg.getEFactoryInstance().create(eClass);
+	public EObject createObject(Resource resource, EClass eClass) {
+		return Bpmn2ModelerFactory.createObject(resource, eClass);
 	}
 	
+	/**
+	 * Get the ModelDecorator.
+	 * 
+	 * @return the ModelDecorator object
+	 */
 	public ModelDecorator getModelDecorator() {
 		if (modelDecorator==null) {
 			String name = null;
@@ -465,7 +439,7 @@ public class ModelExtensionDescriptor extends BaseRuntimeExtensionDescriptor {
 			containingResource = resource;
 			modelObject = object;
 			if (containingResource==null)
-				containingResource = ObjectPropertyProvider.getResource(object);
+				containingResource = ExtendedPropertiesAdapter.getResource(object);
 			getModelDecorator();
 			if (objectDecorator!=null) {
 				if (objectDecorator.canApply(id, containingResource,modelObject)) {
@@ -485,10 +459,7 @@ public class ModelExtensionDescriptor extends BaseRuntimeExtensionDescriptor {
 		return object;
 	}
 
-	// FIXME: this is called in CreateCustomShapeFeature and CreateCustomConnectionFeature
-	// this should not be necessary because it's already done in the Bpmn2Modeler factory,
-	// but check to make sure. Try to decouple!
-	public void populateObject(EObject object, boolean initialize) {
+	private void populateObject(EObject object, boolean initialize) {
 		try {
 			modelObject = object;
 			initializers.clear();
@@ -656,12 +627,6 @@ public class ModelExtensionDescriptor extends BaseRuntimeExtensionDescriptor {
                     reftype = ref.getEReferenceType();
                 }
 
-                // if the factory of the parent object differs from child, create a new adapter on the factory and copy the resource 
-                if (!object.eClass().getEPackage().equals(reftype.getEPackage())) {
-                	ObjectPropertyProvider adapter = ObjectPropertyProvider.getAdapter(object.eClass().getEPackage().getEFactoryInstance());
-                	ObjectPropertyProvider.adapt(reftype.getEPackage().getEFactoryInstance(), adapter.getResource());
-                }
-
                 childObject = basicCreateObject((EClass) reftype);
                 if (property.label!=null) {
                 	ExtendedPropertiesAdapter adapter = ExtendedPropertiesAdapter.adapt(childObject);
@@ -764,33 +729,23 @@ public class ModelExtensionDescriptor extends BaseRuntimeExtensionDescriptor {
 		this.properties = properties;
 	}
 
-	public ExtendedPropertiesAdapter adaptObject(EObject object) {
-		addModelExtensionAdapter(object);
-		ExtendedPropertiesAdapter adapter = ExtendedPropertiesAdapter.adapt(object);
+	private ExtendedPropertiesAdapter adaptObject(EObject object) {
+		return adaptObject(containingResource, object);
+		
+	}
+
+	public ExtendedPropertiesAdapter adaptObject(Resource resource, EObject object) {
+		ExtendedPropertiesAdapter<?> adapter = ExtendedPropertiesAdapter.adapt(object);
 		if (adapter!=null) {
 			// See https://issues.jboss.org/browse/SWITCHYARD-2484
-			adapter.setResource(containingResource);
-			adapter.setProperty(this.getClass().getName(), this);
+			adapter.setResource(resource);
+			adapter.setProperty(this.getClass(), this);
 			if (description!=null)
 				adapter.setProperty(ExtendedPropertiesAdapter.LONG_DESCRIPTION, description);
 		}
 		return adapter;
 	}
 	
-	private void addModelExtensionAdapter(EObject object) {
-		if (getModelExtensionAdapter(object)==null)
-			object.eAdapters().add( new ModelExtensionAdapter(this) );
-	}
-
-	public static ModelExtensionAdapter getModelExtensionAdapter(EObject object) {
-		for (Adapter a : object.eAdapters()) {
-			if (a instanceof ModelExtensionAdapter) {
-				return (ModelExtensionAdapter)a;
-			}
-		}
-		return null;
-	}
-
 	private void adaptFeature(EObject object, EStructuralFeature feature, Object value, Property property) {
 		ExtendedPropertiesAdapter adapter = ExtendedPropertiesAdapter.adapt(object);
 		if (adapter!=null) {

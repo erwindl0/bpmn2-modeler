@@ -456,6 +456,9 @@ public class DefaultBPMN2Editor extends DiagramEditor implements IPreferenceChan
 		if (required==GraphicalViewer.class) {
 			return getGraphicalViewer();
 		}
+		if (required==Resource.class) {
+			return getResource();
+		}
 
 		return super.getAdapter(required);
 	}
@@ -585,7 +588,7 @@ public class DefaultBPMN2Editor extends DiagramEditor implements IPreferenceChan
 		EditPart ep = viewer.getRootEditPart().getContents();
 		if (ep instanceof AbstractGraphicalEditPart) {
 			IFigure fig = ((AbstractGraphicalEditPart)ep).getFigure();
-			fig.setBorder(new MarginBorder(50));
+			fig.setBorder(new MarginBorder(0,0,50,50));
 		}
 
 		ConnectionLayerClippingStrategy.applyTo(viewer);

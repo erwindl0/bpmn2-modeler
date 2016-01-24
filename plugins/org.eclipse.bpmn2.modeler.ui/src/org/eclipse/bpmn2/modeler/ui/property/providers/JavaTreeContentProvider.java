@@ -11,7 +11,6 @@
 package org.eclipse.bpmn2.modeler.ui.property.providers;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 

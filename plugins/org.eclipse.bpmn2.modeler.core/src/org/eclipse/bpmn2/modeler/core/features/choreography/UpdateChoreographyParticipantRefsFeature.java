@@ -30,7 +30,6 @@ import org.eclipse.bpmn2.modeler.core.di.DIUtils;
 import org.eclipse.bpmn2.modeler.core.features.AbstractBpmn2UpdateFeature;
 import org.eclipse.bpmn2.modeler.core.features.label.AddShapeLabelFeature;
 import org.eclipse.bpmn2.modeler.core.preferences.Bpmn2Preferences;
-import org.eclipse.bpmn2.modeler.core.utils.AnchorUtil;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
 import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.bpmn2.modeler.core.utils.StyleUtil;
@@ -105,11 +104,11 @@ public class UpdateChoreographyParticipantRefsFeature extends AbstractBpmn2Updat
 
 		updateParticipantReferences(bandShapes, participants);
 
-		peService.setPropertyValue(choreographyActivityShape, ChoreographyUtil.PARTICIPANT_REF_IDS, ChoreographyUtil.getParticipantRefIds(choreographyActivity));
+		FeatureSupport.setPropertyValue(choreographyActivityShape, ChoreographyUtil.PARTICIPANT_REF_IDS, ChoreographyUtil.getParticipantRefIds(choreographyActivity));
 		
 		Participant initiatingParticipant = choreographyActivity.getInitiatingParticipantRef();
 		String id = initiatingParticipant == null ? "null" : initiatingParticipant.getId(); //$NON-NLS-1$
-		peService.setPropertyValue(choreographyActivityShape, ChoreographyUtil.INITIATING_PARTICIPANT_REF, id);
+		FeatureSupport.setPropertyValue(choreographyActivityShape, ChoreographyUtil.INITIATING_PARTICIPANT_REF, id);
 
 //		ChoreographyUtil.drawMessageLinks(getFeatureProvider(), choreographyActivityShape);
 		
@@ -254,8 +253,8 @@ public class UpdateChoreographyParticipantRefsFeature extends AbstractBpmn2Updat
 		addBandLabel(bandShape, w, h);
 
 		Graphiti.getPeCreateService().createChopboxAnchor(bandShape);
-		peService.setPropertyValue(bandShape, ChoreographyUtil.PARTICIPANT_BAND, Boolean.toString(true));
-		peService.setPropertyValue(bandShape, ChoreographyUtil.MESSAGE_VISIBLE,
+		FeatureSupport.setPropertyValue(bandShape, ChoreographyUtil.PARTICIPANT_BAND, Boolean.toString(true));
+		FeatureSupport.setPropertyValue(bandShape, ChoreographyUtil.MESSAGE_VISIBLE,
 				Boolean.toString(bpmnShape.isIsMessageVisible()));
 		return bandShape;
 	}
@@ -289,8 +288,8 @@ public class UpdateChoreographyParticipantRefsFeature extends AbstractBpmn2Updat
 		addBandLabel(bandShape, w, h);
 
 		Graphiti.getPeCreateService().createChopboxAnchor(bandShape);
-		peService.setPropertyValue(bandShape, ChoreographyUtil.PARTICIPANT_BAND, Boolean.toString(true));
-		peService.setPropertyValue(bandShape, ChoreographyUtil.MESSAGE_VISIBLE,
+		FeatureSupport.setPropertyValue(bandShape, ChoreographyUtil.PARTICIPANT_BAND, Boolean.toString(true));
+		FeatureSupport.setPropertyValue(bandShape, ChoreographyUtil.MESSAGE_VISIBLE,
 				Boolean.toString(bpmnShape.isIsMessageVisible()));
 		return bandShape;
 	}
@@ -324,8 +323,8 @@ public class UpdateChoreographyParticipantRefsFeature extends AbstractBpmn2Updat
 		addBandLabel(bandShape, w, h);
 
 		Graphiti.getPeCreateService().createChopboxAnchor(bandShape);
-		peService.setPropertyValue(bandShape, ChoreographyUtil.PARTICIPANT_BAND, Boolean.toString(true));
-		peService.setPropertyValue(bandShape, ChoreographyUtil.MESSAGE_VISIBLE,
+		FeatureSupport.setPropertyValue(bandShape, ChoreographyUtil.PARTICIPANT_BAND, Boolean.toString(true));
+		FeatureSupport.setPropertyValue(bandShape, ChoreographyUtil.MESSAGE_VISIBLE,
 				Boolean.toString(bpmnShape.isIsMessageVisible()));
 		return bandShape;
 	}

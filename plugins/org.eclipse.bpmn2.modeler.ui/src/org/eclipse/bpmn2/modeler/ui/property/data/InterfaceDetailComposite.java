@@ -13,7 +13,6 @@
 
 package org.eclipse.bpmn2.modeler.ui.property.data;
 
-import org.eclipse.bpmn2.Interface;
 import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesProvider;
 import org.eclipse.bpmn2.modeler.core.merrimac.clad.AbstractBpmn2PropertySection;
 import org.eclipse.bpmn2.modeler.core.merrimac.clad.AbstractPropertiesProvider;

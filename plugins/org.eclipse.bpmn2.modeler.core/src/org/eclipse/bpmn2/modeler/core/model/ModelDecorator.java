@@ -193,6 +193,9 @@ public class ModelDecorator {
 	 * @return the dynamic EPackage or null if not found.
 	 */
 	public static EPackage getEPackage(String nsURI) {
+		if (nsURI==null)
+			return null;
+		
 		EPackage pkg = (EPackage) getResourceSet().getPackageRegistry().get(nsURI);
 		if (pkg!=null)
 			return pkg;
@@ -543,7 +546,7 @@ public class ModelDecorator {
 					return feature;
 			}
 		}
-		return findEStructuralFeatureInDocumentRoot(name);
+		return findEStructuralFeatureInDocumentRoot(name, type);
 	}
 	
 	/**
@@ -555,7 +558,7 @@ public class ModelDecorator {
 	 * @return the EAttribute or null if not found.
 	 */
 	public EAttribute getEAttribute(String name, String type, String owningtype) {
-		EStructuralFeature feature = findEStructuralFeatureInDocumentRoot(name);
+		EStructuralFeature feature = findEStructuralFeatureInDocumentRoot(name, owningtype);
 		if (feature instanceof EAttribute) {
 //			if (type!=null)
 //				Assert.isTrue(type.equals(((EAttribute) feature).getEType().getName()) );
@@ -692,7 +695,7 @@ public class ModelDecorator {
 	 * @return the EReference or null if not found.
 	 */
 	public EReference getEReference(String name, String type, String owningtype, boolean containment, boolean many) {
-		EStructuralFeature feature = findEStructuralFeatureInDocumentRoot(name);
+		EStructuralFeature feature = findEStructuralFeatureInDocumentRoot(name, owningtype);
 		if (feature instanceof EReference) {
 			if (type!=null)
 				Assert.isTrue(type.equals(((EReference) feature).getEType().getName()) );
@@ -891,24 +894,24 @@ public class ModelDecorator {
 		return findEClassifier(null,type);
 	}
 	
-	public EStructuralFeature findEStructuralFeatureInDocumentRoot(String name) {
+	public EStructuralFeature findEStructuralFeatureInDocumentRoot(String name, String owningType) {
 		if (name==null)
 			return null;
-			
+		
 		EStructuralFeature feature = null;
 		
 		if (ePackage!=null) {
-			feature = findEStructuralFeatureInDocumentRoot(ePackage,name);
+			feature = findEStructuralFeatureInDocumentRoot(ePackage,name, owningType);
 			if (feature!=null)
 				return feature;
 		}
 		for (EPackage pkg : getRelatedEPackages()) {
-			feature = findEStructuralFeatureInDocumentRoot(pkg,name);
+			feature = findEStructuralFeatureInDocumentRoot(pkg,name, owningType);
 			if (feature!=null)
 				return feature;
 		}
 		
-		feature = findEStructuralFeatureInDocumentRoot(Bpmn2Package.eINSTANCE, name);
+		feature = findEStructuralFeatureInDocumentRoot(Bpmn2Package.eINSTANCE, name, owningType);
 		if (feature!=null)
 			return feature;
 		
@@ -922,7 +925,8 @@ public class ModelDecorator {
 	 * 3. the BPMN2 packages, including BPMNDI, DI and DC
 	 * 
 	 * @param pkg - an optional EPackage to search.
-	 * @param type - name of the EClassifier to search for.
+	 * @param type - simple name of the EClassifier to search for. This must
+	 *               match the EClassifier's instance class name.
 	 * @return - an EClassifier if found or null if not found.
 	 */
 	public static EClassifier findEClassifier(EPackage pkg, String type) {
@@ -934,10 +938,13 @@ public class ModelDecorator {
 		if (pkg!=null) {
 			eClassifier = pkg.getEClassifier(type);
 			if (eClassifier!=null)
-				return eClassifier;
+				if (eClassifier.getInstanceClass().getSimpleName().equals(type))
+					return eClassifier;
+
 			eClassifier = findEClassifierInDocumentRoot(pkg,type);
 			if (eClassifier!=null)
-				return eClassifier;
+				if (eClassifier.getInstanceClass().getSimpleName().equals(type))
+					return eClassifier;
 		}
 		
 		eClassifier = EcorePackage.eINSTANCE.getEClassifier(type);
@@ -974,29 +981,51 @@ public class ModelDecorator {
 	 * the given EPackage.
 	 * 
 	 * @param pkg - the EPackage to search.
-	 * @param name - name of the EClassifier to search for.
+	 * @param typeName - name of the EClassifier to search for.
 	 * @return - an EClassifier if found or null if not found.
 	 */
-	private static EClassifier findEClassifierInDocumentRoot(EPackage pkg, String name) {
-		EStructuralFeature feature = findEStructuralFeatureInDocumentRoot(pkg, name);
-		if (feature!=null)
-			return feature.getEType();
-		return null;
-	}
-	
-	private static EStructuralFeature findEStructuralFeatureInDocumentRoot(EPackage pkg, String name) {
+	private static EClassifier findEClassifierInDocumentRoot(EPackage pkg, String typeName) {
 		try {
 			EClass docRoot = (EClass)pkg.getEClassifier("DocumentRoot"); //$NON-NLS-1$
 			if (docRoot==null) {
 				docRoot = ExtendedMetaData.INSTANCE.getDocumentRoot(pkg);
 			}
 			if (docRoot!=null) {
-				for (EStructuralFeature feature : docRoot.getEAllStructuralFeatures()) {
-					if (feature.getEContainingClass().getEPackage()==pkg) {
-						if (name.equals(feature.getName()))
-							return feature;
-						if (name.equals(ExtendedMetaData.INSTANCE.getName(feature)))
-							return feature;
+				for (EStructuralFeature f : docRoot.getEAllStructuralFeatures()) {
+					if (f.getEContainingClass().getEPackage()==pkg && f.eContainer() instanceof EClassifier) {
+						EClassifier owningEClass = (EClassifier) f.eContainer();
+						if (typeName.equals(owningEClass.getName())) {
+							return owningEClass;
+						}
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+		}
+		return null;
+	}
+	
+	private static EStructuralFeature findEStructuralFeatureInDocumentRoot(EPackage pkg, String featureName, String typeName) {
+		try {
+			EClass docRoot = (EClass)pkg.getEClassifier("DocumentRoot"); //$NON-NLS-1$
+			if (docRoot==null) {
+				docRoot = ExtendedMetaData.INSTANCE.getDocumentRoot(pkg);
+			}
+			if (docRoot!=null) {
+				for (EStructuralFeature f : docRoot.getEAllStructuralFeatures()) {
+					if (f.getEContainingClass().getEPackage()==pkg && f.eContainer() instanceof EClassifier) {
+						EStructuralFeature feature = null;
+						if (featureName.equals(f.getName()))
+							feature = f;
+						else if (featureName.equals(ExtendedMetaData.INSTANCE.getName(f)))
+							feature = f;
+						if (feature!=null) {
+							EClassifier owningEClass = (EClassifier) feature.eContainer();
+							if (typeName.equals(owningEClass.getName())) {
+								return feature;
+							}
+						}
 					}
 				}
 			}
@@ -1279,7 +1308,7 @@ public class ModelDecorator {
 						domain.getCommandStack().execute(new RecordingCommand(domain) {
 							@Override
 							protected void doExecute() {
-								Process process = Bpmn2ModelerFactory.create(participant.eResource(), Process.class);
+								Process process = Bpmn2ModelerFactory.createObject(participant.eResource(), Process.class);
 								participant.setProcessRef(process);
 								definitions.getRootElements().add(process);
 								ModelUtil.setID(process);

@@ -14,16 +14,14 @@
 package org.eclipse.bpmn2.modeler.ui.adapters.properties;
 
 import java.util.Hashtable;
+import java.util.Map;
 
 import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.Bpmn2Package;
 import org.eclipse.bpmn2.Definitions;
-import org.eclipse.bpmn2.ItemDefinition;
-import org.eclipse.bpmn2.modeler.core.IBpmn2RuntimeExtension;
 import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesAdapter;
 import org.eclipse.bpmn2.modeler.core.adapters.FeatureDescriptor;
 import org.eclipse.bpmn2.modeler.core.adapters.ObjectDescriptor;
-import org.eclipse.bpmn2.modeler.core.model.Bpmn2ModelerFactory;
 import org.eclipse.bpmn2.modeler.core.runtime.ExpressionLanguageDescriptor;
 import org.eclipse.bpmn2.modeler.core.runtime.TargetRuntime;
 import org.eclipse.bpmn2.modeler.core.runtime.TypeLanguageDescriptor;
@@ -68,7 +66,7 @@ public class DefinitionsPropertiesAdapter extends ExtendedPropertiesAdapter<Defi
     	
 		setObjectDescriptor(new ObjectDescriptor<Definitions>(this,object) {
 			@Override
-			public Definitions createObject(Resource resource, EClass eclass) {
+			public Definitions createObject(Resource resource, EClass eclass, Map<String, Object> args) {
 				Definitions definitions = Bpmn2Factory.eINSTANCE.createDefinitions();
 				TargetRuntime rt = TargetRuntime.getRuntime(object);
 				definitions.setTypeLanguage(rt.getTypeLanguage());

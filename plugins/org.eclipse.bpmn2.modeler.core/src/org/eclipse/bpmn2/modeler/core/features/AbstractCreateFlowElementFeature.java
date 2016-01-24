@@ -50,12 +50,6 @@ public abstract class AbstractCreateFlowElementFeature<T extends FlowElement> ex
 	public boolean canCreate(ICreateContext context) {
 		if (!super.canCreate(context))
 			return false;
-		if (FeatureSupport.isTargetParticipant(context)) {
-			Participant participant = FeatureSupport.getTargetParticipant(context);
-			if (FeatureSupport.hasBpmnDiagram(participant)) {
-				return false;
-			}
-		}
 		if (FeatureSupport.isTargetFlowElementsContainer(context)) {
 			FlowElementsContainer flowElementsContainer = FeatureSupport.getTargetFlowElementsContainer(context);
 			if (FeatureSupport.hasBpmnDiagram(flowElementsContainer))

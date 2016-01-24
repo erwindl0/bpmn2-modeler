@@ -261,11 +261,11 @@ public class BoundaryEventPositionHelper {
 	}
 
 	public static void assignPositionOnLineProperty(PropertyContainer propertyContainer, PositionOnLine pos) {
-		peService.setPropertyValue(propertyContainer, GraphitiConstants.BOUNDARY_EVENT_RELATIVE_POS, pos.toString());
+		FeatureSupport.setPropertyValue(propertyContainer, GraphitiConstants.BOUNDARY_EVENT_RELATIVE_POS, pos.toString());
 	}
 
 	public static PositionOnLine getPositionOnLineProperty(PropertyContainer propertyContainer) {
-		String value = peService.getPropertyValue(propertyContainer, GraphitiConstants.BOUNDARY_EVENT_RELATIVE_POS);
+		String value = FeatureSupport.getPropertyValue(propertyContainer, GraphitiConstants.BOUNDARY_EVENT_RELATIVE_POS);
 		return PositionOnLine.fromString(value);
 	}
 }

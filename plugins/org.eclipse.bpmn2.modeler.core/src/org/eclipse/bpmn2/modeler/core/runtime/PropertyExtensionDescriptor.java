@@ -78,6 +78,7 @@ public class PropertyExtensionDescriptor extends BaseRuntimeExtensionDescriptor 
 			else {
 				eclass = object.eClass();
 			}
+			TargetRuntimeAdapter.adapt(object, targetRuntime);
 			ctor = getConstructor(adapterClass, eclass);
 			return (ExtendedPropertiesAdapter)ctor.newInstance(adapterFactory, object);
 		} catch (Exception e) {

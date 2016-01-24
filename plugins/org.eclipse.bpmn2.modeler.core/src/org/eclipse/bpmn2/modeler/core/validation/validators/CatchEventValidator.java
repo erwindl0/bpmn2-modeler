@@ -15,7 +15,6 @@ package org.eclipse.bpmn2.modeler.core.validation.validators;
 
 import org.eclipse.bpmn2.CatchEvent;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.validation.IValidationContext;
 

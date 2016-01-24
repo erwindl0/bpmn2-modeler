@@ -344,7 +344,11 @@ public class EventDefinitionsListComposite extends DefaultListComposite {
 			).setEditable(false);
 		return columnProvider;
 	}
-	
+
+	protected List<EClass> getAllowedEventDefinitions(Event event, Object parentContainer) {
+		return FeatureSupport.getAllowedEventDefinitions(event, parentContainer);
+	}
+
 	@Override
 	public EClass getListItemClassToAdd(EClass listItemClass) {
 		EClass eclass = null;
@@ -352,7 +356,7 @@ public class EventDefinitionsListComposite extends DefaultListComposite {
 			@Override
 			protected void filterList(List<EClass> items) {
 				List<EClass> filteredItems = new ArrayList<EClass>();
-				List<EClass> allowedItems = FeatureSupport.getAllowedEventDefinitions(event, null);
+				List<EClass> allowedItems = getAllowedEventDefinitions(event, null);
 				for (EClass eclass : items) {
 					if (allowedItems.contains(eclass)) {
 						boolean skip = false;

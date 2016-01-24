@@ -13,16 +13,13 @@
 package org.eclipse.bpmn2.modeler.core.features.containers.participant;
 
 import org.eclipse.bpmn2.BaseElement;
-import org.eclipse.bpmn2.Lane;
 import org.eclipse.bpmn2.Participant;
 import org.eclipse.bpmn2.di.BPMNShape;
 import org.eclipse.bpmn2.modeler.core.features.AbstractBpmn2AddFeature;
 import org.eclipse.bpmn2.modeler.core.features.GraphitiConstants;
 import org.eclipse.bpmn2.modeler.core.features.label.AddShapeLabelFeature;
-import org.eclipse.bpmn2.modeler.core.utils.AnchorUtil;
 import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.bpmn2.modeler.core.utils.StyleUtil;
-import org.eclipse.dd.dc.Bounds;
 import org.eclipse.graphiti.features.IAddFeature;
 import org.eclipse.graphiti.features.IFeatureProvider;
 import org.eclipse.graphiti.features.context.IAddContext;
@@ -39,6 +36,8 @@ import org.eclipse.graphiti.services.IPeCreateService;
 
 public class AddParticipantFeature extends AbstractBpmn2AddFeature<Participant> {
 
+	public static final int TITLE_HEIGHT = 30;
+	
 	public AddParticipantFeature(IFeatureProvider fp) {
 		super(fp);
 	}
@@ -88,7 +87,7 @@ public class AddParticipantFeature extends AbstractBpmn2AddFeature<Participant> 
 		boolean isImport = context.getProperty(GraphitiConstants.IMPORT_PROPERTY) != null;
 		BPMNShape bpmnShape = createDIShape(containerShape, businessObject, !isImport);
 		boolean horz = bpmnShape.isIsHorizontal();
-		Object copiedBpmnShape = context.getProperty(GraphitiConstants.COPIED_BPMN_SHAPE);
+		Object copiedBpmnShape = context.getProperty(GraphitiConstants.COPIED_BPMN_DI_ELEMENT);
 		if (copiedBpmnShape instanceof BPMNShape) {
 			horz = ((BPMNShape) copiedBpmnShape).isIsHorizontal();
 		}
@@ -97,14 +96,14 @@ public class AddParticipantFeature extends AbstractBpmn2AddFeature<Participant> 
 		Shape lineShape = peCreateService.createShape(containerShape, false);
 		Polyline line;
 		if (horz)
-			line = gaService.createPolyline(lineShape, new int[] { 30, 0, 30, height });
+			line = gaService.createPolyline(lineShape, new int[] { TITLE_HEIGHT, 0, TITLE_HEIGHT, height });
 		else
-			line = gaService.createPolyline(lineShape, new int[] { 0, 30, width, 30 });
+			line = gaService.createPolyline(lineShape, new int[] { 0, TITLE_HEIGHT, width, TITLE_HEIGHT });
 		StyleUtil.applyStyle(line, businessObject);
 
 		// the decorator for Participant Multiplicity will be added by the update feature
 		// if necessary. Set this property to "false" here, to force an update.
-		peService.setPropertyValue(containerShape, GraphitiConstants.MULTIPLICITY, Boolean.toString(false));
+		FeatureSupport.setPropertyValue(containerShape, GraphitiConstants.MULTIPLICITY, Boolean.toString(false));
 		
 		decorateShape(context, containerShape, businessObject);
 		

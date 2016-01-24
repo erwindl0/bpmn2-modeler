@@ -14,14 +14,14 @@
 package org.eclipse.bpmn2.modeler.core.adapters;
 
 import java.util.Hashtable;
+import java.util.Map;
 
-import org.eclipse.bpmn2.modeler.core.features.GraphitiConstants;
+import org.eclipse.bpmn2.modeler.core.model.Bpmn2ModelerFactory;
 import org.eclipse.bpmn2.modeler.core.model.ModelDecorator;
 import org.eclipse.bpmn2.modeler.core.utils.ModelUtil;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EFactory;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -299,19 +299,6 @@ public class ObjectDescriptor<T extends EObject> {
 			return (TransactionalEditingDomain)result;
 		return null;
 	}
-
-	/**
-	 * Create a new instance of the object that is managed by this
-	 * ObjectDescriptor.
-	 * 
-	 * @param eclass an optional type for the new object. Note that this must be
-	 *            a subtype of the feature type as returned by
-	 *            {@code getEType()}.
-	 * @return the new object.
-	 */
-	public T createObject(EClass eclass) {
-		return createObject(getResource(),eclass);
-	}
 	
 	/**
 	 * Gets the EMF Resource managed by our {@link ExtendedPropertiesAdapter}
@@ -323,17 +310,25 @@ public class ObjectDescriptor<T extends EObject> {
 	}
 	
 	/**
-	 * Create a new instance of the object that is managed by this ObjectDescriptor.
-	 *  
-	 * @param resource the EMF Resource in which to create the new object.
-	 * @param eclass an optional type for the new object. Note that this must be
-	 *            a subtype of the feature type as returned by
-	 *            {@code getEType()}.
+	 * Create a new instance of the object that is managed by this
+	 * ObjectDescriptor.
+	 * 
+	 * This method should ONLY be called by subclasses of ObjectDescriptor or
+	 * its parent ExtendedPropertiesAdapter
+	 * 
+	 * @param resource
+	 *            the EMF Resource in which to create the new object.
+	 * @param eclass
+	 *            an optional type for the new object. Note that this must be a
+	 *            subtype of the feature type as returned by {@code getEType()}.
+	 * @param args
+	 *            a collection of key/value pairs passed down to the model
+	 *            factory. These are used to determine how to initialize the
+	 *            newly constructed object.
 	 * @return the new object.
 	 */
 	@SuppressWarnings("unchecked")
-	public T createObject(Resource resource, EClass eclass) {
-		
+	public T createObject(Resource resource, EClass eclass, Map<String, Object> args) {
 		EClass eClass = null;
 		if (eclass instanceof EClass) {
 			eClass = (EClass)eclass;
@@ -349,34 +344,7 @@ public class ObjectDescriptor<T extends EObject> {
 		if (resource==null)
 			resource = getResource();
 
-		// set the Resource into the Factory's adapter temporarily for use during
-		// object construction and initialization (@see ModelExtensionDescriptor)
-		EFactory factory = eClass.getEPackage().getEFactoryInstance();
-		ObjectPropertyProvider adapter = ObjectPropertyProvider.adapt(factory, resource);
-		Object value = owner.getProperty(GraphitiConstants.CUSTOM_ELEMENT_ID);
-		if (value!=null)
-			adapter.setProperty(GraphitiConstants.CUSTOM_ELEMENT_ID, value);
-		T newObject = null;
-		synchronized(factory) {
-			newObject = (T) factory.create(eClass);
-		}
-		
-		// if the object has an "id", assign it now.
-		String id = ModelUtil.setID(newObject,resource);
-		// also set a default name
-		EStructuralFeature feature = newObject.eClass().getEStructuralFeature("name"); //$NON-NLS-1$
-		if (feature!=null && !newObject.eIsSet(feature)) {
-			if (id!=null)
-				newObject.eSet(feature, ModelUtil.toCanonicalString(id));
-			else {
-				String name = ModelUtil.toCanonicalString(newObject.eClass().getName());
-				newObject.eSet(feature, NLS.bind(Messages.ObjectDescriptor_New, name));
-			}
-		}
-		
-		adapter = ExtendedPropertiesAdapter.adapt(newObject);
-		if (adapter!=null)
-			adapter.setResource(resource);
+		T newObject = (T) Bpmn2ModelerFactory.create(resource, eClass, args);
 		
 		return newObject;
 	}

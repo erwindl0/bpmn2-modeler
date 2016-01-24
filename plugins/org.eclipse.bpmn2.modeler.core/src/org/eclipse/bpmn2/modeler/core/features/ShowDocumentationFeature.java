@@ -12,9 +12,9 @@ package org.eclipse.bpmn2.modeler.core.features;
 
 import java.util.List;
 
-import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.Documentation;
 import org.eclipse.bpmn2.modeler.core.IConstants;
+import org.eclipse.bpmn2.modeler.core.model.Bpmn2ModelerFactory;
 import org.eclipse.bpmn2.modeler.core.preferences.ModelEnablements;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
 import org.eclipse.emf.ecore.EObject;
@@ -137,10 +137,11 @@ public class ShowDocumentationFeature extends AbstractBpmn2CustomFeature {
 			if (documentation==null) {
 				if (text.isEmpty())
 					return;
-				documentation = Bpmn2Factory.eINSTANCE.createDocumentation();
+				documentation = Bpmn2ModelerFactory.create(businessObject.eResource(), Documentation.class);
 				docList.add(documentation);
 			}
 			documentation.setText(text);
+			changesDone = true;
 		}
 	}
 

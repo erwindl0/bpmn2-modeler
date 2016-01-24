@@ -18,8 +18,6 @@ import org.eclipse.bpmn2.di.BPMNDiagram;
 import org.eclipse.bpmn2.di.BPMNShape;
 import org.eclipse.bpmn2.modeler.core.di.DIUtils;
 import org.eclipse.bpmn2.modeler.core.features.AbstractBpmn2CustomFeature;
-import org.eclipse.bpmn2.modeler.core.preferences.Bpmn2Preferences;
-import org.eclipse.bpmn2.modeler.core.preferences.ShapeStyle;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
 import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.bpmn2.modeler.ui.ImageProvider;
@@ -86,41 +84,39 @@ public class CollapseFlowNodeFeature extends AbstractBpmn2CustomFeature {
 					BPMNDiagram bpmnDiagram = DIUtils.findBPMNDiagram(pe0);
 					BPMNShape bpmnShape = DIUtils.findBPMNShape(bpmnDiagram, flowNode);
 					if (bpmnShape.isIsExpanded()) {
-						Bpmn2Preferences preferences = Bpmn2Preferences.getInstance(getDiagram());
-						ShapeStyle ss = preferences.getShapeStyle("TASKS"); //$NON-NLS-1$
+						GraphicsAlgorithm ga = containerShape.getGraphicsAlgorithm();
+						FeatureSupport.updateExpandedSize(containerShape);
 						
-						// SubProcess is expanded - resize to standard Task size
+						// SubProcess is expanded - resize to either previously
+						// collapsed size or standard Task size
 						// NOTE: children tasks will be set not-visible in LayoutExpandableActivityFeature
 						
 						bpmnShape.setIsExpanded(false);
 
-						GraphicsAlgorithm ga = containerShape.getGraphicsAlgorithm();
-						ResizeShapeContext resizeContext = new ResizeShapeContext(containerShape);
-						IResizeShapeFeature resizeFeature = getFeatureProvider().getResizeShapeFeature(resizeContext);
-						IDimension oldSize = FeatureSupport.getCollapsedSize(containerShape);
+						IDimension newSize = FeatureSupport.getCollapsedSize(containerShape);
+						int newWidth = newSize.getWidth();
+						int newHeight = newSize.getHeight();
 						int oldWidth = ga.getWidth();
 						int oldHeight = ga.getHeight();
-						FeatureSupport.setExpandedSize(containerShape, oldWidth, oldHeight);
 
-						int newWidth = ss.getDefaultWidth();
-						int newHeight = ss.getDefaultHeight();
-						if (newWidth < oldSize.getWidth())
-							oldSize.setWidth(newWidth);
-						if (newHeight < oldSize.getHeight())
-							oldSize.setHeight(newHeight);
-						newWidth = oldSize.getWidth();
-						newHeight = oldSize.getHeight();
+						ResizeShapeContext resizeContext = new ResizeShapeContext(containerShape);
+						resizeContext.setWidth(newWidth);
+						resizeContext.setHeight(newHeight);
 						resizeContext.setX(ga.getX() + oldWidth/2 - newWidth/2);
 						resizeContext.setY(ga.getY() + oldHeight/2 - newHeight/2);
 						resizeContext.setWidth(newWidth);
 						resizeContext.setHeight(newHeight);
+
+						IResizeShapeFeature resizeFeature = getFeatureProvider().getResizeShapeFeature(resizeContext);
 						resizeFeature.resizeShape(resizeContext);
 						
 						UpdateContext updateContext = new UpdateContext(containerShape);
 						IUpdateFeature updateFeature = getFeatureProvider().getUpdateFeature(updateContext);
-						if (updateFeature.updateNeeded(updateContext).toBoolean())
-							updateFeature.update(updateContext);
+						updateFeature.update(updateContext);
 						
+						// layout the incoming and outgoing connections
+						FeatureSupport.updateConnections(getFeatureProvider(), FeatureSupport.getConnections(containerShape), true);
+
 						getDiagramEditor().selectPictogramElements(new PictogramElement[] {});
 					}
 					

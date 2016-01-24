@@ -7,21 +7,20 @@
 	<parent>
 		<groupId>org.eclipse.bpmn2.modeler</groupId>
 		<artifactId>org.eclipse.bpmn2.modeler.parent</artifactId>
-		<version>1.2.1-SNAPSHOT</version>
+		<version>1.3.0-SNAPSHOT</version>
 		<relativePath>../parent/pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.eclipse.bpmn2.modeler.plugins</groupId>
 	<artifactId>org.eclipse.bpmn2.modeler.plugins.parent</artifactId>
 	<name>BPMN2 Modeler: Plugins Parent</name>
-	<version>1.2.1-SNAPSHOT</version>
+	<version>1.3.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
 		<module>org.eclipse.bpmn2.modeler.core</module>
 		<module>org.eclipse.bpmn2.modeler.ui</module>
-		<module>org.eclipse.bpmn2.modeler.runtime.jboss.jbpm5</module>
-		<module>org.eclipse.bpmn2.modeler.wsil</module>
+		<module>org.eclipse.bpmn2.modeler.runtime.jboss.jbpm</module>
 		<module>org.eclipse.bpmn2.modeler.help</module>
 	</modules>
 

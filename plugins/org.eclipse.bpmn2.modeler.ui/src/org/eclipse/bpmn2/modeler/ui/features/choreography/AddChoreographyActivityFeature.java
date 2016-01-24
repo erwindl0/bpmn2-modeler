@@ -23,9 +23,9 @@ import org.eclipse.bpmn2.modeler.core.features.AbstractBpmn2AddFeature;
 import org.eclipse.bpmn2.modeler.core.features.GraphitiConstants;
 import org.eclipse.bpmn2.modeler.core.features.choreography.ChoreographyUtil;
 import org.eclipse.bpmn2.modeler.core.features.label.AddShapeLabelFeature;
-import org.eclipse.bpmn2.modeler.core.utils.AnchorUtil;
-import org.eclipse.bpmn2.modeler.core.utils.ShapeDecoratorUtil;
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.bpmn2.modeler.core.utils.ModelUtil;
+import org.eclipse.bpmn2.modeler.core.utils.ShapeDecoratorUtil;
 import org.eclipse.bpmn2.modeler.core.utils.StyleUtil;
 import org.eclipse.graphiti.features.IAddFeature;
 import org.eclipse.graphiti.features.IFeatureProvider;
@@ -102,7 +102,7 @@ public abstract class AddChoreographyActivityFeature<T extends ChoreographyActiv
 		ShapeDecoratorUtil.hideActivityMarker(containerShape, GraphitiConstants.ACTIVITY_MARKER_EXPAND);
 
 		if (businessObject instanceof ChoreographyTask) {
-			peService.setPropertyValue(containerShape, ChoreographyUtil.MESSAGE_REF_IDS,
+			FeatureSupport.setPropertyValue(containerShape, ChoreographyUtil.MESSAGE_REF_IDS,
 					ChoreographyUtil.getMessageRefIds((ChoreographyTask) businessObject));
 		}
 

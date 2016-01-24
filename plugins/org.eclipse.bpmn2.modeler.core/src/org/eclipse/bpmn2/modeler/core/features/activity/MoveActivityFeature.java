@@ -20,8 +20,10 @@ import org.eclipse.bpmn2.modeler.core.features.event.AbstractBoundaryEventOperat
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
 import org.eclipse.graphiti.features.IFeatureProvider;
 import org.eclipse.graphiti.features.IMoveShapeFeature;
+import org.eclipse.graphiti.features.IResizeShapeFeature;
 import org.eclipse.graphiti.features.context.IMoveShapeContext;
 import org.eclipse.graphiti.features.context.impl.MoveShapeContext;
+import org.eclipse.graphiti.features.context.impl.ResizeShapeContext;
 import org.eclipse.graphiti.mm.algorithms.GraphicsAlgorithm;
 import org.eclipse.graphiti.mm.pictograms.ContainerShape;
 import org.eclipse.graphiti.mm.pictograms.PictogramElement;
@@ -55,7 +57,6 @@ public class MoveActivityFeature extends MoveFlowNodeFeature {
 	 */
 	@Override
 	protected void postMoveShape(final IMoveShapeContext context) {
-		super.postMoveShape(context);
 
 		Shape containerShape = context.getShape();
 		Activity activity = BusinessObjectUtil.getFirstElementOfType(containerShape, Activity.class);
@@ -82,11 +83,7 @@ public class MoveActivityFeature extends MoveFlowNodeFeature {
 		}.doWork(activity, getDiagram());
 		
 		layoutPictogramElement(containerShape);
-		if (containerShape.eContainer() instanceof ContainerShape) {
-			PictogramElement pe = (PictogramElement) containerShape.eContainer();
-			if (BusinessObjectUtil.containsElementOfType(pe, SubProcess.class)) {
-				layoutPictogramElement(pe);
-			}
-		}
+		
+		super.postMoveShape(context);
 	}
 }

@@ -74,7 +74,8 @@ public class DefaultDialogComposite extends AbstractDialogComposite {
 			ITabDescriptor[] tabDescriptors = getTabDescriptors();
 			int detailsCount = getDetailsCount();
 			
-			if (detailsCount>1) {
+			// Change from previous version: always display tabs if there is at least one
+			if (detailsCount>0) {
 				folder = new TabFolder(this, SWT.NONE);
 				folder.setLayout(new FormLayout());
 				folder.setBackground(parent.getBackground());

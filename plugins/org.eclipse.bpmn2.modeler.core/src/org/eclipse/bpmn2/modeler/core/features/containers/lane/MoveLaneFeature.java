@@ -144,7 +144,7 @@ public class MoveLaneFeature extends MoveContainerFeature {
 			process = participant.getProcessRef();
 			if (process == null) {
 				// create a new Process
-				process = modelHandler.create(Process.class);
+				process = modelHandler.createObject(Process.class);
 				modelHandler.getDefinitions().getRootElements().add(process);
 				process.setName(participant.getName() + Messages.MoveLaneFeature_Process_Label);
 				if (participant.eContainer() instanceof Collaboration) {
@@ -180,7 +180,7 @@ public class MoveLaneFeature extends MoveContainerFeature {
 	}
 
 	protected LaneSet createLaneSet() {
-		return modelHandler.create(LaneSet.class);
+		return modelHandler.createObject(LaneSet.class);
 	}
 	
 	protected void moveLane(Lane movedLane, Process sourceProcess, Process targetProcess) {

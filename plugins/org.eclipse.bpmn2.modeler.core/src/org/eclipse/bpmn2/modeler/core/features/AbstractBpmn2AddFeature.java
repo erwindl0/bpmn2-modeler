@@ -259,16 +259,10 @@ public abstract class AbstractBpmn2AddFeature<T extends BaseElement>
 				}
 				
 				Connection newConnection = null;
-				for (ICreateConnectionFeature cf : getFeatureProvider().getCreateConnectionFeatures()) {
-					if (cf instanceof AbstractCreateFlowFeature) {
-						AbstractCreateFlowFeature acf = (AbstractCreateFlowFeature) cf;
-						if (acf.getBusinessObjectClass().isInstance(baseElement)) {
-							newConnection = acf.create(ccc);
-							DIUtils.updateDIEdge(newConnection);
-							break;
-						}
-					}
-				}
+				ICreateConnectionFeature ccf = AbstractCreateFlowFeature.getCreateFeature(getFeatureProvider(), ccc, baseElement);
+				if (ccf!=null)
+					newConnection = ccf.create(ccc);
+				DIUtils.updateDIEdge(newConnection);
 			}
 			DIUtils.updateDIEdge(connection);
 		}
@@ -282,12 +276,12 @@ public abstract class AbstractBpmn2AddFeature<T extends BaseElement>
 	 * @return the height
 	 */
 	protected int getHeight(IAddContext context) {
-		Object copiedBpmnShape = context.getProperty(GraphitiConstants.COPIED_BPMN_SHAPE);
+		Object copiedBpmnShape = context.getProperty(GraphitiConstants.COPIED_BPMN_DI_ELEMENT);
 		if (copiedBpmnShape instanceof BPMNShape) {
 			Bounds b = ((BPMNShape)copiedBpmnShape).getBounds();
 			if (b!=null)
-				if (isHorizontal(context))
-					return (int) b.getWidth();
+//				if (isHorizontal(context))
+//					return (int) b.getWidth();
 				return (int) b.getHeight();
 		}
 		if (context.getHeight() > 0)
@@ -310,12 +304,12 @@ public abstract class AbstractBpmn2AddFeature<T extends BaseElement>
 	 * @return the width
 	 */
 	protected int getWidth(IAddContext context) {
-		Object copiedBpmnShape = context.getProperty(GraphitiConstants.COPIED_BPMN_SHAPE);
+		Object copiedBpmnShape = context.getProperty(GraphitiConstants.COPIED_BPMN_DI_ELEMENT);
 		if (copiedBpmnShape instanceof BPMNShape) {
 			Bounds b = ((BPMNShape)copiedBpmnShape).getBounds();
 			if (b!=null) {
-				if (isHorizontal(context))
-					return (int) b.getHeight();
+//				if (isHorizontal(context))
+//					return (int) b.getHeight();
 				return (int) b.getWidth();
 			}
 		}
@@ -366,7 +360,7 @@ public abstract class AbstractBpmn2AddFeature<T extends BaseElement>
 		}
 		if (context.getProperty(GraphitiConstants.IMPORT_PROPERTY) == null) {
 			// not importing - set isHorizontal to be the same as copied element or parent
-			Object copiedBpmnShape = context.getProperty(GraphitiConstants.COPIED_BPMN_SHAPE);
+			Object copiedBpmnShape = context.getProperty(GraphitiConstants.COPIED_BPMN_DI_ELEMENT);
 			if (copiedBpmnShape instanceof BPMNShape) {
 				return ((BPMNShape)copiedBpmnShape).isIsHorizontal();
 			}

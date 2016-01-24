@@ -206,23 +206,29 @@ public class DIUtils {
 					bpmnEdge = BpmnDiFactory.eINSTANCE.createBPMNEdge();
 					bpmnEdge.setBpmnElement(elem);
 
-					if (elem instanceof Association) {
-						bpmnEdge.setSourceElement(DIUtils.findDiagramElement(
-								((Association) elem).getSourceRef()));
-						bpmnEdge.setTargetElement(DIUtils.findDiagramElement(
-								((Association) elem).getTargetRef()));
-					} else if (elem instanceof MessageFlow) {
-						bpmnEdge.setSourceElement(DIUtils.findDiagramElement(
-								(BaseElement) ((MessageFlow) elem).getSourceRef()));
-						bpmnEdge.setTargetElement(DIUtils.findDiagramElement(
-								(BaseElement) ((MessageFlow) elem).getTargetRef()));
-					} else if (elem instanceof SequenceFlow) {
-						bpmnEdge.setSourceElement(DIUtils.findDiagramElement(
-								((SequenceFlow) elem).getSourceRef()));
-						bpmnEdge.setTargetElement(DIUtils.findDiagramElement(
-								((SequenceFlow) elem).getTargetRef()));
+					DiagramElement diSource = BusinessObjectUtil.getFirstElementOfType(connection.getStart().getParent(), DiagramElement.class);
+					DiagramElement diTarget = BusinessObjectUtil.getFirstElementOfType(connection.getEnd().getParent(), DiagramElement.class);
+					if (diSource==null) {
+						if (elem instanceof Association) {
+							diSource = DIUtils.findDiagramElement(((Association) elem).getSourceRef());
+						} else if (elem instanceof MessageFlow) {
+							diSource = DIUtils.findDiagramElement((BaseElement) ((MessageFlow) elem).getSourceRef());
+						} else if (elem instanceof SequenceFlow) {
+							diSource = DIUtils.findDiagramElement(((SequenceFlow) elem).getSourceRef());
+						}
 					}
-
+					if (diTarget==null) {
+						if (elem instanceof Association) {
+							diTarget = DIUtils.findDiagramElement(((Association) elem).getTargetRef());
+						} else if (elem instanceof MessageFlow) {
+							diTarget = DIUtils.findDiagramElement((BaseElement) ((MessageFlow) elem).getTargetRef());
+						} else if (elem instanceof SequenceFlow) {
+							diTarget = DIUtils.findDiagramElement(((SequenceFlow) elem).getTargetRef());
+						}
+					}
+					bpmnEdge.setSourceElement(diSource);
+					bpmnEdge.setTargetElement(diTarget);
+					
 					ILocation sourceLoc = Graphiti.getPeService().getLocationRelativeToDiagram(connection.getStart());
 					ILocation targetLoc = Graphiti.getPeService().getLocationRelativeToDiagram(connection.getEnd());
 
@@ -250,6 +256,9 @@ public class DIUtils {
 	public static void updateDIEdge(Connection connection) {
 		ILayoutService layoutService = Graphiti.getLayoutService();
 		EObject be = BusinessObjectUtil.getFirstElementOfType(connection, BaseElement.class);
+		if (be==null)
+			return;
+		
 		BPMNDiagram bpmnDiagram = DIUtils.findBPMNDiagram(connection);
 		BPMNEdge edge = DIUtils.findBPMNEdge(bpmnDiagram, be);
 		if (edge!=null) {
@@ -530,9 +539,20 @@ public class DIUtils {
 					if (!list.contains(o))
 						list.add(o);
 				}
+				else if (o instanceof PictogramElement)
+					if (!list.contains(o))
+						list.add(o);
 			}
-			for (EObject o : list)
-				EcoreUtil.delete(o);
+			for (EObject o : list) {
+				if (o instanceof PictogramElement) {
+					PictogramLink pl = ((PictogramElement)o).getLink();
+					if (pl!=null)
+						pl.getBusinessObjects().clear();
+					Graphiti.getPeService().deletePictogramElement((PictogramElement)o);
+				}
+				else
+					EcoreUtil.delete(o);
+			}
 			
 			EcoreUtil.delete(diagram);
 			EcoreUtil.delete(bpmnDiagram);
@@ -717,6 +737,13 @@ public class DIUtils {
 		return null;
 	}
 	
+	public static BPMNDiagram createBPMNDiagram(BaseElement container) {
+		Definitions definitions = ModelUtil.getDefinitions(container);
+		if (definitions!=null)
+			return createBPMNDiagram(definitions, container);
+		return null;
+	}
+	
 	public static BPMNDiagram createBPMNDiagram(Definitions definitions, BaseElement container) {
 		
 		Resource resource = definitions.eResource();
@@ -872,9 +899,10 @@ public class DIUtils {
 			}
 			
 			if (canDelete) {
-				EcoreUtil.delete(rootElement);
-				if (bpmnDiagram!=null && newRootElement!=null)
+				if (bpmnDiagram!=null && newRootElement!=null) {
+					EcoreUtil.delete(rootElement);
 					bpmnDiagram.getPlane().setBpmnElement(newRootElement);
+				}
 			}
 		}
 		return canDelete;

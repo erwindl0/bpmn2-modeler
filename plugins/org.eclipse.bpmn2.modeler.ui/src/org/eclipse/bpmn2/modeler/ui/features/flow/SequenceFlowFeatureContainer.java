@@ -38,6 +38,7 @@ import org.eclipse.bpmn2.modeler.core.features.flow.AbstractCreateFlowFeature;
 import org.eclipse.bpmn2.modeler.core.features.flow.AbstractReconnectFlowFeature;
 import org.eclipse.bpmn2.modeler.core.features.label.UpdateLabelFeature;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
+import org.eclipse.bpmn2.modeler.core.utils.FeatureSupport;
 import org.eclipse.bpmn2.modeler.core.utils.StyleUtil;
 import org.eclipse.bpmn2.modeler.core.utils.Tuple;
 import org.eclipse.bpmn2.modeler.ui.ImageProvider;
@@ -313,7 +314,7 @@ public class SequenceFlowFeatureContainer extends BaseElementConnectionFeatureCo
 			}
 		}
 
-		peService.setPropertyValue(connection, IS_DEFAULT_FLOW_PROPERTY,
+		FeatureSupport.setPropertyValue(connection, IS_DEFAULT_FLOW_PROPERTY,
 				Boolean.toString(isDefault));
 
 	}
@@ -335,7 +336,7 @@ public class SequenceFlowFeatureContainer extends BaseElementConnectionFeatureCo
 		@Override
 		public IReason updateNeeded(IUpdateContext context) {
 			IPeService peService = Graphiti.getPeService();
-			String property = peService.getPropertyValue(context.getPictogramElement(), IS_DEFAULT_FLOW_PROPERTY);
+			String property = FeatureSupport.getPropertyValue(context.getPictogramElement(), IS_DEFAULT_FLOW_PROPERTY);
 			if (property == null || !canUpdate(context)) {
 				return Reason.createFalseReason();
 			}
@@ -373,7 +374,7 @@ public class SequenceFlowFeatureContainer extends BaseElementConnectionFeatureCo
 			peService.deletePictogramElement(cond);
 		}
 
-		peService.setPropertyValue(connection, IS_CONDITIONAL_FLOW_PROPERTY,
+		FeatureSupport.setPropertyValue(connection, IS_CONDITIONAL_FLOW_PROPERTY,
 				Boolean.toString(flow.getConditionExpression() != null));
 	}
 	
@@ -402,7 +403,7 @@ public class SequenceFlowFeatureContainer extends BaseElementConnectionFeatureCo
 			if (pe instanceof Connection) {
 				Connection connection = (Connection) pe;
 				SequenceFlow flow = BusinessObjectUtil.getFirstElementOfType(connection, SequenceFlow.class);
-				String property = peService.getPropertyValue(connection, IS_CONDITIONAL_FLOW_PROPERTY);
+				String property = FeatureSupport.getPropertyValue(connection, IS_CONDITIONAL_FLOW_PROPERTY);
 				if (property == null || !canUpdate(context)) {
 					return Reason.createFalseReason();
 				}
@@ -481,12 +482,12 @@ public class SequenceFlowFeatureContainer extends BaseElementConnectionFeatureCo
 		Iterator<ConnectionDecorator> iterator = connection.getConnectionDecorators().iterator();
 		while (iterator.hasNext()) {
 			ConnectionDecorator connectionDecorator = iterator.next();
-			String defProp = peService.getPropertyValue(connectionDecorator, DEFAULT_MARKER_PROPERTY);
+			String defProp = FeatureSupport.getPropertyValue(connectionDecorator, DEFAULT_MARKER_PROPERTY);
 			if (defProp != null && new Boolean(defProp)) {
 				defaultDecorator = connectionDecorator;
 				continue;
 			}
-			String condProp = peService.getPropertyValue(connectionDecorator, CONDITIONAL_MARKER_PROPERTY);
+			String condProp = FeatureSupport.getPropertyValue(connectionDecorator, CONDITIONAL_MARKER_PROPERTY);
 			if (condProp != null && new Boolean(condProp)) {
 				conditionalDecorator = connectionDecorator;
 			}
@@ -499,14 +500,14 @@ public class SequenceFlowFeatureContainer extends BaseElementConnectionFeatureCo
 		ConnectionDecorator marker = Graphiti.getPeService().createConnectionDecorator(connection, false, 0.0, true);
 		Polyline line = Graphiti.getGaService().createPolyline(marker, new int[] { -6, 6, -12, -6 });
 		line.setLineWidth(2);
-		Graphiti.getPeService().setPropertyValue(marker, DEFAULT_MARKER_PROPERTY, Boolean.toString(true));
+		FeatureSupport.setPropertyValue(marker, DEFAULT_MARKER_PROPERTY, Boolean.toString(true));
 		return marker;
 	}
 
 	private static ConnectionDecorator createConditionalConnectionDecorator(Connection connection) {
 		ConnectionDecorator marker = Graphiti.getPeService().createConnectionDecorator(connection, false, 0.0, true);
 		Graphiti.getGaService().createPolygon(marker, new int[] { -15, 0, -7, 5, 0, 0, -7, -5 });
-		Graphiti.getPeService().setPropertyValue(marker, CONDITIONAL_MARKER_PROPERTY, Boolean.toString(true));
+		FeatureSupport.setPropertyValue(marker, CONDITIONAL_MARKER_PROPERTY, Boolean.toString(true));
 		return marker;
 	}
 }

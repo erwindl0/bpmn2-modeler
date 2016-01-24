@@ -13,7 +13,7 @@
 
 package org.eclipse.bpmn2.modeler.core;
 
-import org.eclipse.bpmn2.modeler.core.adapters.ObjectPropertyProvider;
+import org.eclipse.bpmn2.modeler.core.adapters.ExtendedPropertiesAdapter;
 import org.eclipse.bpmn2.modeler.core.runtime.TargetRuntime;
 import org.eclipse.bpmn2.modeler.core.utils.BusinessObjectUtil;
 import org.eclipse.bpmn2.util.Bpmn2Resource;
@@ -466,7 +466,7 @@ public class LifecycleEvent {
 		TargetRuntime rt = lifecycleEvent.targetRuntime;
 		if (rt == null) {
 			if (lifecycleEvent.target instanceof EObject) {
-				Resource resource = ObjectPropertyProvider.getResource((EObject)lifecycleEvent.target);
+				Resource resource = ExtendedPropertiesAdapter.getResource((EObject)lifecycleEvent.target);
 				if (!(resource instanceof Bpmn2Resource))
 					return;
 			}

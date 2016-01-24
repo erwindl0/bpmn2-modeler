@@ -102,7 +102,7 @@ public class UpdateChoreographyMessageLinkFeature extends AbstractUpdateBaseElem
 			List<ContainerShape> bandShapes = FeatureSupport.getParticipantBandContainerShapes(choreographyActivityShape);
 			for (ContainerShape bandShape : bandShapes) {
 				BPMNShape bpmnShape = BusinessObjectUtil.getFirstElementOfType(bandShape, BPMNShape.class);
-				boolean visible = new Boolean(Graphiti.getPeService().getPropertyValue(bandShape, ChoreographyUtil.MESSAGE_VISIBLE));
+				boolean visible = new Boolean(FeatureSupport.getPropertyValue(bandShape, ChoreographyUtil.MESSAGE_VISIBLE));
 				if (bpmnShape.isIsMessageVisible() != visible) {
 					reason = Reason.createTrueReason(Messages.UpdateChoreographyMessageLinkFeature_Message_Link_Visible_Changed);
 					break;
@@ -140,7 +140,7 @@ public class UpdateChoreographyMessageLinkFeature extends AbstractUpdateBaseElem
 
 		for (Connection connection : AnchorUtil.getConnections(choreographyTaskShape, AnchorSite.TOP)) {
 			AnchorContainer container = connection.getEnd().getParent();
-			String property = peService.getPropertyValue((PropertyContainer) container, GraphitiConstants.MESSAGE_LINK);
+			String property = FeatureSupport.getPropertyValue((PropertyContainer) container, GraphitiConstants.MESSAGE_LINK);
 			if (Boolean.parseBoolean(property)) {
 				topConnection = connection;
 				topAnchor = (FixPointAnchor) connection.getEnd();
@@ -154,7 +154,7 @@ public class UpdateChoreographyMessageLinkFeature extends AbstractUpdateBaseElem
 
 		for (Connection connection : AnchorUtil.getConnections(choreographyTaskShape, AnchorSite.BOTTOM)) {
 			AnchorContainer container = connection.getEnd().getParent();
-			String property = peService.getPropertyValue((PropertyContainer) container, GraphitiConstants.MESSAGE_LINK);
+			String property = FeatureSupport.getPropertyValue((PropertyContainer) container, GraphitiConstants.MESSAGE_LINK);
 			if (Boolean.parseBoolean(property)) {
 				bottomConnection = connection;
 				bottomAnchor = (FixPointAnchor) connection.getEnd();
@@ -207,7 +207,7 @@ public class UpdateChoreographyMessageLinkFeature extends AbstractUpdateBaseElem
 		if (topConnection==null && shouldDrawTopMessage && flow!=null) {
 			int y = (int) (bounds.getY() - ChoreographyUtil.ENVELOPE_HEIGHT_MODIFIER - ChoreographyUtil.ENV_H);
 			envelope = drawMessageLink(topMessage, topMessageName, topAnchor, x, y, isFilled(topAndBottom.getFirst()));
-			peService.setPropertyValue(envelope, ChoreographyUtil.MESSAGE_NAME, topMessageName);
+			FeatureSupport.setPropertyValue(envelope, ChoreographyUtil.MESSAGE_NAME, topMessageName);
 		}
 		else if (topConnection!=null && !shouldDrawTopMessage) {
 			envelope = (ContainerShape) topConnection.getEnd().getParent();
@@ -229,7 +229,7 @@ public class UpdateChoreographyMessageLinkFeature extends AbstractUpdateBaseElem
 		if (bottomConnection==null && shouldDrawBottomMessage && flow!=null) {
 			int y = (int) (bounds.getY() + bounds.getHeight() + ChoreographyUtil.ENVELOPE_HEIGHT_MODIFIER);
 			envelope = drawMessageLink(bottomMessage, bottomMessageName, bottomAnchor, x, y, isFilled(topAndBottom.getSecond()));
-			peService.setPropertyValue(envelope, ChoreographyUtil.MESSAGE_NAME, bottomMessageName);
+			FeatureSupport.setPropertyValue(envelope, ChoreographyUtil.MESSAGE_NAME, bottomMessageName);
 		}
 		else if (bottomConnection!=null && !shouldDrawBottomMessage) {
 			envelope = (ContainerShape) bottomConnection.getEnd().getParent();
@@ -249,7 +249,7 @@ public class UpdateChoreographyMessageLinkFeature extends AbstractUpdateBaseElem
 
 		for (ContainerShape bandShape : bandShapes) {
 			bpmnShape = BusinessObjectUtil.getFirstElementOfType(bandShape, BPMNShape.class);
-			Graphiti.getPeService().setPropertyValue(bandShape, ChoreographyUtil.MESSAGE_VISIBLE,
+			FeatureSupport.setPropertyValue(bandShape, ChoreographyUtil.MESSAGE_VISIBLE,
 					Boolean.toString(bpmnShape.isIsMessageVisible()));
 		}
 
@@ -296,7 +296,7 @@ public class UpdateChoreographyMessageLinkFeature extends AbstractUpdateBaseElem
 				IDimension size = GraphitiUi.getUiLayoutService().calculateTextSize(label, text.getFont());
 				gaService.setSize(containerShape.getGraphicsAlgorithm(), ChoreographyUtil.ENV_W + size.getWidth() + 3, ChoreographyUtil.ENV_H);
 				gaService.setSize(text, size.getWidth(), size.getHeight());
-				peService.setPropertyValue(containerShape, ChoreographyUtil.MESSAGE_NAME, label);
+				FeatureSupport.setPropertyValue(containerShape, ChoreographyUtil.MESSAGE_NAME, label);
 				break;
 			}
 		}
@@ -336,7 +336,7 @@ public class UpdateChoreographyMessageLinkFeature extends AbstractUpdateBaseElem
 		MessageFlow flow = getMessageFlow(messageFlows, bands);
 		if (flow!=null) {
 			if (flow.getMessageRef()==null && create) {
-				Message msg = Bpmn2ModelerFactory.create(flow.eResource(), Message.class);
+				Message msg = Bpmn2ModelerFactory.createObject(flow.eResource(), Message.class);
 				msg.setName(Messages.ChoreographyUtil_Undefined_Message);
 				ModelUtil.getDefinitions(flow).getRootElements().add(msg);
 				flow.setMessageRef(msg);
@@ -355,14 +355,14 @@ public class UpdateChoreographyMessageLinkFeature extends AbstractUpdateBaseElem
 		connectionLine.setForeground(gaService.manageColor(diagram, StyleUtil.CLASS_FOREGROUND));
 		connectionLine.setLineStyle(LineStyle.DOT);
 		connectionLine.setLineWidth(2);
-		peService.setPropertyValue(connection, GraphitiConstants.MESSAGE_LINK, Boolean.toString(true));
+		FeatureSupport.setPropertyValue(connection, GraphitiConstants.MESSAGE_LINK, Boolean.toString(true));
 
 		ContainerShape envelope = peService.createContainerShape(diagram, true);
 		Rectangle invisibleRectangle = gaService.createInvisibleRectangle(envelope);
 		gaService.setLocation(invisibleRectangle, x, y);
 		gaService.setSize(invisibleRectangle, ChoreographyUtil.ENV_W, ChoreographyUtil.ENV_H);
 		getFeatureProvider().link(envelope, message);
-		peService.setPropertyValue(envelope, GraphitiConstants.MESSAGE_LINK, Boolean.toString(true));
+		FeatureSupport.setPropertyValue(envelope, GraphitiConstants.MESSAGE_LINK, Boolean.toString(true));
 
 		Shape envelopeShape = peService.createShape(envelope, false);
 		Envelope envelopeGa = ShapeDecoratorUtil.createEnvelope(envelopeShape, 0, 0, ChoreographyUtil.ENV_W, ChoreographyUtil.ENV_H);

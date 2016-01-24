@@ -286,8 +286,18 @@ public class DefaultBpmn2RuntimeExtension implements IBpmn2RuntimeExtension {
 		}
 		else if (event.eventType.equals(EventType.COMMAND_UNDO) || event.eventType.equals(EventType.COMMAND_REDO)) {
 			AbstractBpmn2PropertySection section = PropertyUtil.getCurrentPropertySection();
-			if (section!=null)
-				section.redraw();
+			if (section!=null) {
+				// in general we want to update the current property section
+				// to reflect the old/new values of an undo/redo operation.
+				// However, iIf the business object being rendered by this
+				// property section has been deleted, the framework will throw
+				// an NPE - this is safe to ignore
+				try {
+					section.redraw();
+				}
+				catch (Exception e) {
+				}
+			}
 		}
 	}
 

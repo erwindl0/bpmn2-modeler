@@ -14,6 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.bpmn2.modeler.ui.diagram.messages"; //$NON-NLS-1$
+	public static String Bpmn2ToolBehaviorProvider_Create_Connection;
 	public static String BPMNToolBehaviorProvider_Click_Drag_Prompt;
 	public static String BPMNToolBehaviorProvider_Click_Drag_Prompt_Last_Separator;
 	public static String BPMNToolBehaviorProvider_Connectors_Drawer_Label;

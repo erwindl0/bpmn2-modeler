@@ -86,7 +86,7 @@ public class DataOutputPropertiesAdapter extends ItemAwareElementPropertiesAdapt
 	}
 
 	public static DataOutput createDataOutput(Resource resource, List<DataOutput> dataOutputs) {
-		DataOutput dataOutput = Bpmn2ModelerFactory.create(resource,DataOutput.class);
+		DataOutput dataOutput = Bpmn2ModelerFactory.createObject(resource,DataOutput.class);
 		dataOutput.setName( generateName(dataOutputs) );
 		dataOutputs.add(dataOutput);
 	
